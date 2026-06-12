@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akabane · Doctor</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../shared/config.js"></script>
+  <style>
+    :root{--bg:#0d0d14;--bg2:#13131f;--bg3:#1a1a2a;--line:#2a2a40;--txt:#e8e8f0;--mut:#9090b0;--gold:#e0b852;--violet:#7c6af7;--red:#e05252;--blue:#5280e0}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:1180px;margin:0 auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.brand{font-weight:900;color:var(--gold);letter-spacing:.08em}.grid{display:grid;grid-template-columns:360px 1fr;gap:16px}.card{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:16px}.title{font-size:18px;font-weight:900;margin-bottom:12px}.mut{color:var(--mut);font-size:13px}input,textarea{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:12px;color:var(--txt);padding:12px;font:inherit}textarea{min-height:92px}.btn{border:0;background:var(--violet);color:#fff;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer}.btn2{background:var(--bg3);border:1px solid var(--line);color:var(--txt)}.row{display:flex;gap:8px}.list{display:grid;gap:8px;margin-top:12px}.item{padding:12px;border:1px solid var(--line);background:var(--bg3);border-radius:14px;cursor:pointer}.item.active{border-color:var(--violet)}.pill{display:inline-block;border:1px solid var(--line);background:#202039;border-radius:999px;padding:6px 10px;margin:4px;color:#bfc1ff}.msg{padding:10px 12px;border-radius:12px;background:var(--bg3);margin:8px 0}.msg.doctor{border-left:3px solid var(--gold)}.msg.patient{border-left:3px solid var(--violet)}.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:850px){.grid,.cols{grid-template-columns:1fr}.app{padding:12px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div><div class="brand">KUNGFU MAN · DOCTOR CRM</div><div class="mut">Кабинет специалиста · Акабане</div></div><a class="btn btn2" href="../patient/" target="_blank">Кабинет пациента</a></div>
+  <div class="grid">
+    <aside class="card">
+      <div class="title">Пациенты</div>
+      <input id="pName" placeholder="ФИО пациента">
+      <input id="pPhone" placeholder="Телефон" style="margin-top:8px">
+      <button class="btn" style="width:100%;margin-top:8px" onclick="addPatient()">+ Создать пациента</button>
+      <div class="list" id="patients"></div>
+    </aside>
+    <main id="work" class="card">
+      <div class="title">Выберите пациента</div>
+      <div class="mut">Создайте пациента или выберите из списка. После этого можно добавить диагностику, открыть личную ссылку и вести чат.</div>
+    </main>
+  </div>
+</div>
+<script>
+const cfg=window.APP_CONFIG||{}; const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+let patients=[], current=null, diagnostics=[], messages=[];
+function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+async function loadPatients(){const {data,error}=await sb.from('patients').select('*').order('created_at',{ascending:false}); if(error)return alert(error.message); patients=data||[]; renderPatients()}
+function renderPatients(){patientsEl=document.getElementById('patients');patientsEl.innerHTML=patients.map(p=>`<div class="item ${current&&current.id===p.id?'active':''}" onclick="selectPatient('${p.id}')"><b>${esc(p.full_name)}</b><div class="mut">${esc(p.phone||'Без телефона')}</div></div>`).join('')||'<div class="mut">Пока нет пациентов</div>'}
+async function addPatient(){const full_name=pName.value.trim(); if(!full_name)return alert('Введите ФИО'); const {data,error}=await sb.from('patients').insert({full_name,phone:pPhone.value.trim()}).select().single(); if(error)return alert(error.message); pName.value='';pPhone.value=''; await loadPatients(); selectPatient(data.id)}
+async function selectPatient(id){current=patients.find(p=>p.id===id); renderPatients(); await loadPatientData(); renderWork()}
+async function loadPatientData(){const [d,m]=await Promise.all([sb.from('diagnostics').select('*').eq('patient_id',current.id).order('created_at',{ascending:false}),sb.from('messages').select('*').eq('patient_id',current.id).order('created_at',{ascending:true})]); diagnostics=d.data||[]; messages=m.data||[]}
+function patientLink(){return location.origin+location.pathname.replace('/doctor/','/patient/')+'?id='+current.id}
+function renderWork(){document.getElementById('work').innerHTML=`<div class="top"><div><div class="title">${esc(current.full_name)}</div><div class="mut">${esc(current.phone||'Без телефона')}</div></div><button class="btn btn2" onclick="copyLink()">Скопировать ссылку</button></div><div class="card" style="background:var(--bg3);margin-bottom:14px"><div class="mut">Личная ссылка пациента</div><div style="word-break:break-all;margin-top:6px">${patientLink()}</div></div><div class="cols"><section><div class="title">Диагностики</div><textarea id="diagText" placeholder='Вставь краткий итог или JSON результата'></textarea><button class="btn" style="width:100%;margin-top:8px" onclick="addDiagnostic()">Сохранить диагностику</button><div class="list">${diagnostics.map(d=>`<div class="item"><b>${new Date(d.created_at).toLocaleString()}</b><div class="mut">${esc(summary(d.result_json))}</div></div>`).join('')||'<div class="mut">Диагностик пока нет</div>'}</div></section><section><div class="title">Чат</div><div id="chatBox">${messages.map(msgHtml).join('')||'<div class="mut">Сообщений пока нет</div>'}</div><textarea id="msgText" placeholder="Сообщение пациенту"></textarea><button class="btn" style="width:100%;margin-top:8px" onclick="sendMessage('doctor')">Отправить</button></section></div>`}
+function summary(x){if(!x)return 'Без данных'; if(typeof x==='string')return x.slice(0,120); return (x.summary||x.text||JSON.stringify(x)).slice(0,120)}
+function msgHtml(m){return `<div class="msg ${m.author}"><b>${m.author==='doctor'?'Акмал':'Пациент'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`}
+async function addDiagnostic(){let raw=diagText.value.trim(); if(!raw)return; let result_json; try{result_json=JSON.parse(raw)}catch{result_json={text:raw,summary:raw}} const {error}=await sb.from('diagnostics').insert({patient_id:current.id,result_json}); if(error)return alert(error.message); await loadPatientData(); renderWork()}
+async function sendMessage(author){const t=msgText.value.trim(); if(!t)return; const {error}=await sb.from('messages').insert({patient_id:current.id,author,message:t}); if(error)return alert(error.message); await loadPatientData(); renderWork()}
+function copyLink(){navigator.clipboard.writeText(patientLink()); alert('Ссылка скопирована')}
+loadPatients();
+</script>
+</body>
+</html>
