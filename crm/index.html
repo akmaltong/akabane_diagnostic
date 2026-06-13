@@ -1,33 +1,145 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Akabane CRM</title>
 <style>
-body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:820px;margin:auto;padding:18px}.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:#9696b8;line-height:1.5}input,textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit}textarea{min-height:82px}.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}.btn2{background:#1a1a2a;border:1px solid #2a2a40}.btnRed{background:#331616;border:1px solid #693030;color:#ff9b9b}.patient{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.small{font-size:13px}.top{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{background:#23233a;border:1px solid #343452;border-radius:999px;padding:6px 10px;color:#bdbdff;font-size:12px}@media(max-width:650px){.row{grid-template-columns:1fr}.top{display:block}}
+body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+.app{max-width:820px;margin:auto;padding:18px}
+.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}
+.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}
+.title{font-size:24px;font-weight:900;margin:8px 0}
+.mut{color:#9696b8;line-height:1.5}
+input,textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit}
+textarea{min-height:82px}
+.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}
+.btn2{background:#1a1a2a;border:1px solid #2a2a40}
+.btnRed{background:#331616;border:1px solid #693030;color:#ff9b9b}
+.patient{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.small{font-size:13px}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.badge{background:#23233a;border:1px solid #343452;border-radius:999px;padding:6px 10px;color:#bdbdff;font-size:12px}
+@media(max-width:650px){.row{grid-template-columns:1fr}.top{display:block}}
 </style>
 </head>
 <body>
 <div class="app">
- <div class="card">
-  <div class="brand">KUNGFU MAN · AKABANE CRM</div>
-  <div class="title">Пациенты</div>
-  <div class="mut">CRM работает отдельно и не трогает диагностику. Диагностика открывается кнопкой в рабочем разделе <b>doctor/</b>.</div>
- </div>
- <div class="card">
-  <div class="title">Новый пациент</div>
-  <input id="name" placeholder="ФИО пациента">
-  <input id="phone" placeholder="Телефон">
-  <textarea id="note" placeholder="Заметки: жалобы, дата визита, состояние"></textarea>
-  <button class="btn" onclick="savePatient()">+ Сохранить пациента</button>
- </div>
- <div class="card">
-  <div class="top"><div class="title">Список пациентов</div><span class="badge" id="count">0 пациентов</span></div>
-  <div id="list" class="mut">Пока нет пациентов</div>
- </div>
+  <div class="card">
+    <div class="brand">KUNGFU MAN · AKABANE CRM</div>
+    <div class="title">Пациенты</div>
+    <div class="mut">CRM читает общую базу <b>akabane_patients</b>, которую использует диагностика.</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Новый пациент</div>
+    <input id="name" placeholder="ФИО пациента">
+    <input id="phone" placeholder="Телефон">
+    <textarea id="note" placeholder="Заметки: жалобы, дата визита, состояние"></textarea>
+    <button class="btn" onclick="savePatient()">+ Сохранить пациента</button>
+  </div>
+
+  <div class="card">
+    <div class="top">
+      <div class="title">Список пациентов</div>
+      <span class="badge" id="count">0 пациентов</span>
+    </div>
+    <div id="list" class="mut">Пока нет пациентов</div>
+  </div>
 </div>
+
 <script>
-const KEY='akabane_crm_patients';function db(){return JSON.parse(localStorage.getItem(KEY)||'[]')}function put(x){localStorage.setItem(KEY,JSON.stringify(x))}function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function uid(){return crypto.randomUUID?crypto.randomUUID():'p_'+Date.now()}function savePatient(){let n=name.value.trim();if(!n)return alert('Введите ФИО');let arr=db();arr.unshift({id:uid(),name:n,phone:phone.value.trim(),note:note.value.trim(),createdAt:new Date().toISOString()});put(arr);name.value='';phone.value='';note.value='';render()}function delPatient(id){if(!confirm('Удалить пациента?'))return;put(db().filter(p=>p.id!==id));render()}function render(){let arr=db();count.textContent=arr.length+' пациентов';list.innerHTML=arr.map(p=>{let doctor='../doctor/?patient='+encodeURIComponent(p.id)+'&name='+encodeURIComponent(p.name);let patient='../patient/?id='+encodeURIComponent(p.id);return `<div class="patient"><div class="top"><div><b>${esc(p.name)}</b><div class="mut small">${esc(p.phone||'Без телефона')} · ${new Date(p.createdAt).toLocaleString()}</div></div><span class="badge">ID ${esc(p.id.slice(0,8))}</span></div><div class="mut" style="margin-top:8px">${esc(p.note||'Без заметок')}</div><div class="row"><a class="btn" href="${doctor}">▶ Запустить диагностику</a><a class="btn btn2" href="${patient}">Кабинет пациента</a></div><button class="btn btnRed" onclick="delPatient('${p.id}')">Удалить</button></div>`}).join('')||'Пока нет пациентов'}render();
+const KEY = 'akabane_patients';
+
+function db() {
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || '[]');
+  } catch(e) {
+    return [];
+  }
+}
+
+function put(list) {
+  localStorage.setItem(KEY, JSON.stringify(list));
+}
+
+function esc(s) {
+  return String(s || '').replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+}
+
+function uid() {
+  return crypto.randomUUID ? crypto.randomUUID() : 'p_' + Date.now();
+}
+
+function savePatient() {
+  const n = name.value.trim();
+  if (!n) return alert('Введите ФИО');
+
+  const arr = db();
+  const old = arr.find(p => (p.name || '').toLowerCase() === n.toLowerCase());
+
+  if (old) {
+    old.phone = phone.value.trim() || old.phone || '';
+    old.note = note.value.trim() || old.note || '';
+    old.updatedAt = new Date().toISOString();
+  } else {
+    arr.unshift({
+      id: uid(),
+      name: n,
+      phone: phone.value.trim(),
+      note: note.value.trim(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  put(arr);
+  name.value = '';
+  phone.value = '';
+  note.value = '';
+  render();
+}
+
+function delPatient(id) {
+  if (!confirm('Удалить пациента?')) return;
+  put(db().filter(p => p.id !== id));
+  render();
+}
+
+function render() {
+  const arr = db();
+  count.textContent = arr.length + ' пациентов';
+
+  list.innerHTML = arr.map(p => {
+    const doctor = '../doctor/?patient=' + encodeURIComponent(p.id) + '&name=' + encodeURIComponent(p.name);
+    const patient = '../patient/?id=' + encodeURIComponent(p.id);
+    const created = p.createdAt ? new Date(p.createdAt).toLocaleString() : 'без даты';
+
+    return `
+      <div class="patient">
+        <div class="top">
+          <div>
+            <b>${esc(p.name)}</b>
+            <div class="mut small">${esc(p.phone || 'Без телефона')} · ${created}</div>
+          </div>
+          <span class="badge">ID ${esc((p.id || '').slice(0,8))}</span>
+        </div>
+
+        <div class="mut" style="margin-top:8px">${esc(p.note || 'Без заметок')}</div>
+
+        <div class="row">
+          <a class="btn" href="${doctor}">▶ Запустить диагностику</a>
+          <a class="btn btn2" href="${patient}">Кабинет пациента</a>
+        </div>
+
+        <button class="btn btnRed" onclick="delPatient('${p.id}')">Удалить</button>
+      </div>
+    `;
+  }).join('') || 'Пока нет пациентов';
+}
+
+render();
 </script>
 </body>
 </html>
