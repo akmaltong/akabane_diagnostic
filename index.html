@@ -6,27 +6,36 @@
 <title>KUNGFU MAN · Akabane</title>
 <style>
 body{margin:0;min-height:100vh;background:#09090d;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center}
-.app{width:min(920px,92vw);padding:28px}
-.logo{width:100%;max-height:420px;object-fit:cover;object-position:top center;border-radius:24px;border:1px solid rgba(224,184,82,.28);box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.app{width:min(760px,92vw);padding:28px}
+.logo-card{background:radial-gradient(circle at top,#1b170d,#09090d 65%);border:1px solid rgba(224,184,82,.32);border-radius:28px;padding:42px 28px;text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.55)}
+.symbol{font-size:96px;line-height:.8;color:#d8ad4f;font-weight:900;letter-spacing:-.08em;text-shadow:0 0 30px rgba(224,184,82,.25)}
+.logo-text{font-family:Georgia,serif;letter-spacing:.32em;font-size:28px;color:#d9c295;margin-top:24px}
+.tagline{letter-spacing:.28em;color:#8f7b4a;font-size:11px;margin-top:10px;text-transform:uppercase}
 .card{background:#13131f;border:1px solid #2a2a40;border-radius:22px;padding:24px;margin-top:18px}
 .brand{color:#e0b852;font-weight:900;letter-spacing:.12em}
 h1{font-size:34px;line-height:1.05;margin:10px 0 12px}
 p{color:#a9a9c8;line-height:1.55;margin:0 0 18px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 a{display:block;text-align:center;text-decoration:none;color:white;background:#7c6af7;border-radius:14px;padding:15px;font-weight:900}
 a.secondary{background:#1a1a2a;border:1px solid #2a2a40}
-@media(max-width:650px){.grid{grid-template-columns:1fr}h1{font-size:28px}.app{padding:14px}}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.app{padding:14px}.symbol{font-size:74px}.logo-text{font-size:22px}h1{font-size:28px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <img class="logo" src="assets/kungfu-man-logo.jpg" alt="KUNGFU MAN">
+  <div class="logo-card">
+    <div class="symbol">门</div>
+    <div class="logo-text">KUNGFU MAN</div>
+    <div class="tagline">дисциплина · баланс · внутренняя сила</div>
+  </div>
+
   <div class="card">
     <div class="brand">KUNGFU MAN · AKABANE</div>
     <h1>Диагностика Акабане</h1>
-    <p>Кабинет специалиста, личный кабинет пациента, результаты диагностики, рекомендации и связь с врачом.</p>
+    <p>Кабинет специалиста, диагностика, личный кабинет пациента, результаты, рекомендации и связь с врачом.</p>
     <div class="grid">
-      <a href="crm/">Открыть CRM</a>
+      <a href="crm/">CRM</a>
+      <a class="secondary" href="doctor/">Диагностика</a>
       <a class="secondary" href="patient/">Кабинет пациента</a>
     </div>
   </div>
