@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-.app{max-width:920px;margin:auto;padding:18px}
+.app{max-width:940px;margin:auto;padding:18px}
 .card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}
 .brand{color:#e0b852;font-weight:900;letter-spacing:.08em}
 h1,h2{margin:8px 0;font-weight:950}
@@ -19,14 +19,19 @@ textarea{min-height:90px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .patient{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px}
 .patient-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.badge{display:inline-block;background:#262648;border:1px solid #3a3a68;border-radius:999px;padding:6px 10px;font-size:12px;color:#cfcfff}
+.badge{display:inline-block;background:#262648;border:1px solid #3a3a68;border-radius:999px;padding:6px 10px;font-size:12px;color:#cfcfff;margin:2px}
 .unread{background:#3b2112;border-color:#d08a2b;color:#ffcf8a}
 .inbox-item{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px;border-left:4px solid #e0b852}
-.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}
-.msg.patient{border-left:3px solid #7c6af7}.msg.doctor{border-left:3px solid #e0b852}
+.chat-box{background:#10101a;border:1px solid #2a2a40;border-radius:16px;padding:14px;max-height:360px;overflow:auto;margin-top:10px}
+.chat-msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}
+.chat-msg.patient{border-left:3px solid #7c6af7}
+.chat-msg.doctor{border-left:3px solid #e0b852}
+.chat-author{font-weight:900;color:#fff}
+.chat-time{color:#9696b8;font-size:12px;margin-top:4px}
 .err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0}
 .ok{background:#12301d;border:1px solid #247548;color:#7be89f;border-radius:12px;padding:10px;margin:10px 0}
 .selected{outline:2px solid #7c6af7}
+.empty{color:#9696b8;padding:10px 0}
 @media(max-width:650px){.app{padding:12px}.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -35,19 +40,20 @@ textarea{min-height:90px}
   <div class="card">
     <div class="brand">KUNGFU MAN · AKABANE CRM</div>
     <h1>Пациенты</h1>
-    <div class="mut">Облачная база Supabase. CRM больше не восстанавливает тестовых пациентов из localStorage.</div>
+    <div class="mut">Облачная база Supabase. Входящие сообщения, чат врача и личные ссылки пациентов.</div>
     <div id="status"></div>
   </div>
 
   <div class="card">
     <h2>Входящие сообщения</h2>
-    <div class="mut">Здесь врач видит, кто написал из личного кабинета пациента.</div>
+    <div class="mut">Показываются пациенты, у которых последнее сообщение написал пациент.</div>
     <div id="inbox">Загрузка...</div>
   </div>
 
   <div class="card">
-    <h2>Ответ пациенту</h2>
+    <h2>Чат врача</h2>
     <div id="selectedPatient" class="mut">Выберите пациента из списка или входящих сообщений.</div>
+    <div id="chatBox" class="chat-box"><div class="empty">Диалог не выбран</div></div>
     <textarea id="replyText" placeholder="Ответ пациенту"></textarea>
     <button class="btn" onclick="sendDoctorReply()">Отправить ответ</button>
   </div>
@@ -85,39 +91,48 @@ function doctorUrl(id){return `${location.origin}/akabane_diagnostic/doctor/?pat
 function setStatus(text,type='ok'){status.innerHTML=`<div class="${type}">${esc(text)}</div>`;setTimeout(()=>status.innerHTML='',2500)}
 function getPatient(id){return patients.find(p=>p.id===id)}
 function patientName(id){return getPatient(id)?.full_name || 'Без имени'}
+function patientMessages(id){return messages.filter(m=>m.patient_id===id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}
+function lastMessage(id){const arr=patientMessages(id);return arr[arr.length-1]||null}
+function isNewForDoctor(id){const last=lastMessage(id);return last && last.author==='patient'}
+function incomingCount(id){return patientMessages(id).filter(m=>m.author==='patient').length}
+function totalCount(id){return patientMessages(id).length}
 
-async function load(){
+async function load(keepScroll=false){
   const p=await sb.from('patients').select('*').order('created_at',{ascending:false});
   if(p.error){setStatus(p.error.message,'err');return}
   patients=p.data||[];
 
-  const m=await sb.from('messages').select('*').order('created_at',{ascending:false});
+  const m=await sb.from('messages').select('*').order('created_at',{ascending:true});
   if(m.error){setStatus(m.error.message,'err');return}
   messages=m.data||[];
 
   renderPatients();
   renderInbox();
+  renderChat(keepScroll);
 }
 
 function renderPatients(){
   count.textContent=`${patients.length} пациентов`;
-  patientsEl = document.getElementById('patients');
+  const patientsEl=document.getElementById('patients');
 
   patientsEl.innerHTML=patients.map(p=>{
-    const patientMsgs=messages.filter(m=>m.patient_id===p.id);
-    const incoming=patientMsgs.filter(m=>m.author==='patient');
-    const last=patientMsgs[0];
-    const unreadCount=incoming.length;
+    const last=lastMessage(p.id);
+    const newFlag=isNewForDoctor(p.id);
+    const total=totalCount(p.id);
+    const incoming=incomingCount(p.id);
+
     return `<div class="patient ${selectedPatientId===p.id?'selected':''}">
       <div class="patient-head">
         <div>
           <b>${esc(p.full_name||'Без имени')}</b>
           <div class="mut">${esc(p.phone||'Без телефона')} · ${new Date(p.created_at).toLocaleString()}</div>
-          ${last?`<div class="mut">Последнее: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message)}</div>`:''}
+          ${last?`<div class="mut">Последнее сообщение: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message)}</div>`:''}
         </div>
         <div>
           <span class="badge">ID ${shortId(p.id)}</span>
-          ${unreadCount?`<span class="badge unread">${unreadCount} сообщ.</span>`:''}
+          ${newFlag?`<span class="badge unread">Новое</span>`:''}
+          ${total?`<span class="badge">Всего ${total}</span>`:''}
+          ${incoming?`<span class="badge">От пациента ${incoming}</span>`:''}
         </div>
       </div>
       <div class="grid">
@@ -126,48 +141,76 @@ function renderPatients(){
       </div>
       <div class="grid">
         <button class="btn btn2" onclick="copyPatientLink('${p.id}')">Скопировать ссылку пациенту</button>
-        <button class="btn btn2" onclick="selectPatient('${p.id}')">Ответить</button>
+        <button class="btn btn2" onclick="selectPatient('${p.id}')">Открыть чат</button>
       </div>
       <button class="btn btn-danger" onclick="deletePatient('${p.id}')">Удалить</button>
     </div>`;
-  }).join('') || '<div class="mut">Пока нет пациентов</div>';
+  }).join('') || '<div class="empty">Пока нет пациентов</div>';
 }
 
 function renderInbox(){
-  const incoming=messages.filter(m=>m.author==='patient');
-  inbox.innerHTML=incoming.slice(0,20).map(m=>{
+  const ids=[...new Set(messages.filter(m=>m.author==='patient').map(m=>m.patient_id))];
+  const incomingPatients=ids
+    .map(id=>({id,last:lastMessage(id)}))
+    .filter(x=>x.last && x.last.author==='patient')
+    .sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
+
+  inbox.innerHTML=incomingPatients.map(x=>{
+    const m=x.last;
     return `<div class="inbox-item">
       <div class="patient-head">
         <div>
-          <b>${esc(patientName(m.patient_id))}</b>
+          <b>${esc(patientName(x.id))}</b>
           <div>${esc(m.message)}</div>
           <div class="mut">${new Date(m.created_at).toLocaleString()}</div>
         </div>
         <span class="badge unread">Новое</span>
       </div>
       <div class="grid">
-        <button class="btn" onclick="selectPatient('${m.patient_id}')">Ответить</button>
-        <button class="btn btn2" onclick="openCabinet('${m.patient_id}')">Открыть кабинет</button>
+        <button class="btn" onclick="selectPatient('${x.id}')">Ответить</button>
+        <button class="btn btn2" onclick="openCabinet('${x.id}')">Открыть кабинет</button>
       </div>
     </div>`;
-  }).join('') || '<div class="mut">Новых сообщений пока нет</div>';
+  }).join('') || '<div class="empty">Новых сообщений пока нет</div>';
+}
+
+function renderChat(keepScroll=false){
+  const box=document.getElementById('chatBox');
+  if(!selectedPatientId){
+    box.innerHTML='<div class="empty">Диалог не выбран</div>';
+    selectedPatient.textContent='Выберите пациента из списка или входящих сообщений.';
+    return;
+  }
+
+  const p=getPatient(selectedPatientId);
+  selectedPatient.innerHTML=`Выбран пациент: <b>${esc(p?.full_name||'Без имени')}</b>`;
+
+  const arr=patientMessages(selectedPatientId);
+  box.innerHTML=arr.map(m=>`
+    <div class="chat-msg ${esc(m.author)}">
+      <div class="chat-author">${m.author==='patient'?'Пациент':'Акмал'}</div>
+      <div>${esc(m.message)}</div>
+      <div class="chat-time">${new Date(m.created_at).toLocaleString()}</div>
+    </div>
+  `).join('') || '<div class="empty">Сообщений пока нет</div>';
+
+  if(!keepScroll) box.scrollTop=box.scrollHeight;
 }
 
 async function createPatient(){
   const full_name=name.value.trim();
-  const phone=phoneEl().value.trim();
+  const phone=document.getElementById('phone').value.trim();
   if(!full_name){setStatus('Введите ФИО пациента','err');return}
   const r=await sb.from('patients').insert({full_name,phone}).select().single();
   if(r.error){setStatus(r.error.message,'err');return}
-  name.value='';phoneEl().value='';note.value='';
+  name.value='';document.getElementById('phone').value='';note.value='';
   setStatus('Пациент создан');
   load();
 }
 
-function phoneEl(){return document.getElementById('phone')}
-
 async function deletePatient(id){
-  if(!confirm('Удалить пациента и связанные сообщения/диагностики?'))return;
+  const p=getPatient(id);
+  if(!confirm(`Удалить пациента "${p?.full_name||'Без имени'}" и все его сообщения/диагностики?`))return;
   await sb.from('messages').delete().eq('patient_id',id);
   await sb.from('diagnostics').delete().eq('patient_id',id);
   const r=await sb.from('patients').delete().eq('id',id);
@@ -179,8 +222,10 @@ async function deletePatient(id){
 
 function selectPatient(id){
   selectedPatientId=id;
-  selectedPatient.innerHTML=`Выбран пациент: <b>${esc(patientName(id))}</b>`;
+  replyText.focus();
   renderPatients();
+  renderInbox();
+  renderChat();
 }
 
 async function sendDoctorReply(){
@@ -202,7 +247,7 @@ function copyPatientLink(id){
 }
 
 load();
-setInterval(load,10000);
+setInterval(()=>load(true),10000);
 </script>
 </body>
 </html>
