@@ -63,138 +63,95 @@ const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const id=new URLSearchParams(location.search).get('id');
 
-const ORDER=[
-  ['Лёгкие','Левая'],['Лёгкие','Правая'],
-  ['Толстая кишка','Левая'],['Толстая кишка','Правая'],
-  ['Желудок','Левая'],['Желудок','Правая'],
-  ['Селезёнка/Поджелудочная','Левая'],['Селезёнка/Поджелудочная','Правая'],
-  ['Сердце','Левая'],['Сердце','Правая'],
-  ['Тонкая кишка','Левая'],['Тонкая кишка','Правая'],
-  ['Мочевой пузырь','Левая'],['Мочевой пузырь','Правая'],
-  ['Почки','Левая'],['Почки','Правая'],
-  ['Перикард','Левая'],['Перикард','Правая'],
-  ['Тройной обогреватель','Левая'],['Тройной обогреватель','Правая'],
-  ['Жёлчный пузырь','Левая'],['Жёлчный пузырь','Правая'],
-  ['Печень','Левая'],['Печень','Правая']
-];
-
-function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
+function norm(s){return String(s??'').toLowerCase().replace(/ё/g,'е').trim()}
+function isObj(x){return x && typeof x==='object' && !Array.isArray(x)}
 
-function norm(s){
-  return String(s||'')
-    .toLowerCase()
-    .replace(/ё/g,'е')
-    .replace(/\s+/g,' ')
-    .trim();
-}
-
-function sameSide(a,b){
-  const x=norm(a), y=norm(b);
-  if(!x||!y) return false;
-  if(x===y) return true;
-  if((x==='л'||x.includes('лев')) && (y==='л'||y.includes('лев'))) return true;
-  if((x==='п'||x.includes('прав')) && (y==='п'||y.includes('прав'))) return true;
-  return false;
-}
-
-function sameOrgan(a,b){
-  const x=norm(a), y=norm(b);
-  if(!x||!y) return false;
-  if(x===y) return true;
-  if(x.includes('селез') && y.includes('селез')) return true;
-  if(x.includes('поджел') && y.includes('поджел')) return true;
-  if(x.includes('желч') && y.includes('желч')) return true;
-  if(x.includes('мочев') && y.includes('мочев')) return true;
-  if(x.includes('трой') && y.includes('трой')) return true;
-  if(x.includes('толст') && y.includes('толст')) return true;
-  if(x.includes('тонк') && y.includes('тонк')) return true;
-  return false;
-}
-
-function getField(o,names){
-  if(!o) return '';
-  for(const k of names){
-    if(o[k]!==undefined && o[k]!==null && o[k]!=='') return o[k];
+function get(o, keys){
+  if(!isObj(o)) return '';
+  for(const k of keys){
+    if(o[k]!==undefined && o[k]!==null && o[k]!=='' ) return o[k];
   }
   return '';
 }
 
-function itemOrgan(o){return getField(o,['organ','meridian','name','channel','title','system'])}
-function itemSide(o){return getField(o,['side','lr','leftRight','direction','hand','leg'])}
-function itemPoint(o){return getField(o,['point','acupoint','code','pointCode','treat','sourcePoint'])}
-function itemTime(o){return getField(o,['time','seconds','sec','value','duration'])}
-
-function fmtState(state){
-  if(state==='excess') return 'Избыток';
-  if(state==='deficiency') return 'Недостаток';
-  if(state==='normal') return 'Норма';
-  if(state==='Избыток') return 'Избыток';
-  if(state==='Недостаток') return 'Недостаток';
-  if(state==='Норма') return 'Норма';
-  return state || '—';
+function fmtState(v){
+  const s=norm(v);
+  if(s==='excess'||s==='high'||s==='red'||s==='избыток'||s.includes('изб')) return 'Избыток';
+  if(s==='deficiency'||s==='low'||s==='blue'||s==='недостаток'||s.includes('нед')) return 'Недостаток';
+  if(s==='normal'||s==='green'||s==='норма'||s.includes('норм')) return 'Норма';
+  return v ? String(v) : '—';
 }
-
-function stateClass(state){
-  const s=norm(state);
-  if(s==='excess'||s==='избыток') return 'red';
-  if(s==='deficiency'||s==='недостаток') return 'blue';
-  if(s==='normal'||s==='норма') return 'green';
+function stateClass(v){
+  const s=fmtState(v);
+  if(s==='Избыток') return 'red';
+  if(s==='Недостаток') return 'blue';
+  if(s==='Норма') return 'green';
   return '';
 }
 
-function itemMatches(item, organ, side){
-  if(!item) return false;
-  return sameOrgan(itemOrgan(item), organ) && (!side || sameSide(itemSide(item), side));
+function collectArray(r, names){
+  for(const n of names){
+    const v=r?.[n] ?? r?.analysis?.[n];
+    if(Array.isArray(v)) return v;
+  }
+  return [];
 }
 
-function stateFromBuckets(organ, side, buckets){
-  if(buckets.excess.some(x=>itemMatches(x,organ,side))) return 'excess';
-  if(buckets.deficiency.some(x=>itemMatches(x,organ,side))) return 'deficiency';
-  if(buckets.normalArr.some(x=>itemMatches(x,organ,side))) return 'normal';
-  return 'normal';
+function readableItem(x){
+  if(typeof x==='string') return x;
+  if(typeof x==='number') return String(x);
+  if(!isObj(x)) return '';
+  return get(x,['organ','meridian','channel','name','title','label','system']) || JSON.stringify(x);
 }
 
-function findResult(organ, side, results){
-  return results.find(x=>itemMatches(x,organ,side)) || null;
-}
+function parseActualRows(r){
+  const results = Array.isArray(r.results) ? r.results :
+                  Array.isArray(r.measurements) ? r.measurements :
+                  Array.isArray(r.rows) ? r.rows :
+                  Array.isArray(r.items) ? r.items : [];
 
-function getAnalysis(r){
-  const a=r.analysis||{};
-  const results=Array.isArray(r.results)?r.results:[];
-  const rawEx=a.excess||r.excess||[];
-  const rawDf=a.deficiency||r.deficiency||[];
-  const rawNm=a.normal||r.normal||[];
-
-  const computedEx=results.filter(y=>norm(y.state)==='excess'||norm(y.state)==='избыток');
-  const computedDf=results.filter(y=>norm(y.state)==='deficiency'||norm(y.state)==='недостаток');
-  const computedNm=results.filter(y=>norm(y.state)==='normal'||norm(y.state)==='норма');
-
-  const excess=rawEx.length?rawEx:computedEx;
-  const deficiency=rawDf.length?rawDf:computedDf;
-  const normalArr=rawNm.length?rawNm:computedNm;
-
-  const total=results.length || excess.length + deficiency.length + normalArr.length || 24;
-  const normal=normalArr.length || Math.max(0,total-excess.length-deficiency.length);
-
-  return {results,excess,deficiency,normalArr,normal,total};
-}
-
-function makeRows(r, an){
-  const results=an.results||[];
-  const hasUsefulResults=results.some(x=>itemTime(x)||itemPoint(x)||x.state||x.status);
-  const sourceRows=results.length ? results.map(x=>[itemOrgan(x), itemSide(x), x]) : ORDER.map(x=>[x[0],x[1],null]);
-
-  return sourceRows.map(([organRaw,sideRaw,obj],idx)=>{
-    const organ=organRaw||ORDER[idx]?.[0]||'—';
-    const side=sideRaw||ORDER[idx]?.[1]||'—';
-    const found=obj || findResult(organ,side,results);
-    const point=itemPoint(found)||'—';
-    const sec=itemTime(found);
-    let state=getField(found,['state','status','condition']);
-    if(!state || state==='—') state=stateFromBuckets(organ,side,an);
-    return {idx:idx+1,organ,side,point,sec,state};
+  return results.map((x,idx)=>{
+    const organ=get(x,['organ','meridian','channel','name','title','label','system']) || readableItem(x) || '—';
+    const side=get(x,['side','lr','leftRight','direction','part']) || '';
+    const point=get(x,['point','acupoint','code','pointCode','sourcePoint']) || '';
+    const time=get(x,['time','seconds','sec','value','duration','t']) || '';
+    const state=get(x,['state','status','condition','type','result']) || '';
+    return {idx:idx+1, organ, side, point, time, state, raw:x};
   });
+}
+
+function rowsFromBuckets(r){
+  const excess=collectArray(r,['excess']);
+  const deficiency=collectArray(r,['deficiency']);
+  const normal=collectArray(r,['normal']);
+
+  const rows=[];
+  excess.forEach((x,i)=>rows.push({idx:rows.length+1, organ:readableItem(x), side:get(x,['side','lr','leftRight'])||'', point:get(x,['point','code','treat'])||'', time:get(x,['time','seconds','sec','value'])||'', state:'excess', raw:x}));
+  deficiency.forEach((x,i)=>rows.push({idx:rows.length+1, organ:readableItem(x), side:get(x,['side','lr','leftRight'])||'', point:get(x,['point','code','treat'])||'', time:get(x,['time','seconds','sec','value'])||'', state:'deficiency', raw:x}));
+  normal.forEach((x,i)=>rows.push({idx:rows.length+1, organ:readableItem(x), side:get(x,['side','lr','leftRight'])||'', point:get(x,['point','code','treat'])||'', time:get(x,['time','seconds','sec','value'])||'', state:'normal', raw:x}));
+  return rows;
+}
+
+function getRows(r){
+  const actual=parseActualRows(r);
+  const actualUseful=actual.some(x=>x.state||x.time||x.point);
+  if(actual.length && actualUseful) return actual;
+  const bucketRows=rowsFromBuckets(r);
+  if(bucketRows.length) return bucketRows;
+  return actual;
+}
+
+function counts(r, rows){
+  const excess=collectArray(r,['excess']);
+  const deficiency=collectArray(r,['deficiency']);
+  const normal=collectArray(r,['normal']);
+  const exCount = excess.length || rows.filter(x=>fmtState(x.state)==='Избыток').length || Number(r.excessCount||r.analysis?.excessCount||0);
+  const dfCount = deficiency.length || rows.filter(x=>fmtState(x.state)==='Недостаток').length || Number(r.deficiencyCount||r.analysis?.deficiencyCount||0);
+  const nmCount = normal.length || rows.filter(x=>fmtState(x.state)==='Норма').length || Number(r.normalCount||r.analysis?.normalCount||0);
+  const total = rows.length || Number(r.total||r.analysis?.total||0) || 24;
+  return {ex:exCount, df:dfCount, nm:nmCount || Math.max(0,total-exCount-dfCount)};
 }
 
 async function load(){
@@ -216,18 +173,19 @@ async function load(){
 function renderDiags(arr){
   diagnostics.innerHTML=arr.map(x=>{
     const r=x.result_json||{};
-    const an=getAnalysis(r);
-    const rowData=makeRows(r,an);
+    const rows=getRows(r);
+    const c=counts(r,rows);
 
-    const rows=rowData.map(y=>{
-      const timeText=(y.sec===undefined||y.sec===null||y.sec==='')?'—':`${esc(y.sec)}с`;
+    const tableRows=rows.map((y,idx)=>{
+      const timeText=(y.time===undefined||y.time===null||y.time==='')?'—':`${esc(y.time)}с`;
+      const stateText=fmtState(y.state);
       return `<tr>
-        <td>${y.idx}</td>
-        <td>${esc(y.organ)}</td>
-        <td>${esc(y.side)}</td>
-        <td>${esc(y.point)}</td>
+        <td>${idx+1}</td>
+        <td>${esc(y.organ||'—')}</td>
+        <td>${esc(y.side||'—')}</td>
+        <td>${esc(y.point||'—')}</td>
         <td>${timeText}</td>
-        <td><span class="pill ${stateClass(y.state)}">${esc(fmtState(y.state))}</span></td>
+        <td><span class="pill ${stateClass(y.state)}">${esc(stateText)}</span></td>
       </tr>`;
     }).join('');
 
@@ -243,18 +201,15 @@ function renderDiags(arr){
       </div>
 
       <div>
-        <span class="pill red">Избыток ${an.excess.length}</span>
-        <span class="pill blue">Недостаток ${an.deficiency.length}</span>
-        <span class="pill green">Норма ${an.normal}</span>
+        <span class="pill red">Избыток ${c.ex}</span>
+        <span class="pill blue">Недостаток ${c.df}</span>
+        <span class="pill green">Норма ${c.nm}</span>
       </div>
 
       <div class="diag-details">
         ${protocol?`<div class="section-title">Итог</div><div class="mut">${esc(protocol)}</div>`:''}
         <div class="section-title">Измерения</div>
-        <table class="table">
-          <tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>
-          ${rows}
-        </table>
+        ${tableRows?`<table class="table"><tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${tableRows}</table>`:`<div class="mut small">В этой записи нет массива измерений. Сводка сохранена, но детали не были переданы из диагностики.</div>`}
       </div>
     </div>`;
   }).join('')||'Диагностик пока нет';
@@ -272,7 +227,6 @@ async function sendMsg(){
   if(r.error)return err(r.error.message);
   msg.value=''; load();
 }
-
 load();
 </script>
 </body>
