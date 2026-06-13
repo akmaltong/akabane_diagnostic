@@ -12,7 +12,8 @@ body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-syst
 .brand{color:#e0b852;font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:#9696b8;line-height:1.5}
 textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit;min-height:90px}
 .btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}
-.btn2{background:#1a1a2a;border:1px solid #2a2a40}.diag{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px;cursor:pointer}
+.btn2{background:#1a1a2a;border:1px solid #2a2a40}
+.diag{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px;cursor:pointer}
 .diag-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.diag-details{display:none;margin-top:12px;border-top:1px solid #2a2a40;padding-top:10px}.diag.open .diag-details{display:block}
 .chev{color:#9696b8;font-weight:900;font-size:18px}.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}.msg.patient{border-left:3px solid #7c6af7}.msg.doctor{border-left:3px solid #e0b852}
 .pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800;white-space:nowrap}
@@ -24,10 +25,15 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
 .interpretation b,.recommendations b,.main-picture b{color:#fff}.interpretation ul,.recommendations ul{margin:8px 0 0 18px;padding:0}.interpretation li,.recommendations li{margin:5px 0}
 .warning{border-left:3px solid #ffb36b}.asym{background:#161625;border:1px solid #2a2a40;border-radius:14px;padding:10px;margin-top:8px}
 .pdf-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.payment-card{background:linear-gradient(180deg,#171423,#11111a);border:1px solid rgba(224,184,82,.35);border-radius:22px;padding:20px;margin:18px 0}
+
+.payment-card{background:linear-gradient(180deg,#171423,#11111a);border:1px solid rgba(224,184,82,.35);border-radius:22px;margin:18px 0;overflow:hidden}
+.payment-head{padding:20px;cursor:pointer}
 .payment-kicker{color:#e0b852;font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
 .payment-title{font-size:28px;font-weight:950;margin:8px 0 4px;color:#fff}
-.payment-sub{color:#c8c0a6;line-height:1.55;margin-bottom:14px}
+.payment-sub{color:#f1e4b7;line-height:1.55}
+.payment-arrow{float:right;color:#e0b852;font-size:20px;font-weight:900}
+.payment-body{display:none;padding:0 20px 20px;border-top:1px solid rgba(224,184,82,.2)}
+.payment-card.open .payment-body{display:block}
 .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
 .price-box{background:#0f0f18;border:1px solid #2a2a40;border-radius:16px;padding:14px}
 .price-box small{display:block;color:#8f8faa;font-size:12px;margin-bottom:5px}
@@ -39,8 +45,8 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
 .payment-total small{display:block;color:#c9b77c;margin-bottom:4px}.payment-total b{font-size:32px;color:#e0b852}
 @media(max-width:650px){.app{padding:12px}.table{display:block;overflow-x:auto}.diag-head{display:block}.pdf-actions,.price-grid{grid-template-columns:1fr}}
 @media print{
-  body{background:white;color:#111}.app{max-width:none;padding:0}.card,.diag,.interpretation,.recommendations,.main-picture,.summary-box,.asym,.payment-card,.price-box,.payment-total{background:white!important;color:#111!important;border-color:#ddd!important}
-  .mut,.table th{color:#555!important}.pill{border:1px solid #ccc}.btn,textarea,#messages,.chev{display:none!important}.diag-details{display:block!important}
+  body{background:white;color:#111}.app{max-width:none;padding:0}.card,.diag,.interpretation,.recommendations,.main-picture,.asym,.payment-card,.price-box,.payment-total{background:white!important;color:#111!important;border-color:#ddd!important}
+  .mut,.table th{color:#555!important}.pill{border:1px solid #ccc}.btn,textarea,#messages,.chev{display:none!important}.diag-details,.payment-body{display:block!important}
   .brand,.payment-kicker{color:#9b7a22!important}.red,.blue,.green,.orange,.gray{background:white!important;color:#111!important}.payment-title,.price-box b,.payment-total b{color:#111!important}
 }
 </style>
@@ -59,59 +65,49 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
     <div id="diagnostics" class="mut">Загрузка...</div>
   </div>
 
-  <div class="payment-card">
-    <div class="payment-kicker">Лучший способ начать</div>
-    <div class="payment-title">3 сеанса терапии</div>
-    <div class="payment-sub">+ диагностика в подарок · 90 минут каждый сеанс</div>
-
-    <div class="mut">
-      Сначала проводится диагностика состояния организма и функционального состояния меридианов.
-      После этого составляется индивидуальный план восстановления и проводится курс из трёх терапевтических сеансов Чжэнь Цзю.
+  <div class="payment-card" id="paymentCard">
+    <div class="payment-head" onclick="togglePayment()">
+      <span class="payment-arrow">⌄</span>
+      <div class="payment-kicker">Лучший способ начать</div>
+      <div class="payment-title">3 сеанса терапии</div>
+      <div class="payment-sub">+ диагностика в подарок · 90 минут каждый сеанс</div>
     </div>
 
-    <div class="price-grid">
-      <div class="price-box">
-        <small>Диагностика отдельно</small>
-        <b><s>300</s></b>
-        <div class="mut">сомони</div>
+    <div class="payment-body">
+      <div class="mut">
+        Сначала проводится диагностика состояния организма и функционального состояния меридианов.
+        После этого составляется индивидуальный план восстановления и проводится курс из трёх терапевтических сеансов Чжэнь Цзю.
       </div>
-      <div class="price-box">
-        <small>Для участников программы</small>
-        <b>В подарок</b>
-      </div>
-      <div class="price-box">
-        <small>3 сеанса терапии</small>
-        <b>900</b>
-        <div class="mut">сомони</div>
-      </div>
-      <div class="price-box">
-        <small>Ваша выгода</small>
-        <b>300</b>
-        <div class="mut">сомони</div>
-      </div>
-    </div>
 
-    <div class="payment-total">
-      <small>К оплате сегодня</small>
-      <b>900 сомони</b>
-      <div class="mut">Полная оплата программы производится до начала курса.</div>
-    </div>
+      <div class="price-grid">
+        <div class="price-box"><small>Диагностика отдельно</small><b><s>300</s></b><div class="mut">сомони</div></div>
+        <div class="price-box"><small>Для участников программы</small><b>В подарок</b></div>
+        <div class="price-box"><small>3 сеанса терапии</small><b>900</b><div class="mut">сомони</div></div>
+        <div class="price-box"><small>Ваша выгода</small><b>300</b><div class="mut">сомони</div></div>
+      </div>
 
-    <div class="section-title">В программу входит</div>
-    <ul class="payment-list">
-      <li>Диагностика по методу Акабане</li>
-      <li>Анализ состояния меридианов</li>
-      <li>Индивидуальный план терапии</li>
-      <li>3 сеанса Чжэнь Цзю по 90 минут</li>
-      <li>Контроль динамики состояния</li>
-      <li>Персональные рекомендации</li>
-    </ul>
+      <div class="payment-total">
+        <small>К оплате сегодня</small>
+        <b>900 сомони</b>
+        <div class="mut">Полная оплата программы производится до начала курса.</div>
+      </div>
 
-    <div class="section-title">Почему курс из 3 сеансов</div>
-    <div class="mut">
-      Один сеанс помогает получить первичный терапевтический эффект.
-      Курс из трёх посещений позволяет закрепить результат, снизить выраженность симптомов
-      и запустить более устойчивые восстановительные процессы.
+      <div class="section-title">В программу входит</div>
+      <ul class="payment-list">
+        <li>Диагностика по методу Акабане</li>
+        <li>Анализ состояния меридианов</li>
+        <li>Индивидуальный план терапии</li>
+        <li>3 сеанса Чжэнь Цзю по 90 минут</li>
+        <li>Контроль динамики состояния</li>
+        <li>Персональные рекомендации</li>
+      </ul>
+
+      <div class="section-title">Почему курс из 3 сеансов</div>
+      <div class="mut">
+        Один сеанс помогает получить первичный терапевтический эффект.
+        Курс из трёх посещений позволяет закрепить результат, снизить выраженность симптомов
+        и запустить более устойчивые восстановительные процессы.
+      </div>
     </div>
   </div>
 
@@ -149,6 +145,7 @@ function asymmetry(rows){let html='';for(let i=0;i<rows.length;i+=2){const l=row
 function interpretation(rows,c){let main='';if(c.sdf>0){main=`Выявлены зоны выраженного недостатка: ${c.sdf}. Эти показатели требуют приоритетного внимания и проверки в динамике.`}else if(c.df>c.ex&&c.df>=c.nm){main=`Преобладает недостаток: ${c.df} меридианов. Это указывает на сниженный функциональный ответ в ряде каналов.`}else if(c.ex>c.df&&c.ex>=c.nm){main=`Преобладает избыток: ${c.ex} меридианов. Это может указывать на функциональное напряжение и перегрузку отдельных систем.`}else if(c.nm>=c.ex&&c.nm>=c.df&&c.sdf===0){main=`Преобладает нормальная реакция: ${c.nm} меридианов. Сильных отклонений по общей картине не выявлено.`}else{main=`Картина смешанная: избыток ${c.ex}, недостаток ${c.df}, норма ${c.nm}. Требуется смотреть сочетания меридианов.`}const severe=listByState(rows,'severe_deficiency').slice(0,6);const excess=listByState(rows,'excess').slice(0,6);const deficiency=listByState(rows,'deficiency').slice(0,6);return `<div class="interpretation ${c.sdf>0?'warning':''}"><b>Заключение</b><br>${esc(main)}<ul>${severe.length?`<li><b>Выраженный недостаток:</b> ${esc(severe.join(', '))}</li>`:''}${deficiency.length?`<li><b>Недостаток:</b> ${esc(deficiency.join(', '))}</li>`:''}${excess.length?`<li><b>Избыток:</b> ${esc(excess.join(', '))}</li>`:''}</ul></div>`}
 function recommendations(rows,c){let rec=[]; if(c.sdf>0) rec.push('Проверить зоны выраженного недостатка в повторной диагностике и не делать резких нагрузок на эти системы.'); if(c.df>0) rec.push('Для зон недостатка: мягкое восстановление, дыхание, сон, умеренное тепло, постепенная работа без перегруза.'); if(c.ex>0) rec.push('Для зон избытка: снизить лишнее напряжение, добавить расслабление, спокойное дыхание и мягкую подвижность.'); rec.push('Оценивать динамику по повторной диагностике, а не по одному измерению.'); return `<div class="recommendations"><b>Рекомендации</b><ul>${rec.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`}
 function printReport(){window.print()}
+function togglePayment(){document.getElementById('paymentCard').classList.toggle('open')}
 
 async function load(){if(!id){patientInfo.textContent='Нет ID пациента в ссылке.';diagnostics.textContent='';return}const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();if(p.error){err(p.error.message);return}if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});if(d.error)err(d.error.message);renderDiags(d.data||[]);const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});if(m.error)err(m.error.message);renderMsgs(m.data||[])}
 function renderDiags(arr){diagnostics.innerHTML=arr.map(x=>{const r=x.result_json||{};const rows=buildRows(r);const c=countRows(rows);const tableRows=rows.map(y=>`<tr><td>${y.id}</td><td>${esc(y.organ)}</td><td>${esc(y.side)}</td><td>${esc(y.point)}</td><td>${esc(fmtTime(y.time))}</td><td><span class="pill ${y.state.className}">${esc(y.state.label)}</span></td></tr>`).join('');return `<div class="diag" onclick="toggleDiag(this)"><div class="diag-head"><div><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div></div><div class="chev">⌄</div></div><div><span class="pill red">Избыток ${c.ex} (${pct(c.ex)}%)</span><span class="pill green">Норма ${c.nm} (${pct(c.nm)}%)</span><span class="pill blue">Недостаток ${c.df} (${pct(c.df)}%)</span><span class="pill orange">Выраженный ${c.sdf} (${pct(c.sdf)}%)</span>${c.un?`<span class="pill gray">Не измерено ${c.un}</span>`:''}</div><div class="diag-details">${mainPicture(c)}<div class="section-title">Итог</div><div class="mut">Избыток ${c.ex} (${pct(c.ex)}%), Норма ${c.nm} (${pct(c.nm)}%), Недостаток ${c.df} (${pct(c.df)}%), Выраженный недостаток ${c.sdf} (${pct(c.sdf)}%).</div>${interpretation(rows,c)}${recommendations(rows,c)}${asymmetry(rows)}<div class="pdf-actions"><button class="btn" onclick="event.stopPropagation();printReport()">Скачать / сохранить PDF</button><button class="btn btn2" onclick="event.stopPropagation();navigator.clipboard?.writeText(location.href)">Скопировать ссылку</button></div><div class="section-title">Измерения</div><table class="table"><tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${tableRows}</table></div></div>`}).join('')||'Диагностик пока нет'}
