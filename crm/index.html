@@ -6,65 +6,203 @@
 <title>Akabane CRM</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:900px;margin:auto;padding:18px}.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:#9696b8;line-height:1.5}input,textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit}textarea{min-height:82px}.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}.btn2{background:#1a1a2a;border:1px solid #2a2a40}.btnRed{background:#331616;border:1px solid #693030;color:#ff9b9b}.patient{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.small{font-size:13px}.top{display:flex;justify-content:space-between;gap:10px;align-items:center}.badge{background:#23233a;border:1px solid #343452;border-radius:999px;padding:6px 10px;color:#bdbdff;font-size:12px}.err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0;white-space:pre-wrap}@media(max-width:650px){.row{grid-template-columns:1fr}.top{display:block}}
+body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+.app{max-width:920px;margin:auto;padding:18px}
+.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}
+.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}
+h1,h2{margin:8px 0;font-weight:950}
+.mut{color:#9696b8;line-height:1.5}
+input,textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit}
+textarea{min-height:90px}
+.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}
+.btn2{background:#1a1a2a;border:1px solid #2a2a40}.btn-danger{background:#411616;border:1px solid #7e2a2a}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.patient{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px}
+.patient-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.badge{display:inline-block;background:#262648;border:1px solid #3a3a68;border-radius:999px;padding:6px 10px;font-size:12px;color:#cfcfff}
+.unread{background:#3b2112;border-color:#d08a2b;color:#ffcf8a}
+.inbox-item{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px;border-left:4px solid #e0b852}
+.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}
+.msg.patient{border-left:3px solid #7c6af7}.msg.doctor{border-left:3px solid #e0b852}
+.err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0}
+.ok{background:#12301d;border:1px solid #247548;color:#7be89f;border-radius:12px;padding:10px;margin:10px 0}
+.selected{outline:2px solid #7c6af7}
+@media(max-width:650px){.app{padding:12px}.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="card"><div class="brand">KUNGFU MAN · AKABANE CRM</div><div class="title">Пациенты</div><div class="mut">Облачная база Supabase. Пациента можно открыть с любого устройства по личной ссылке.</div><div id="status"></div></div>
-  <div class="card"><div class="title">Новый пациент</div><input id="name" placeholder="ФИО пациента"><input id="phone" placeholder="Телефон"><textarea id="note" placeholder="Заметки: жалобы, дата визита, состояние"></textarea><button class="btn" onclick="savePatient()">+ Сохранить пациента</button></div>
-  <div class="card"><div class="top"><div class="title">Список пациентов</div><span class="badge" id="count">0 пациентов</span></div><div id="list" class="mut">Загрузка...</div></div>
+  <div class="card">
+    <div class="brand">KUNGFU MAN · AKABANE CRM</div>
+    <h1>Пациенты</h1>
+    <div class="mut">Облачная база Supabase. CRM больше не восстанавливает тестовых пациентов из localStorage.</div>
+    <div id="status"></div>
+  </div>
+
+  <div class="card">
+    <h2>Входящие сообщения</h2>
+    <div class="mut">Здесь врач видит, кто написал из личного кабинета пациента.</div>
+    <div id="inbox">Загрузка...</div>
+  </div>
+
+  <div class="card">
+    <h2>Ответ пациенту</h2>
+    <div id="selectedPatient" class="mut">Выберите пациента из списка или входящих сообщений.</div>
+    <textarea id="replyText" placeholder="Ответ пациенту"></textarea>
+    <button class="btn" onclick="sendDoctorReply()">Отправить ответ</button>
+  </div>
+
+  <div class="card">
+    <h2>Новый пациент</h2>
+    <input id="name" placeholder="ФИО пациента">
+    <input id="phone" placeholder="Телефон">
+    <textarea id="note" placeholder="Заметки: жалобы, дата визита, состояние"></textarea>
+    <button class="btn" onclick="createPatient()">+ Сохранить пациента</button>
+  </div>
+
+  <div class="card">
+    <div class="patient-head">
+      <h2>Список пациентов</h2>
+      <span id="count" class="badge">0 пациентов</span>
+    </div>
+    <div id="patients">Загрузка...</div>
+  </div>
 </div>
+
 <script>
 const SUPABASE_URL='https://ytalluctuccinghqaotw.supabase.co';
 const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
-function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
-function localPatients(){try{return JSON.parse(localStorage.getItem('akabane_patients')||'[]')}catch{return[]}}
-function saveLocalPatients(a){localStorage.setItem('akabane_patients',JSON.stringify(a))}
-async function syncLocalToCloud(){
-  const local=localPatients();
-  for(const p of local){
-    if(!p.name) continue;
-    const found=await sb.from('patients').select('id').eq('full_name',p.name).limit(1).maybeSingle();
-    if(found.data){p.id=found.data.id;continue}
-    const ins=await sb.from('patients').insert({full_name:p.name,phone:p.phone||''}).select().single();
-    if(ins.data)p.id=ins.data.id;
-  }
-  saveLocalPatients(local);
-}
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let patients=[];
+let messages=[];
+let selectedPatientId=null;
+
+function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+function shortId(id){return String(id||'').slice(0,8)}
+function patientUrl(id){return `${location.origin}/akabane_diagnostic/patient/?id=${encodeURIComponent(id)}`}
+function doctorUrl(id){return `${location.origin}/akabane_diagnostic/doctor/?patient_id=${encodeURIComponent(id)}`}
+function setStatus(text,type='ok'){status.innerHTML=`<div class="${type}">${esc(text)}</div>`;setTimeout(()=>status.innerHTML='',2500)}
+function getPatient(id){return patients.find(p=>p.id===id)}
+function patientName(id){return getPatient(id)?.full_name || 'Без имени'}
+
 async function load(){
-  status.innerHTML='';
-  try{
-    await syncLocalToCloud();
-    const r=await sb.from('patients').select('*').order('created_at',{ascending:false});
-    if(r.error) throw r.error;
-    render(r.data||[]);
-  }catch(e){err('Ошибка Supabase: '+(e.message||e)); render(localPatients().map(p=>({id:p.id,full_name:p.name,phone:p.phone,created_at:p.createdAt})))}
+  const p=await sb.from('patients').select('*').order('created_at',{ascending:false});
+  if(p.error){setStatus(p.error.message,'err');return}
+  patients=p.data||[];
+
+  const m=await sb.from('messages').select('*').order('created_at',{ascending:false});
+  if(m.error){setStatus(m.error.message,'err');return}
+  messages=m.data||[];
+
+  renderPatients();
+  renderInbox();
 }
-function render(arr){
-  count.textContent=arr.length+' пациентов';
-  list.innerHTML=arr.map(p=>{
-    const name=p.full_name||p.name||'Без имени';
-    const phone=p.phone||'Без телефона';
-    const created=p.created_at||p.createdAt;
-    const doctor='../doctor/?patient='+encodeURIComponent(p.id)+'&name='+encodeURIComponent(name);
-    const patient='../patient/?id='+encodeURIComponent(p.id);
-    return `<div class="patient"><div class="top"><div><b>${esc(name)}</b><div class="mut small">${esc(phone)} · ${created?new Date(created).toLocaleString():'без даты'}</div></div><span class="badge">ID ${esc((p.id||'').slice(0,8))}</span></div><div class="row"><a class="btn" href="${doctor}">▶ Запустить диагностику</a><a class="btn btn2" href="${patient}" target="_blank">Открыть кабинет</a></div><button class="btn btn2" onclick="copyLink('${p.id}')">Скопировать ссылку пациенту</button></div>`
-  }).join('')||'Пока нет пациентов';
+
+function renderPatients(){
+  count.textContent=`${patients.length} пациентов`;
+  patientsEl = document.getElementById('patients');
+
+  patientsEl.innerHTML=patients.map(p=>{
+    const patientMsgs=messages.filter(m=>m.patient_id===p.id);
+    const incoming=patientMsgs.filter(m=>m.author==='patient');
+    const last=patientMsgs[0];
+    const unreadCount=incoming.length;
+    return `<div class="patient ${selectedPatientId===p.id?'selected':''}">
+      <div class="patient-head">
+        <div>
+          <b>${esc(p.full_name||'Без имени')}</b>
+          <div class="mut">${esc(p.phone||'Без телефона')} · ${new Date(p.created_at).toLocaleString()}</div>
+          ${last?`<div class="mut">Последнее: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message)}</div>`:''}
+        </div>
+        <div>
+          <span class="badge">ID ${shortId(p.id)}</span>
+          ${unreadCount?`<span class="badge unread">${unreadCount} сообщ.</span>`:''}
+        </div>
+      </div>
+      <div class="grid">
+        <button class="btn" onclick="openDiagnostic('${p.id}')">▶ Запустить диагностику</button>
+        <button class="btn btn2" onclick="openCabinet('${p.id}')">Открыть кабинет</button>
+      </div>
+      <div class="grid">
+        <button class="btn btn2" onclick="copyPatientLink('${p.id}')">Скопировать ссылку пациенту</button>
+        <button class="btn btn2" onclick="selectPatient('${p.id}')">Ответить</button>
+      </div>
+      <button class="btn btn-danger" onclick="deletePatient('${p.id}')">Удалить</button>
+    </div>`;
+  }).join('') || '<div class="mut">Пока нет пациентов</div>';
 }
-async function savePatient(){
-  const n=name.value.trim(); if(!n)return alert('Введите ФИО');
-  const r=await sb.from('patients').insert({full_name:n,phone:phone.value.trim()}).select().single();
-  if(r.error)return err(r.error.message);
-  const local=localPatients(); local.unshift({id:r.data.id,name:r.data.full_name,phone:r.data.phone,createdAt:r.data.created_at}); saveLocalPatients(local);
-  name.value='';phone.value='';note.value='';load();
+
+function renderInbox(){
+  const incoming=messages.filter(m=>m.author==='patient');
+  inbox.innerHTML=incoming.slice(0,20).map(m=>{
+    return `<div class="inbox-item">
+      <div class="patient-head">
+        <div>
+          <b>${esc(patientName(m.patient_id))}</b>
+          <div>${esc(m.message)}</div>
+          <div class="mut">${new Date(m.created_at).toLocaleString()}</div>
+        </div>
+        <span class="badge unread">Новое</span>
+      </div>
+      <div class="grid">
+        <button class="btn" onclick="selectPatient('${m.patient_id}')">Ответить</button>
+        <button class="btn btn2" onclick="openCabinet('${m.patient_id}')">Открыть кабинет</button>
+      </div>
+    </div>`;
+  }).join('') || '<div class="mut">Новых сообщений пока нет</div>';
 }
-function copyLink(id){
-  const link=location.origin+location.pathname.replace('/crm/','/patient/')+'?id='+encodeURIComponent(id);
-  navigator.clipboard.writeText(link); alert('Ссылка скопирована:\\n'+link);
+
+async function createPatient(){
+  const full_name=name.value.trim();
+  const phone=phoneEl().value.trim();
+  if(!full_name){setStatus('Введите ФИО пациента','err');return}
+  const r=await sb.from('patients').insert({full_name,phone}).select().single();
+  if(r.error){setStatus(r.error.message,'err');return}
+  name.value='';phoneEl().value='';note.value='';
+  setStatus('Пациент создан');
+  load();
 }
+
+function phoneEl(){return document.getElementById('phone')}
+
+async function deletePatient(id){
+  if(!confirm('Удалить пациента и связанные сообщения/диагностики?'))return;
+  await sb.from('messages').delete().eq('patient_id',id);
+  await sb.from('diagnostics').delete().eq('patient_id',id);
+  const r=await sb.from('patients').delete().eq('id',id);
+  if(r.error){setStatus(r.error.message,'err');return}
+  setStatus('Пациент удалён');
+  if(selectedPatientId===id)selectedPatientId=null;
+  load();
+}
+
+function selectPatient(id){
+  selectedPatientId=id;
+  selectedPatient.innerHTML=`Выбран пациент: <b>${esc(patientName(id))}</b>`;
+  renderPatients();
+}
+
+async function sendDoctorReply(){
+  const text=replyText.value.trim();
+  if(!selectedPatientId){setStatus('Выберите пациента','err');return}
+  if(!text){setStatus('Введите текст ответа','err');return}
+  const r=await sb.from('messages').insert({patient_id:selectedPatientId,author:'doctor',message:text});
+  if(r.error){setStatus(r.error.message,'err');return}
+  replyText.value='';
+  setStatus('Ответ отправлен');
+  load();
+}
+
+function openDiagnostic(id){location.href=doctorUrl(id)}
+function openCabinet(id){window.open(patientUrl(id),'_blank')}
+function copyPatientLink(id){
+  navigator.clipboard?.writeText(patientUrl(id));
+  setStatus('Ссылка пациента скопирована');
+}
+
 load();
+setInterval(load,10000);
 </script>
-</body></html>
+</body>
+</html>
