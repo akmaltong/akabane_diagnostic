@@ -22,7 +22,7 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
 .msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}
 .msg.patient{border-left:3px solid #7c6af7}
 .msg.doctor{border-left:3px solid #e0b852}
-.pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800}
+.pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800;white-space:nowrap}
 .red{background:#351515;color:#ff8b8b}
 .blue{background:#15223d;color:#86aaff}
 .green{background:#12301d;color:#7be89f}
@@ -32,11 +32,7 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
 .table th{color:#9696b8}
 .section-title{font-size:13px;color:#7c6af7;text-transform:uppercase;font-weight:900;margin-top:12px;margin-bottom:6px}
 .small{font-size:13px}
-@media(max-width:650px){
-  .app{padding:12px}
-  .table{display:block;overflow-x:auto}
-  .diag-head{display:block}
-}
+@media(max-width:650px){.app{padding:12px}.table{display:block;overflow-x:auto}.diag-head{display:block}}
 </style>
 </head>
 <body>
@@ -67,31 +63,138 @@ const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const id=new URLSearchParams(location.search).get('id');
 
+const ORDER=[
+  ['Лёгкие','Левая'],['Лёгкие','Правая'],
+  ['Толстая кишка','Левая'],['Толстая кишка','Правая'],
+  ['Желудок','Левая'],['Желудок','Правая'],
+  ['Селезёнка/Поджелудочная','Левая'],['Селезёнка/Поджелудочная','Правая'],
+  ['Сердце','Левая'],['Сердце','Правая'],
+  ['Тонкая кишка','Левая'],['Тонкая кишка','Правая'],
+  ['Мочевой пузырь','Левая'],['Мочевой пузырь','Правая'],
+  ['Почки','Левая'],['Почки','Правая'],
+  ['Перикард','Левая'],['Перикард','Правая'],
+  ['Тройной обогреватель','Левая'],['Тройной обогреватель','Правая'],
+  ['Жёлчный пузырь','Левая'],['Жёлчный пузырь','Правая'],
+  ['Печень','Левая'],['Печень','Правая']
+];
+
 function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
+
+function norm(s){
+  return String(s||'')
+    .toLowerCase()
+    .replace(/ё/g,'е')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function sameSide(a,b){
+  const x=norm(a), y=norm(b);
+  if(!x||!y) return false;
+  if(x===y) return true;
+  if((x==='л'||x.includes('лев')) && (y==='л'||y.includes('лев'))) return true;
+  if((x==='п'||x.includes('прав')) && (y==='п'||y.includes('прав'))) return true;
+  return false;
+}
+
+function sameOrgan(a,b){
+  const x=norm(a), y=norm(b);
+  if(!x||!y) return false;
+  if(x===y) return true;
+  if(x.includes('селез') && y.includes('селез')) return true;
+  if(x.includes('поджел') && y.includes('поджел')) return true;
+  if(x.includes('желч') && y.includes('желч')) return true;
+  if(x.includes('мочев') && y.includes('мочев')) return true;
+  if(x.includes('трой') && y.includes('трой')) return true;
+  if(x.includes('толст') && y.includes('толст')) return true;
+  if(x.includes('тонк') && y.includes('тонк')) return true;
+  return false;
+}
+
+function getField(o,names){
+  if(!o) return '';
+  for(const k of names){
+    if(o[k]!==undefined && o[k]!==null && o[k]!=='') return o[k];
+  }
+  return '';
+}
+
+function itemOrgan(o){return getField(o,['organ','meridian','name','channel','title','system'])}
+function itemSide(o){return getField(o,['side','lr','leftRight','direction','hand','leg'])}
+function itemPoint(o){return getField(o,['point','acupoint','code','pointCode','treat','sourcePoint'])}
+function itemTime(o){return getField(o,['time','seconds','sec','value','duration'])}
 
 function fmtState(state){
   if(state==='excess') return 'Избыток';
   if(state==='deficiency') return 'Недостаток';
   if(state==='normal') return 'Норма';
+  if(state==='Избыток') return 'Избыток';
+  if(state==='Недостаток') return 'Недостаток';
+  if(state==='Норма') return 'Норма';
   return state || '—';
 }
+
 function stateClass(state){
-  const s=String(state||'').toLowerCase();
+  const s=norm(state);
   if(s==='excess'||s==='избыток') return 'red';
   if(s==='deficiency'||s==='недостаток') return 'blue';
   if(s==='normal'||s==='норма') return 'green';
   return '';
 }
+
+function itemMatches(item, organ, side){
+  if(!item) return false;
+  return sameOrgan(itemOrgan(item), organ) && (!side || sameSide(itemSide(item), side));
+}
+
+function stateFromBuckets(organ, side, buckets){
+  if(buckets.excess.some(x=>itemMatches(x,organ,side))) return 'excess';
+  if(buckets.deficiency.some(x=>itemMatches(x,organ,side))) return 'deficiency';
+  if(buckets.normalArr.some(x=>itemMatches(x,organ,side))) return 'normal';
+  return 'normal';
+}
+
+function findResult(organ, side, results){
+  return results.find(x=>itemMatches(x,organ,side)) || null;
+}
+
 function getAnalysis(r){
   const a=r.analysis||{};
   const results=Array.isArray(r.results)?r.results:[];
-  const excess=a.excess||r.excess||results.filter(y=>String(y.state||'').toLowerCase()==='excess'||y.state==='Избыток')||[];
-  const deficiency=a.deficiency||r.deficiency||results.filter(y=>String(y.state||'').toLowerCase()==='deficiency'||y.state==='Недостаток')||[];
-  const normalArr=a.normal||r.normal||results.filter(y=>String(y.state||'').toLowerCase()==='normal'||y.state==='Норма')||[];
+  const rawEx=a.excess||r.excess||[];
+  const rawDf=a.deficiency||r.deficiency||[];
+  const rawNm=a.normal||r.normal||[];
+
+  const computedEx=results.filter(y=>norm(y.state)==='excess'||norm(y.state)==='избыток');
+  const computedDf=results.filter(y=>norm(y.state)==='deficiency'||norm(y.state)==='недостаток');
+  const computedNm=results.filter(y=>norm(y.state)==='normal'||norm(y.state)==='норма');
+
+  const excess=rawEx.length?rawEx:computedEx;
+  const deficiency=rawDf.length?rawDf:computedDf;
+  const normalArr=rawNm.length?rawNm:computedNm;
+
   const total=results.length || excess.length + deficiency.length + normalArr.length || 24;
   const normal=normalArr.length || Math.max(0,total-excess.length-deficiency.length);
-  return {results,excess,deficiency,normal,total};
+
+  return {results,excess,deficiency,normalArr,normal,total};
+}
+
+function makeRows(r, an){
+  const results=an.results||[];
+  const hasUsefulResults=results.some(x=>itemTime(x)||itemPoint(x)||x.state||x.status);
+  const sourceRows=results.length ? results.map(x=>[itemOrgan(x), itemSide(x), x]) : ORDER.map(x=>[x[0],x[1],null]);
+
+  return sourceRows.map(([organRaw,sideRaw,obj],idx)=>{
+    const organ=organRaw||ORDER[idx]?.[0]||'—';
+    const side=sideRaw||ORDER[idx]?.[1]||'—';
+    const found=obj || findResult(organ,side,results);
+    const point=itemPoint(found)||'—';
+    const sec=itemTime(found);
+    let state=getField(found,['state','status','condition']);
+    if(!state || state==='—') state=stateFromBuckets(organ,side,an);
+    return {idx:idx+1,organ,side,point,sec,state};
+  });
 }
 
 async function load(){
@@ -114,27 +217,45 @@ function renderDiags(arr){
   diagnostics.innerHTML=arr.map(x=>{
     const r=x.result_json||{};
     const an=getAnalysis(r);
-    const rows=an.results.map((y,idx)=>{
-      const organ=y.organ||y.meridian||y.name||y.channel||'—';
-      const side=y.side||y.lr||'—';
-      const point=y.point||y.acupoint||'—';
-      const sec=y.time||y.seconds||y.sec||y.value||'—';
-      const state=y.state||y.status||'—';
-      return `<tr><td>${idx+1}</td><td>${esc(organ)}</td><td>${esc(side)}</td><td>${esc(point)}</td><td>${esc(sec)}${sec==='—'?'':'с'}</td><td><span class="pill ${stateClass(state)}">${esc(fmtState(state))}</span></td></tr>`;
+    const rowData=makeRows(r,an);
+
+    const rows=rowData.map(y=>{
+      const timeText=(y.sec===undefined||y.sec===null||y.sec==='')?'—':`${esc(y.sec)}с`;
+      return `<tr>
+        <td>${y.idx}</td>
+        <td>${esc(y.organ)}</td>
+        <td>${esc(y.side)}</td>
+        <td>${esc(y.point)}</td>
+        <td>${timeText}</td>
+        <td><span class="pill ${stateClass(y.state)}">${esc(fmtState(y.state))}</span></td>
+      </tr>`;
     }).join('');
 
     const protocol=r.protocol||r.patientProtocol||r.recommendation||r.summary||'';
-    const details=rows
-      ? `<div class="section-title">Измерения</div><table class="table"><tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${rows}</table>`
-      : `<div class="mut small">Подробные измерения не найдены в этой записи.</div>`;
 
     return `<div class="diag" onclick="toggleDiag(this)">
       <div class="diag-head">
-        <div><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div></div>
+        <div>
+          <b>${new Date(x.created_at).toLocaleString()}</b>
+          <div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div>
+        </div>
         <div class="chev">⌄</div>
       </div>
-      <div><span class="pill red">Избыток ${an.excess.length}</span><span class="pill blue">Недостаток ${an.deficiency.length}</span><span class="pill green">Норма ${an.normal}</span></div>
-      <div class="diag-details">${protocol?`<div class="section-title">Итог</div><div class="mut">${esc(protocol)}</div>`:''}${details}</div>
+
+      <div>
+        <span class="pill red">Избыток ${an.excess.length}</span>
+        <span class="pill blue">Недостаток ${an.deficiency.length}</span>
+        <span class="pill green">Норма ${an.normal}</span>
+      </div>
+
+      <div class="diag-details">
+        ${protocol?`<div class="section-title">Итог</div><div class="mut">${esc(protocol)}</div>`:''}
+        <div class="section-title">Измерения</div>
+        <table class="table">
+          <tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>
+          ${rows}
+        </table>
+      </div>
     </div>`;
   }).join('')||'Диагностик пока нет';
 }
