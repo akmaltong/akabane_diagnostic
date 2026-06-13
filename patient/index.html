@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Akabane Patient</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../shared/akabane-rules.js"></script>
 <style>
 body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
 .app{max-width:760px;margin:auto;padding:18px}
@@ -26,13 +27,13 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
 .red{background:#351515;color:#ff8b8b}
 .blue{background:#15223d;color:#86aaff}
 .green{background:#12301d;color:#7be89f}
+.purple{background:#2a173d;color:#d6a6ff}
 .gray{background:#262637;color:#b4b4ca}
 .err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0;white-space:pre-wrap}
 .table{width:100%;border-collapse:collapse;margin-top:8px}
 .table td,.table th{border-bottom:1px solid #2a2a40;padding:8px;text-align:left;font-size:13px;vertical-align:top}
 .table th{color:#9696b8}
 .section-title{font-size:13px;color:#7c6af7;text-transform:uppercase;font-weight:900;margin-top:12px;margin-bottom:6px}
-.small{font-size:13px}
 @media(max-width:650px){.app{padding:12px}.table{display:block;overflow-x:auto}.diag-head{display:block}}
 </style>
 </head>
@@ -65,89 +66,45 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const id=new URLSearchParams(location.search).get('id');
 
 const MERIDIANS=[
-  {id:1,organ:"Лёгкие",side:"Левая",point:"LU11",min:2,max:4},
-  {id:2,organ:"Лёгкие",side:"Правая",point:"LU11",min:2,max:4},
-  {id:3,organ:"Толстая кишка",side:"Левая",point:"LI1",min:2,max:4},
-  {id:4,organ:"Толстая кишка",side:"Правая",point:"LI1",min:2,max:4},
-  {id:5,organ:"Желудок",side:"Левая",point:"ST45",min:2,max:4},
-  {id:6,organ:"Желудок",side:"Правая",point:"ST45",min:2,max:4},
-  {id:7,organ:"Селезёнка/Поджелудочная",side:"Левая",point:"SP1",min:2,max:4},
-  {id:8,organ:"Селезёнка/Поджелудочная",side:"Правая",point:"SP1",min:2,max:4},
-  {id:9,organ:"Сердце",side:"Левая",point:"HT9",min:2,max:4},
-  {id:10,organ:"Сердце",side:"Правая",point:"HT9",min:2,max:4},
-  {id:11,organ:"Тонкая кишка",side:"Левая",point:"SI1",min:2,max:4},
-  {id:12,organ:"Тонкая кишка",side:"Правая",point:"SI1",min:2,max:4},
-  {id:13,organ:"Мочевой пузырь",side:"Левая",point:"BL67",min:2,max:4},
-  {id:14,organ:"Мочевой пузырь",side:"Правая",point:"BL67",min:2,max:4},
-  {id:15,organ:"Почки",side:"Левая",point:"KI1",min:2,max:4},
-  {id:16,organ:"Почки",side:"Правая",point:"KI1",min:2,max:4},
-  {id:17,organ:"Перикард",side:"Левая",point:"PC9",min:2,max:4},
-  {id:18,organ:"Перикард",side:"Правая",point:"PC9",min:2,max:4},
-  {id:19,organ:"Тройной обогреватель",side:"Левая",point:"TE1",min:2,max:4},
-  {id:20,organ:"Тройной обогреватель",side:"Правая",point:"TE1",min:2,max:4},
-  {id:21,organ:"Жёлчный пузырь",side:"Левая",point:"GB44",min:2,max:4},
-  {id:22,organ:"Жёлчный пузырь",side:"Правая",point:"GB44",min:2,max:4},
-  {id:23,organ:"Печень",side:"Левая",point:"LIV1",min:2,max:4},
-  {id:24,organ:"Печень",side:"Правая",point:"LIV1",min:2,max:4}
+  {id:1,organ:"Лёгкие",side:"Левая",point:"LU11"},
+  {id:2,organ:"Лёгкие",side:"Правая",point:"LU11"},
+  {id:3,organ:"Толстая кишка",side:"Левая",point:"LI1"},
+  {id:4,organ:"Толстая кишка",side:"Правая",point:"LI1"},
+  {id:5,organ:"Желудок",side:"Левая",point:"ST45"},
+  {id:6,organ:"Желудок",side:"Правая",point:"ST45"},
+  {id:7,organ:"Селезёнка/Поджелудочная",side:"Левая",point:"SP1"},
+  {id:8,organ:"Селезёнка/Поджелудочная",side:"Правая",point:"SP1"},
+  {id:9,organ:"Сердце",side:"Левая",point:"HT9"},
+  {id:10,organ:"Сердце",side:"Правая",point:"HT9"},
+  {id:11,organ:"Тонкая кишка",side:"Левая",point:"SI1"},
+  {id:12,organ:"Тонкая кишка",side:"Правая",point:"SI1"},
+  {id:13,organ:"Мочевой пузырь",side:"Левая",point:"BL67"},
+  {id:14,organ:"Мочевой пузырь",side:"Правая",point:"BL67"},
+  {id:15,organ:"Почки",side:"Левая",point:"KI1"},
+  {id:16,organ:"Почки",side:"Правая",point:"KI1"},
+  {id:17,organ:"Перикард",side:"Левая",point:"PC9"},
+  {id:18,organ:"Перикард",side:"Правая",point:"PC9"},
+  {id:19,organ:"Тройной обогреватель",side:"Левая",point:"TE1"},
+  {id:20,organ:"Тройной обогреватель",side:"Правая",point:"TE1"},
+  {id:21,organ:"Жёлчный пузырь",side:"Левая",point:"GB44"},
+  {id:22,organ:"Жёлчный пузырь",side:"Правая",point:"GB44"},
+  {id:23,organ:"Печень",side:"Левая",point:"LIV1"},
+  {id:24,organ:"Печень",side:"Правая",point:"LIV1"}
 ];
 
 function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
 function norm(s){return String(s??'').toLowerCase().replace(/ё/g,'е').trim()}
-
-function get(o,keys){
-  if(!o || typeof o!=='object') return '';
-  for(const k of keys){
-    if(o[k]!==undefined && o[k]!==null && o[k]!=='') return o[k];
-  }
-  return '';
-}
-
-function getTime(row){
-  return get(row,['reaction_time','time','seconds','sec','value','duration','t']);
-}
-
-function getMeridianId(row){
-  const v=get(row,['meridian_id','meridianId','id']);
-  const n=Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
-function fmtTime(v){
-  if(v===undefined || v===null || v==='') return 'Не измерено';
-  const n=Number(v);
-  if(Number.isFinite(n)) return n.toFixed(1)+'с';
-  return String(v);
-}
-
-function stateByTime(v, m){
-  const n=Number(v);
-  if(!Number.isFinite(n)) return 'unmeasured';
-  if(n < m.min) return 'excess';
-  if(n > m.max) return 'deficiency';
-  return 'normal';
-}
-
-function fmtState(state){
-  if(state==='excess') return 'Избыток';
-  if(state==='deficiency') return 'Недостаток';
-  if(state==='normal') return 'Норма';
-  if(state==='unmeasured') return 'Не измерено';
-  return state || '—';
-}
-
-function stateClass(state){
-  if(state==='excess') return 'red';
-  if(state==='deficiency') return 'blue';
-  if(state==='normal') return 'green';
-  return 'gray';
-}
+function get(o,keys){if(!o||typeof o!=='object')return'';for(const k of keys){if(o[k]!==undefined&&o[k]!==null&&o[k]!=='')return o[k]}return''}
+function getTime(row){return get(row,['reaction_time','time','seconds','sec','value','duration','t'])}
+function getMeridianId(row){const v=get(row,['meridian_id','meridianId','id']);const n=Number(v);return Number.isFinite(n)?n:null}
+function fmtTime(v){if(v===undefined||v===null||v==='')return'Не измерено';const n=Number(v);return Number.isFinite(n)?n.toFixed(1)+'с':String(v)}
 
 function rawResults(r){
-  if(Array.isArray(r.results)) return r.results;
-  if(Array.isArray(r.measurements)) return r.measurements;
-  if(Array.isArray(r.rows)) return r.rows;
-  if(Array.isArray(r.items)) return r.items;
+  if(Array.isArray(r.results))return r.results;
+  if(Array.isArray(r.measurements))return r.measurements;
+  if(Array.isArray(r.rows))return r.rows;
+  if(Array.isArray(r.items))return r.items;
   return [];
 }
 
@@ -156,27 +113,19 @@ function buildRows(r){
   return MERIDIANS.map(m=>{
     const found=results.find(x=>getMeridianId(x)===m.id) ||
       results.find(x=>norm(get(x,['organ','meridian','channel','name']))===norm(m.organ) && norm(get(x,['side','lr','direction']))===norm(m.side));
-
-    const t=found ? getTime(found) : '';
-    const state=stateByTime(t,m);
-
-    return {
-      id:m.id,
-      organ:m.organ,
-      side:m.side,
-      point:get(found,['point','acupoint','code','pointCode']) || m.point,
-      time:t,
-      state
-    };
+    const t=found?getTime(found):'';
+    const state=AKABANE_RULES.classify(t);
+    return {id:m.id,organ:m.organ,side:m.side,point:get(found,['point','acupoint','code','pointCode'])||m.point,time:t,state};
   });
 }
 
 function countRows(rows){
   return {
-    ex: rows.filter(x=>x.state==='excess').length,
-    df: rows.filter(x=>x.state==='deficiency').length,
-    nm: rows.filter(x=>x.state==='normal').length,
-    un: rows.filter(x=>x.state==='unmeasured').length
+    ex:rows.filter(x=>x.state.key==='excess').length,
+    nm:rows.filter(x=>x.state.key==='normal').length,
+    df:rows.filter(x=>x.state.key==='deficiency').length,
+    sdf:rows.filter(x=>x.state.key==='severe_deficiency').length,
+    un:rows.filter(x=>x.state.key==='unmeasured').length
   };
 }
 
@@ -188,11 +137,11 @@ async function load(){
   patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');
 
   const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
-  if(d.error) err(d.error.message);
+  if(d.error)err(d.error.message);
   renderDiags(d.data||[]);
 
   const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});
-  if(m.error) err(m.error.message);
+  if(m.error)err(m.error.message);
   renderMsgs(m.data||[]);
 }
 
@@ -201,7 +150,6 @@ function renderDiags(arr){
     const r=x.result_json||{};
     const rows=buildRows(r);
     const c=countRows(rows);
-
     const tableRows=rows.map(y=>`
       <tr>
         <td>${y.id}</td>
@@ -209,11 +157,8 @@ function renderDiags(arr){
         <td>${esc(y.side)}</td>
         <td>${esc(y.point)}</td>
         <td>${esc(fmtTime(y.time))}</td>
-        <td><span class="pill ${stateClass(y.state)}">${esc(fmtState(y.state))}</span></td>
-      </tr>
-    `).join('');
-
-    const protocol=r.protocol||r.patientProtocol||r.recommendation||r.summary||'';
+        <td><span class="pill ${y.state.className}">${esc(y.state.label)}</span></td>
+      </tr>`).join('');
 
     return `<div class="diag" onclick="toggleDiag(this)">
       <div class="diag-head">
@@ -223,16 +168,16 @@ function renderDiags(arr){
         </div>
         <div class="chev">⌄</div>
       </div>
-
       <div>
         <span class="pill red">Избыток ${c.ex}</span>
-        <span class="pill blue">Недостаток ${c.df}</span>
         <span class="pill green">Норма ${c.nm}</span>
+        <span class="pill blue">Недостаток ${c.df}</span>
+        <span class="pill purple">Выраженный недостаток ${c.sdf}</span>
         ${c.un?`<span class="pill gray">Не измерено ${c.un}</span>`:''}
       </div>
-
       <div class="diag-details">
-        ${protocol?`<div class="section-title">Итог</div><div class="mut">${esc(protocol)}</div>`:''}
+        <div class="section-title">Итог</div>
+        <div class="mut">Избыток ${c.ex}, Норма ${c.nm}, Недостаток ${c.df}, Выраженный недостаток ${c.sdf}</div>
         <div class="section-title">Измерения</div>
         <table class="table">
           <tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>
@@ -246,20 +191,14 @@ function renderDiags(arr){
 function toggleDiag(el){el.classList.toggle('open')}
 
 function renderMsgs(arr){
-  messages.innerHTML=arr.map(m=>`
-    <div class="msg ${esc(m.author)}">
-      <b>${m.author==='patient'?'Пациент':'Акмал'}</b>
-      <div>${esc(m.message)}</div>
-      <div class="mut">${new Date(m.created_at).toLocaleString()}</div>
-    </div>
-  `).join('')||'<div class="mut">Сообщений пока нет</div>';
+  messages.innerHTML=arr.map(m=>`<div class="msg ${esc(m.author)}"><b>${m.author==='patient'?'Пациент':'Акмал'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет</div>';
 }
 
 async function sendMsg(){
-  const text=msg.value.trim(); if(!text||!id)return;
+  const text=msg.value.trim();if(!text||!id)return;
   const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text});
   if(r.error)return err(r.error.message);
-  msg.value=''; load();
+  msg.value='';load();
 }
 
 load();
