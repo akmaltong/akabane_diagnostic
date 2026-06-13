@@ -1,44 +1,59 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Akabane · Patient</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../shared/config.js"></script>
-  <style>
-    :root{--bg:#0d0d14;--bg2:#13131f;--bg3:#1a1a2a;--line:#2a2a40;--txt:#e8e8f0;--mut:#9090b0;--gold:#e0b852;--violet:#7c6af7}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:760px;margin:0 auto;padding:18px}.hero,.card{background:var(--bg2);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:14px}.k{color:var(--gold);font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:var(--mut);line-height:1.6}.btn{border:0;background:var(--violet);color:#fff;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer}.btn2{background:var(--bg3);border:1px solid var(--line);color:var(--txt)}input,textarea{width:100%;background:var(--bg3);border:1px solid var(--line);border-radius:12px;color:var(--txt);padding:12px;font:inherit}textarea{min-height:90px}.item{padding:14px;border:1px solid var(--line);background:var(--bg3);border-radius:16px;margin:8px 0}.msg{padding:10px 12px;border-radius:12px;background:var(--bg3);margin:8px 0}.msg.doctor{border-left:3px solid var(--gold)}.msg.patient{border-left:3px solid var(--violet)}pre{white-space:pre-wrap;word-break:break-word}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Akabane Patient</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:760px;margin:auto;padding:18px}.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:#9696b8;line-height:1.5}textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit;min-height:90px}.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}.diag{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px}.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}.msg.patient{border-left:3px solid #7c6af7}.msg.doctor{border-left:3px solid #e0b852}.pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800}.red{background:#351515;color:#ff8b8b}.blue{background:#15223d;color:#86aaff}.green{background:#12301d;color:#7be89f}.err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0;white-space:pre-wrap}
+</style>
 </head>
 <body>
 <div class="app">
-  <section class="hero">
-    <div class="k">KUNGFU MAN · PATIENT</div>
-    <div class="title" id="patientName">Личный кабинет пациента</div>
-    <div class="mut" id="patientSub">Загрузка...</div>
-  </section>
-  <section class="card">
-    <div class="title">Мои диагностики</div>
-    <div id="diagnostics"></div>
-  </section>
-  <section class="card">
-    <div class="title">Сообщения</div>
-    <div id="messages"></div>
-    <textarea id="msgText" placeholder="Написать Акмалу"></textarea>
-    <button class="btn" style="width:100%;margin-top:8px" onclick="sendMessage()">Отправить</button>
-  </section>
+  <div class="card"><div class="brand">KUNGFU MAN · PATIENT</div><div class="title">Личный кабинет пациента</div><div id="patientInfo" class="mut">Загрузка...</div><div id="status"></div></div>
+  <div class="card"><div class="title">Мои диагностики</div><div id="diagnostics" class="mut">Загрузка...</div></div>
+  <div class="card"><div class="title">Сообщения</div><div id="messages"></div><textarea id="msg" placeholder="Написать Акмалу"></textarea><button class="btn" onclick="sendMsg()">Отправить</button></div>
 </div>
 <script>
-const cfg=window.APP_CONFIG||{}; const sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-const id=new URLSearchParams(location.search).get('id'); let patient=null;
+const SUPABASE_URL='https://ytalluctuccinghqaotw.supabase.co';
+const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const id=new URLSearchParams(location.search).get('id');
 function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
-function summary(x){if(!x)return 'Без данных'; if(typeof x==='string')return x; return x.text||x.summary||JSON.stringify(x,null,2)}
-async function load(){if(!id){patientSub.textContent='Нет ID пациента в ссылке. Откройте персональную ссылку от специалиста.';return} const p=await sb.from('patients').select('*').eq('id',id).single(); if(p.error){patientSub.textContent='Пациент не найден или доступ закрыт.';return} patient=p.data; patientName.textContent=patient.full_name; patientSub.textContent='Ваши результаты, рекомендации и связь со специалистом.'; await Promise.all([loadDiagnostics(),loadMessages()])}
-async function loadDiagnostics(){const {data,error}=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false}); diagnostics.innerHTML=(data||[]).map(d=>`<div class="item"><b>${new Date(d.created_at).toLocaleString()}</b><pre>${esc(summary(d.result_json))}</pre></div>`).join('')||'<div class="mut">Диагностик пока нет.</div>'}
-async function loadMessages(){const {data}=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true}); messages.innerHTML=(data||[]).map(m=>`<div class="msg ${m.author}"><b>${m.author==='doctor'?'Акмал':'Вы'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет.</div>'}
-async function sendMessage(){const t=msgText.value.trim(); if(!t||!id)return; const {error}=await sb.from('messages').insert({patient_id:id,author:'patient',message:t}); if(error)return alert(error.message); msgText.value=''; loadMessages()}
+function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
+async function load(){
+  if(!id){patientInfo.textContent='Нет ID пациента в ссылке.';diagnostics.textContent='';return}
+  const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();
+  if(p.error){err(p.error.message);return}
+  if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}
+  patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');
+  const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
+  if(d.error)err(d.error.message);
+  renderDiags(d.data||[]);
+  const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});
+  renderMsgs(m.data||[]);
+}
+function renderDiags(arr){
+  diagnostics.innerHTML=arr.map(x=>{
+    const r=x.result_json||{};
+    const a=r.analysis||{};
+    const ex=a.excess||r.excess||[];
+    const df=a.deficiency||r.deficiency||[];
+    const total=(r.results||[]).length||24;
+    const normal=Math.max(0,total-ex.length-df.length);
+    return `<div class="diag"><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div><div><span class="pill red">Избыток ${ex.length}</span><span class="pill blue">Недостаток ${df.length}</span><span class="pill green">Норма ${normal}</span></div></div>`
+  }).join('')||'Диагностик пока нет';
+}
+function renderMsgs(arr){
+  messages.innerHTML=arr.map(m=>`<div class="msg ${esc(m.author)}"><b>${m.author==='patient'?'Пациент':'Акмал'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет</div>';
+}
+async function sendMsg(){
+  const text=msg.value.trim(); if(!text||!id)return;
+  const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text});
+  if(r.error)return err(r.error.message);
+  msg.value=''; load();
+}
 load();
 </script>
-</body>
-</html>
+</body></html>
