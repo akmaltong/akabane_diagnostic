@@ -15,7 +15,8 @@ h1,h2{margin:8px 0;font-weight:950}
 input,textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit}
 textarea{min-height:90px}
 .btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}
-.btn2{background:#1a1a2a;border:1px solid #2a2a40}.btn-danger{background:#411616;border:1px solid #7e2a2a}
+.btn2{background:#1a1a2a;border:1px solid #2a2a40}
+.btn-danger{background:#411616;border:1px solid #7e2a2a}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .patient{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px}
@@ -36,6 +37,7 @@ textarea{min-height:90px}
 @media(max-width:650px){.app{padding:12px}.grid,.grid3{grid-template-columns:1fr}}
 </style>
 </head>
+
 <body>
 <div class="app">
   <div class="card">
@@ -54,7 +56,9 @@ textarea{min-height:90px}
   <div class="card">
     <h2>Чат врача</h2>
     <div id="selectedPatient" class="mut">Выберите пациента из списка или входящих сообщений.</div>
-    <div id="chatBox" class="chat-box"><div class="empty">Диалог не выбран</div></div>
+    <div id="chatBox" class="chat-box">
+      <div class="empty">Диалог не выбран</div>
+    </div>
     <textarea id="replyText" placeholder="Ответ пациенту"></textarea>
     <div class="grid">
       <button class="btn" onclick="sendDoctorReply()">Отправить ответ</button>
@@ -80,71 +84,137 @@ textarea{min-height:90px}
 </div>
 
 <script>
-const SUPABASE_URL='https://ytalluctuccinghqaotw.supabase.co';
-const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const SUPABASE_URL = 'https://ytalluctuccinghqaotw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let statePatients=[];
-let stateMessages=[];
-let selectedPatientId=null;
+let statePatients = [];
+let stateMessages = [];
+let selectedPatientId = null;
 
-const statusEl=document.getElementById('status');
-const patientsListEl=document.getElementById('patientsList');
-const inboxEl=document.getElementById('inbox');
-const countEl=document.getElementById('count');
-const chatBoxEl=document.getElementById('chatBox');
-const selectedPatientEl=document.getElementById('selectedPatient');
-const replyTextEl=document.getElementById('replyText');
+const statusEl = document.getElementById('status');
+const patientsListEl = document.getElementById('patientsList');
+const inboxEl = document.getElementById('inbox');
+const countEl = document.getElementById('count');
+const chatBoxEl = document.getElementById('chatBox');
+const selectedPatientEl = document.getElementById('selectedPatient');
+const replyTextEl = document.getElementById('replyText');
 
-function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
-function shortId(id){return String(id||'').slice(0,8)}
-function patientUrl(id){return `${location.origin}/akabane_diagnostic/patient/?id=${encodeURIComponent(id)}`}
-function doctorUrl(id){return `${location.origin}/akabane_diagnostic/doctor/?patient_id=${encodeURIComponent(id)}`}
-function setStatus(text,type='ok'){statusEl.innerHTML=`<div class="${type}">${esc(text)}</div>`;setTimeout(()=>statusEl.innerHTML='',2500)}
-function getPatient(id){return statePatients.find(p=>p.id===id)}
-function patientName(id){return getPatient(id)?.full_name || 'Без имени'}
-function patientMessages(id){return stateMessages.filter(m=>m.patient_id===id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}
-function lastMessage(id){const arr=patientMessages(id);return arr[arr.length-1]||null}
-function isNewForDoctor(id){const last=lastMessage(id);return last && last.author==='patient'}
-function incomingCount(id){return patientMessages(id).filter(m=>m.author==='patient').length}
-function totalCount(id){return patientMessages(id).length}
+function esc(s){
+  return String(s ?? '').replace(/[&<>]/g, m => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;'
+  }[m]));
+}
+
+function shortId(id){
+  return String(id || '').slice(0,8);
+}
+
+function patientUrl(id){
+  return `${location.origin}/akabane_diagnostic/patient/?id=${encodeURIComponent(id)}`;
+}
+
+function doctorUrl(id){
+  return `${location.origin}/akabane_diagnostic/doctor/?patient_id=${encodeURIComponent(id)}`;
+}
+
+function setStatus(text,type='ok'){
+  statusEl.innerHTML = `<div class="${type}">${esc(text)}</div>`;
+  setTimeout(() => statusEl.innerHTML = '', 3500);
+}
+
+function getPatient(id){
+  return statePatients.find(p => p.id === id);
+}
+
+function patientName(id){
+  return getPatient(id)?.full_name || 'Без имени';
+}
+
+function patientMessages(id){
+  return stateMessages
+    .filter(m => m.patient_id === id)
+    .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+}
+
+function lastMessage(id){
+  const arr = patientMessages(id);
+  return arr[arr.length - 1] || null;
+}
+
+function isNewForDoctor(id){
+  const last = lastMessage(id);
+  return last && last.author === 'patient';
+}
+
+function incomingCount(id){
+  return patientMessages(id).filter(m => m.author === 'patient').length;
+}
+
+function totalCount(id){
+  return patientMessages(id).length;
+}
 
 async function load(keepScroll=false){
   try{
-    const p=await sb.from('patients').select('*').order('created_at',{ascending:false});
-    if(p.error) throw p.error;
-    statePatients=p.data||[];
+    const p = await sb
+      .from('patients')
+      .select('*')
+      .order('created_at',{ascending:false});
 
-    const m=await sb.from('messages').select('*').order('created_at',{ascending:true});
+    if(p.error) throw p.error;
+    statePatients = p.data || [];
+
+    const m = await sb
+      .from('messages')
+      .select('*')
+      .order('created_at',{ascending:true});
+
     if(m.error) throw m.error;
-    stateMessages=m.data||[];
+    stateMessages = m.data || [];
 
     renderPatients();
     renderInbox();
     renderChat(keepScroll);
   }catch(e){
-    patientsListEl.innerHTML=`<div class="err">Ошибка загрузки: ${esc(e.message||e)}</div>`;
-    inboxEl.innerHTML=`<div class="err">Ошибка загрузки сообщений</div>`;
+    console.error(e);
+    patientsListEl.innerHTML = `<div class="err">Ошибка загрузки: ${esc(e.message || e)}</div>`;
+    inboxEl.innerHTML = `<div class="err">Ошибка загрузки сообщений</div>`;
   }
 }
 
 function renderPatients(){
-  countEl.textContent=`${statePatients.length} пациентов`;
-  patientsListEl.innerHTML=statePatients.map(p=>{
-    const last=lastMessage(p.id), newFlag=isNewForDoctor(p.id), total=totalCount(p.id), incoming=incomingCount(p.id);
+  countEl.textContent = `${statePatients.length} пациентов`;
+
+  patientsListEl.innerHTML = statePatients.map(p => {
+    const last = lastMessage(p.id);
+    const newFlag = isNewForDoctor(p.id);
+    const total = totalCount(p.id);
+    const incoming = incomingCount(p.id);
+
     return `<div class="patient ${selectedPatientId===p.id?'selected':''}">
-      <div class="patient-head"><div>
-        <b>${esc(p.full_name||'Без имени')}</b>
-        <div class="mut">${esc(p.phone||'Без телефона')} · ${new Date(p.created_at).toLocaleString()}</div>
-        ${last?`<div class="mut">Последнее сообщение: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message)}</div>`:''}
-      </div><div>
-        <span class="badge">ID ${shortId(p.id)}</span>${newFlag?`<span class="badge unread">Новое</span>`:''}${total?`<span class="badge">Всего ${total}</span>`:''}${incoming?`<span class="badge">От пациента ${incoming}</span>`:''}
-      </div></div>
+      <div class="patient-head">
+        <div>
+          <b>${esc(p.full_name || 'Без имени')}</b>
+          <div class="mut">${esc(p.phone || 'Без телефона')} · ${new Date(p.created_at).toLocaleString()}</div>
+          ${last ? `<div class="mut">Последнее сообщение: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message)}</div>` : ''}
+        </div>
+        <div>
+          <span class="badge">ID ${shortId(p.id)}</span>
+          ${newFlag ? `<span class="badge unread">Новое</span>` : ''}
+          ${total ? `<span class="badge">Всего ${total}</span>` : ''}
+          ${incoming ? `<span class="badge">От пациента ${incoming}</span>` : ''}
+        </div>
+      </div>
+
       <div class="grid3">
         <button class="btn" onclick="openDiagnostic('${p.id}')">▶ Диагностика</button>
         <button class="btn btn2" onclick="openCabinet('${p.id}')">Кабинет</button>
         <button class="btn btn2" onclick="selectPatient('${p.id}')">Чат</button>
       </div>
+
       <div class="grid">
         <button class="btn btn2" onclick="copyPatientLink('${p.id}')">Скопировать ссылку пациенту</button>
         <button class="btn btn-danger" onclick="deletePatient('${p.id}')">Удалить</button>
@@ -154,13 +224,30 @@ function renderPatients(){
 }
 
 function renderInbox(){
-  const ids=[...new Set(stateMessages.filter(m=>m.author==='patient').map(m=>m.patient_id))];
-  const incomingPatients=ids.map(id=>({id,last:lastMessage(id)})).filter(x=>x.last && x.last.author==='patient').sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));
-  inboxEl.innerHTML=incomingPatients.map(x=>{
-    const m=x.last;
-    return `<div class="inbox-item"><div class="patient-head"><div>
-      <b>${esc(patientName(x.id))}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div>
-      </div><span class="badge unread">Новое</span></div>
+  const ids = [...new Set(
+    stateMessages
+      .filter(m => m.author === 'patient')
+      .map(m => m.patient_id)
+  )];
+
+  const incomingPatients = ids
+    .map(id => ({id, last:lastMessage(id)}))
+    .filter(x => x.last && x.last.author === 'patient')
+    .sort((a,b) => new Date(b.last.created_at) - new Date(a.last.created_at));
+
+  inboxEl.innerHTML = incomingPatients.map(x => {
+    const m = x.last;
+
+    return `<div class="inbox-item">
+      <div class="patient-head">
+        <div>
+          <b>${esc(patientName(x.id))}</b>
+          <div>${esc(m.message)}</div>
+          <div class="mut">${new Date(m.created_at).toLocaleString()}</div>
+        </div>
+        <span class="badge unread">Новое</span>
+      </div>
+
       <div class="grid">
         <button class="btn" onclick="selectPatient('${x.id}')">Ответить</button>
         <button class="btn btn2" onclick="openCabinet('${x.id}')">Открыть кабинет</button>
@@ -171,61 +258,190 @@ function renderInbox(){
 
 function renderChat(keepScroll=false){
   if(!selectedPatientId){
-    chatBoxEl.innerHTML='<div class="empty">Диалог не выбран</div>';
-    selectedPatientEl.textContent='Выберите пациента из списка или входящих сообщений.';
+    chatBoxEl.innerHTML = '<div class="empty">Диалог не выбран</div>';
+    selectedPatientEl.textContent = 'Выберите пациента из списка или входящих сообщений.';
     return;
   }
-  const p=getPatient(selectedPatientId);
-  selectedPatientEl.innerHTML=`Выбран пациент: <b>${esc(p?.full_name||'Без имени')}</b>`;
-  const arr=patientMessages(selectedPatientId);
-  chatBoxEl.innerHTML=arr.map(m=>`<div class="chat-msg ${esc(m.author)}"><div class="chat-author">${m.author==='patient'?'Пациент':'Акмал'}</div><div>${esc(m.message)}</div><div class="chat-time">${new Date(m.created_at).toLocaleString()}</div></div>`).join('') || '<div class="empty">Сообщений пока нет</div>';
-  if(!keepScroll) chatBoxEl.scrollTop=chatBoxEl.scrollHeight;
+
+  const p = getPatient(selectedPatientId);
+  selectedPatientEl.innerHTML = `Выбран пациент: <b>${esc(p?.full_name || 'Без имени')}</b>`;
+
+  const arr = patientMessages(selectedPatientId);
+
+  chatBoxEl.innerHTML = arr.map(m => `
+    <div class="chat-msg ${esc(m.author)}">
+      <div class="chat-author">${m.author === 'patient' ? 'Пациент' : 'Акмал'}</div>
+      <div>${esc(m.message)}</div>
+      <div class="chat-time">${new Date(m.created_at).toLocaleString()}</div>
+    </div>
+  `).join('') || '<div class="empty">Сообщений пока нет</div>';
+
+  if(!keepScroll){
+    chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
+  }
 }
 
 async function createPatient(){
-  const full_name=document.getElementById('name').value.trim();
-  const ph=document.getElementById('phone').value.trim();
-  if(!full_name){setStatus('Введите ФИО пациента','err');return}
-  const r=await sb.from('patients').insert({full_name,phone:ph}).select().single();
-  if(r.error){setStatus(r.error.message,'err');return}
-  document.getElementById('name').value='';document.getElementById('phone').value='';document.getElementById('note').value='';
-  setStatus('Пациент создан');load();
+  const full_name = document.getElementById('name').value.trim();
+  const ph = document.getElementById('phone').value.trim();
+
+  if(!full_name){
+    setStatus('Введите ФИО пациента','err');
+    return;
+  }
+
+  try{
+    const r = await sb
+      .from('patients')
+      .insert({full_name, phone: ph})
+      .select()
+      .single();
+
+    if(r.error) throw r.error;
+
+    document.getElementById('name').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('note').value = '';
+
+    setStatus('Пациент создан');
+    await load();
+  }catch(e){
+    console.error(e);
+    setStatus('Ошибка создания пациента: '+(e.message || e),'err');
+  }
 }
 
 async function deletePatient(id){
-  const p=getPatient(id);
-  if(!confirm(`Удалить пациента "${p?.full_name||'Без имени'}" и все его сообщения/диагностики?`))return;
-  await sb.from('messages').delete().eq('patient_id',id);
-  await sb.from('diagnostics').delete().eq('patient_id',id);
-  const r=await sb.from('patients').delete().eq('id',id);
-  if(r.error){setStatus(r.error.message,'err');return}
-  setStatus('Пациент удалён'); if(selectedPatientId===id)selectedPatientId=null; load();
+  const p = getPatient(id);
+  const name = p?.full_name || 'Без имени';
+
+  if(!confirm(`Удалить пациента "${name}"?\n\nБудут удалены:\n— пациент\n— его диагностики\n— его сообщения`)){
+    return;
+  }
+
+  setStatus('Удаляю пациента...');
+
+  try{
+    const m = await sb
+      .from('messages')
+      .delete()
+      .eq('patient_id',id);
+
+    if(m.error) throw new Error('messages: '+m.error.message);
+
+    const d = await sb
+      .from('diagnostics')
+      .delete()
+      .eq('patient_id',id);
+
+    if(d.error) throw new Error('diagnostics: '+d.error.message);
+
+    const pdel = await sb
+      .from('patients')
+      .delete()
+      .eq('id',id);
+
+    if(pdel.error) throw new Error('patients: '+pdel.error.message);
+
+    if(selectedPatientId === id){
+      selectedPatientId = null;
+    }
+
+    setStatus(`Пациент "${name}" удалён`);
+    await load();
+  }catch(e){
+    console.error(e);
+    setStatus('Ошибка удаления: '+(e.message || e),'err');
+  }
 }
 
 async function clearSelectedChat(){
-  if(!selectedPatientId){setStatus('Выберите пациента','err');return}
-  const p=getPatient(selectedPatientId);
-  if(!confirm(`Очистить весь чат с пациентом "${p?.full_name||'Без имени'}"? Диагностики не удаляются.`))return;
-  const r=await sb.from('messages').delete().eq('patient_id',selectedPatientId);
-  if(r.error){setStatus(r.error.message,'err');return}
-  setStatus('Чат очищен'); load();
+  if(!selectedPatientId){
+    setStatus('Выберите пациента','err');
+    return;
+  }
+
+  const p = getPatient(selectedPatientId);
+  const name = p?.full_name || 'Без имени';
+
+  if(!confirm(`Очистить весь чат с пациентом "${name}"?\n\nДиагностики и пациент НЕ удаляются.`)){
+    return;
+  }
+
+  setStatus('Очищаю чат...');
+
+  try{
+    const r = await sb
+      .from('messages')
+      .delete()
+      .eq('patient_id', selectedPatientId);
+
+    if(r.error) throw r.error;
+
+    setStatus('Чат очищен');
+    await load();
+  }catch(e){
+    console.error(e);
+    setStatus('Ошибка очистки чата: '+(e.message || e),'err');
+  }
 }
 
-function selectPatient(id){selectedPatientId=id;replyTextEl.focus();renderPatients();renderInbox();renderChat();}
-async function sendDoctorReply(){
-  const text=replyTextEl.value.trim();
-  if(!selectedPatientId){setStatus('Выберите пациента','err');return}
-  if(!text){setStatus('Введите текст ответа','err');return}
-  const r=await sb.from('messages').insert({patient_id:selectedPatientId,author:'doctor',message:text});
-  if(r.error){setStatus(r.error.message,'err');return}
-  replyTextEl.value='';setStatus('Ответ отправлен');load();
+function selectPatient(id){
+  selectedPatientId = id;
+  replyTextEl.focus();
+  renderPatients();
+  renderInbox();
+  renderChat();
 }
-function openDiagnostic(id){location.href=doctorUrl(id)}
-function openCabinet(id){window.open(patientUrl(id),'_blank')}
-function copyPatientLink(id){navigator.clipboard?.writeText(patientUrl(id));setStatus('Ссылка пациента скопирована')}
+
+async function sendDoctorReply(){
+  const text = replyTextEl.value.trim();
+
+  if(!selectedPatientId){
+    setStatus('Выберите пациента','err');
+    return;
+  }
+
+  if(!text){
+    setStatus('Введите текст ответа','err');
+    return;
+  }
+
+  try{
+    const r = await sb
+      .from('messages')
+      .insert({
+        patient_id:selectedPatientId,
+        author:'doctor',
+        message:text
+      });
+
+    if(r.error) throw r.error;
+
+    replyTextEl.value = '';
+    setStatus('Ответ отправлен');
+    await load();
+  }catch(e){
+    console.error(e);
+    setStatus('Ошибка отправки: '+(e.message || e),'err');
+  }
+}
+
+function openDiagnostic(id){
+  location.href = doctorUrl(id);
+}
+
+function openCabinet(id){
+  window.open(patientUrl(id),'_blank');
+}
+
+function copyPatientLink(id){
+  navigator.clipboard?.writeText(patientUrl(id));
+  setStatus('Ссылка пациента скопирована');
+}
 
 load();
-setInterval(()=>load(true),10000);
+setInterval(() => load(true), 10000);
 </script>
 </body>
 </html>
