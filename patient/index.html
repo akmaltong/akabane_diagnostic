@@ -8,90 +8,35 @@
 <script src="../shared/akabane-rules.js"></script>
 <style>
 body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-.app{max-width:760px;margin:auto;padding:18px}
-.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}
-.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}
-.title{font-size:24px;font-weight:900;margin:8px 0}
-.mut{color:#9696b8;line-height:1.5}
+.app{max-width:760px;margin:auto;padding:18px}.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}
+.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:#9696b8;line-height:1.5}
 textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit;min-height:90px}
 .btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}
 .diag{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px;cursor:pointer}
-.diag-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.diag-details{display:none;margin-top:12px;border-top:1px solid #2a2a40;padding-top:10px}
-.diag.open .diag-details{display:block}
-.chev{color:#9696b8;font-weight:900;font-size:18px}
-.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}
-.msg.patient{border-left:3px solid #7c6af7}
-.msg.doctor{border-left:3px solid #e0b852}
+.diag-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.diag-details{display:none;margin-top:12px;border-top:1px solid #2a2a40;padding-top:10px}.diag.open .diag-details{display:block}
+.chev{color:#9696b8;font-weight:900;font-size:18px}.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}.msg.patient{border-left:3px solid #7c6af7}.msg.doctor{border-left:3px solid #e0b852}
 .pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800;white-space:nowrap}
-.red{background:#351515;color:#ff8b8b}
-.blue{background:#15223d;color:#86aaff}
-.green{background:#12301d;color:#7be89f}
-.purple{background:#2a173d;color:#d6a6ff}
-.gray{background:#262637;color:#b4b4ca}
+.red{background:#351515;color:#ff8b8b}.blue{background:#15223d;color:#86aaff}.green{background:#12301d;color:#7be89f}.orange{background:#3b2112;color:#ffb36b}.gray{background:#262637;color:#b4b4ca}
 .err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0;white-space:pre-wrap}
-.table{width:100%;border-collapse:collapse;margin-top:8px}
-.table td,.table th{border-bottom:1px solid #2a2a40;padding:8px;text-align:left;font-size:13px;vertical-align:top}
-.table th{color:#9696b8}
+.table{width:100%;border-collapse:collapse;margin-top:8px}.table td,.table th{border-bottom:1px solid #2a2a40;padding:8px;text-align:left;font-size:13px;vertical-align:top}.table th{color:#9696b8}
 .section-title{font-size:13px;color:#7c6af7;text-transform:uppercase;font-weight:900;margin-top:12px;margin-bottom:6px}
+.interpretation{background:#141421;border:1px solid #2c2c45;border-radius:14px;padding:14px;margin-top:10px;color:#c9c9e8;line-height:1.55}.interpretation b{color:#fff}.interpretation ul{margin:8px 0 0 18px;padding:0}.interpretation li{margin:5px 0}.warning{border-left:3px solid #ffb36b}
 @media(max-width:650px){.app{padding:12px}.table{display:block;overflow-x:auto}.diag-head{display:block}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="card">
-    <div class="brand">KUNGFU MAN · PATIENT</div>
-    <div class="title">Личный кабинет пациента</div>
-    <div id="patientInfo" class="mut">Загрузка...</div>
-    <div id="status"></div>
-  </div>
-
-  <div class="card">
-    <div class="title">Мои диагностики</div>
-    <div id="diagnostics" class="mut">Загрузка...</div>
-  </div>
-
-  <div class="card">
-    <div class="title">Сообщения</div>
-    <div id="messages"></div>
-    <textarea id="msg" placeholder="Написать Акмалу"></textarea>
-    <button class="btn" onclick="sendMsg()">Отправить</button>
-  </div>
+  <div class="card"><div class="brand">KUNGFU MAN · PATIENT</div><div class="title">Личный кабинет пациента</div><div id="patientInfo" class="mut">Загрузка...</div><div id="status"></div></div>
+  <div class="card"><div class="title">Мои диагностики</div><div id="diagnostics" class="mut">Загрузка...</div></div>
+  <div class="card"><div class="title">Сообщения</div><div id="messages"></div><textarea id="msg" placeholder="Написать Акмалу"></textarea><button class="btn" onclick="sendMsg()">Отправить</button></div>
 </div>
-
 <script>
 const SUPABASE_URL='https://ytalluctuccinghqaotw.supabase.co';
 const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const id=new URLSearchParams(location.search).get('id');
-
 const MERIDIANS=[
-  {id:1,organ:"Лёгкие",side:"Левая",point:"LU11"},
-  {id:2,organ:"Лёгкие",side:"Правая",point:"LU11"},
-  {id:3,organ:"Толстая кишка",side:"Левая",point:"LI1"},
-  {id:4,organ:"Толстая кишка",side:"Правая",point:"LI1"},
-  {id:5,organ:"Желудок",side:"Левая",point:"ST45"},
-  {id:6,organ:"Желудок",side:"Правая",point:"ST45"},
-  {id:7,organ:"Селезёнка/Поджелудочная",side:"Левая",point:"SP1"},
-  {id:8,organ:"Селезёнка/Поджелудочная",side:"Правая",point:"SP1"},
-  {id:9,organ:"Сердце",side:"Левая",point:"HT9"},
-  {id:10,organ:"Сердце",side:"Правая",point:"HT9"},
-  {id:11,organ:"Тонкая кишка",side:"Левая",point:"SI1"},
-  {id:12,organ:"Тонкая кишка",side:"Правая",point:"SI1"},
-  {id:13,organ:"Мочевой пузырь",side:"Левая",point:"BL67"},
-  {id:14,organ:"Мочевой пузырь",side:"Правая",point:"BL67"},
-  {id:15,organ:"Почки",side:"Левая",point:"KI1"},
-  {id:16,organ:"Почки",side:"Правая",point:"KI1"},
-  {id:17,organ:"Перикард",side:"Левая",point:"PC9"},
-  {id:18,organ:"Перикард",side:"Правая",point:"PC9"},
-  {id:19,organ:"Тройной обогреватель",side:"Левая",point:"TE1"},
-  {id:20,organ:"Тройной обогреватель",side:"Правая",point:"TE1"},
-  {id:21,organ:"Жёлчный пузырь",side:"Левая",point:"GB44"},
-  {id:22,organ:"Жёлчный пузырь",side:"Правая",point:"GB44"},
-  {id:23,organ:"Печень",side:"Левая",point:"LIV1"},
-  {id:24,organ:"Печень",side:"Правая",point:"LIV1"}
-];
-
+{id:1,organ:"Лёгкие",side:"Левая",point:"LU11"},{id:2,organ:"Лёгкие",side:"Правая",point:"LU11"},{id:3,organ:"Толстая кишка",side:"Левая",point:"LI1"},{id:4,organ:"Толстая кишка",side:"Правая",point:"LI1"},{id:5,organ:"Желудок",side:"Левая",point:"ST45"},{id:6,organ:"Желудок",side:"Правая",point:"ST45"},{id:7,organ:"Селезёнка/Поджелудочная",side:"Левая",point:"SP1"},{id:8,organ:"Селезёнка/Поджелудочная",side:"Правая",point:"SP1"},{id:9,organ:"Сердце",side:"Левая",point:"HT9"},{id:10,organ:"Сердце",side:"Правая",point:"HT9"},{id:11,organ:"Тонкая кишка",side:"Левая",point:"SI1"},{id:12,organ:"Тонкая кишка",side:"Правая",point:"SI1"},{id:13,organ:"Мочевой пузырь",side:"Левая",point:"BL67"},{id:14,organ:"Мочевой пузырь",side:"Правая",point:"BL67"},{id:15,organ:"Почки",side:"Левая",point:"KI1"},{id:16,organ:"Почки",side:"Правая",point:"KI1"},{id:17,organ:"Перикард",side:"Левая",point:"PC9"},{id:18,organ:"Перикард",side:"Правая",point:"PC9"},{id:19,organ:"Тройной обогреватель",side:"Левая",point:"TE1"},{id:20,organ:"Тройной обогреватель",side:"Правая",point:"TE1"},{id:21,organ:"Жёлчный пузырь",side:"Левая",point:"GB44"},{id:22,organ:"Жёлчный пузырь",side:"Правая",point:"GB44"},{id:23,organ:"Печень",side:"Левая",point:"LIV1"},{id:24,organ:"Печень",side:"Правая",point:"LIV1"}];
 function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
 function norm(s){return String(s??'').toLowerCase().replace(/ё/g,'е').trim()}
@@ -99,108 +44,16 @@ function get(o,keys){if(!o||typeof o!=='object')return'';for(const k of keys){if
 function getTime(row){return get(row,['reaction_time','time','seconds','sec','value','duration','t'])}
 function getMeridianId(row){const v=get(row,['meridian_id','meridianId','id']);const n=Number(v);return Number.isFinite(n)?n:null}
 function fmtTime(v){if(v===undefined||v===null||v==='')return'Не измерено';const n=Number(v);return Number.isFinite(n)?n.toFixed(1)+'с':String(v)}
-
-function rawResults(r){
-  if(Array.isArray(r.results))return r.results;
-  if(Array.isArray(r.measurements))return r.measurements;
-  if(Array.isArray(r.rows))return r.rows;
-  if(Array.isArray(r.items))return r.items;
-  return [];
-}
-
-function buildRows(r){
-  const results=rawResults(r);
-  return MERIDIANS.map(m=>{
-    const found=results.find(x=>getMeridianId(x)===m.id) ||
-      results.find(x=>norm(get(x,['organ','meridian','channel','name']))===norm(m.organ) && norm(get(x,['side','lr','direction']))===norm(m.side));
-    const t=found?getTime(found):'';
-    const state=AKABANE_RULES.classify(t);
-    return {id:m.id,organ:m.organ,side:m.side,point:get(found,['point','acupoint','code','pointCode'])||m.point,time:t,state};
-  });
-}
-
-function countRows(rows){
-  return {
-    ex:rows.filter(x=>x.state.key==='excess').length,
-    nm:rows.filter(x=>x.state.key==='normal').length,
-    df:rows.filter(x=>x.state.key==='deficiency').length,
-    sdf:rows.filter(x=>x.state.key==='severe_deficiency').length,
-    un:rows.filter(x=>x.state.key==='unmeasured').length
-  };
-}
-
-async function load(){
-  if(!id){patientInfo.textContent='Нет ID пациента в ссылке.';diagnostics.textContent='';return}
-  const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();
-  if(p.error){err(p.error.message);return}
-  if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}
-  patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');
-
-  const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
-  if(d.error)err(d.error.message);
-  renderDiags(d.data||[]);
-
-  const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});
-  if(m.error)err(m.error.message);
-  renderMsgs(m.data||[]);
-}
-
-function renderDiags(arr){
-  diagnostics.innerHTML=arr.map(x=>{
-    const r=x.result_json||{};
-    const rows=buildRows(r);
-    const c=countRows(rows);
-    const tableRows=rows.map(y=>`
-      <tr>
-        <td>${y.id}</td>
-        <td>${esc(y.organ)}</td>
-        <td>${esc(y.side)}</td>
-        <td>${esc(y.point)}</td>
-        <td>${esc(fmtTime(y.time))}</td>
-        <td><span class="pill ${y.state.className}">${esc(y.state.label)}</span></td>
-      </tr>`).join('');
-
-    return `<div class="diag" onclick="toggleDiag(this)">
-      <div class="diag-head">
-        <div>
-          <b>${new Date(x.created_at).toLocaleString()}</b>
-          <div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div>
-        </div>
-        <div class="chev">⌄</div>
-      </div>
-      <div>
-        <span class="pill red">Избыток ${c.ex}</span>
-        <span class="pill green">Норма ${c.nm}</span>
-        <span class="pill blue">Недостаток ${c.df}</span>
-        <span class="pill purple">Выраженный недостаток ${c.sdf}</span>
-        ${c.un?`<span class="pill gray">Не измерено ${c.un}</span>`:''}
-      </div>
-      <div class="diag-details">
-        <div class="section-title">Итог</div>
-        <div class="mut">Избыток ${c.ex}, Норма ${c.nm}, Недостаток ${c.df}, Выраженный недостаток ${c.sdf}</div>
-        <div class="section-title">Измерения</div>
-        <table class="table">
-          <tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>
-          ${tableRows}
-        </table>
-      </div>
-    </div>`;
-  }).join('')||'Диагностик пока нет';
-}
-
+function rawResults(r){return Array.isArray(r.results)?r.results:Array.isArray(r.measurements)?r.measurements:Array.isArray(r.rows)?r.rows:Array.isArray(r.items)?r.items:[]}
+function buildRows(r){const results=rawResults(r);return MERIDIANS.map(m=>{const found=results.find(x=>getMeridianId(x)===m.id)||results.find(x=>norm(get(x,['organ','meridian','channel','name']))===norm(m.organ)&&norm(get(x,['side','lr','direction']))===norm(m.side));const t=found?getTime(found):'';const state=AKABANE_RULES.classify(t);return {id:m.id,organ:m.organ,side:m.side,point:get(found,['point','acupoint','code','pointCode'])||m.point,time:t,state};})}
+function countRows(rows){return {ex:rows.filter(x=>x.state.key==='excess').length,nm:rows.filter(x=>x.state.key==='normal').length,df:rows.filter(x=>x.state.key==='deficiency').length,sdf:rows.filter(x=>x.state.key==='severe_deficiency').length,un:rows.filter(x=>x.state.key==='unmeasured').length}}
+function listByState(rows,key){return rows.filter(x=>x.state.key===key).map(x=>`${x.organ} (${x.side})`)}
+function interpretation(rows,c){let main='';if(c.sdf>0){main=`Выявлены зоны выраженного недостатка: ${c.sdf}. Эти показатели требуют приоритетного внимания и проверки в динамике.`}else if(c.df>c.ex&&c.df>=c.nm){main=`Преобладает недостаток энергии: ${c.df} меридианов. Это указывает на сниженный функциональный ответ в ряде каналов.`}else if(c.ex>c.df&&c.ex>=c.nm){main=`Преобладает избыток энергии: ${c.ex} меридианов. Это может указывать на функциональное напряжение и перегрузку отдельных систем.`}else if(c.nm>=c.ex&&c.nm>=c.df&&c.sdf===0){main=`Преобладает нормальная реакция: ${c.nm} меридианов. Сильных отклонений по общей картине не выявлено.`}else{main=`Картина смешанная: избыток ${c.ex}, недостаток ${c.df}, норма ${c.nm}. Требуется смотреть сочетания меридианов.`}const severe=listByState(rows,'severe_deficiency').slice(0,6);const excess=listByState(rows,'excess').slice(0,6);const deficiency=listByState(rows,'deficiency').slice(0,6);return `<div class="interpretation ${c.sdf>0?'warning':''}"><b>Заключение</b><br>${esc(main)}<ul>${severe.length?`<li><b>Выраженный недостаток:</b> ${esc(severe.join(', '))}</li>`:''}${deficiency.length?`<li><b>Недостаток энергии:</b> ${esc(deficiency.join(', '))}</li>`:''}${excess.length?`<li><b>Избыток энергии:</b> ${esc(excess.join(', '))}</li>`:''}</ul></div>`}
+async function load(){if(!id){patientInfo.textContent='Нет ID пациента в ссылке.';diagnostics.textContent='';return}const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();if(p.error){err(p.error.message);return}if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});if(d.error)err(d.error.message);renderDiags(d.data||[]);const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});if(m.error)err(m.error.message);renderMsgs(m.data||[])}
+function renderDiags(arr){diagnostics.innerHTML=arr.map(x=>{const r=x.result_json||{};const rows=buildRows(r);const c=countRows(rows);const tableRows=rows.map(y=>`<tr><td>${y.id}</td><td>${esc(y.organ)}</td><td>${esc(y.side)}</td><td>${esc(y.point)}</td><td>${esc(fmtTime(y.time))}</td><td><span class="pill ${y.state.className}">${esc(y.state.label)}</span></td></tr>`).join('');return `<div class="diag" onclick="toggleDiag(this)"><div class="diag-head"><div><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div></div><div class="chev">⌄</div></div><div><span class="pill red">Избыток ${c.ex}</span><span class="pill green">Норма ${c.nm}</span><span class="pill blue">Недостаток ${c.df}</span><span class="pill orange">Выраженный ${c.sdf}</span>${c.un?`<span class="pill gray">Не измерено ${c.un}</span>`:''}</div><div class="diag-details"><div class="section-title">Итог</div><div class="mut">Избыток энергии ${c.ex}, Норма ${c.nm}, Недостаток энергии ${c.df}, Выраженный недостаток ${c.sdf}</div>${interpretation(rows,c)}<div class="section-title">Измерения</div><table class="table"><tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${tableRows}</table></div></div>`}).join('')||'Диагностик пока нет'}
 function toggleDiag(el){el.classList.toggle('open')}
-
-function renderMsgs(arr){
-  messages.innerHTML=arr.map(m=>`<div class="msg ${esc(m.author)}"><b>${m.author==='patient'?'Пациент':'Акмал'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет</div>';
-}
-
-async function sendMsg(){
-  const text=msg.value.trim();if(!text||!id)return;
-  const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text});
-  if(r.error)return err(r.error.message);
-  msg.value='';load();
-}
-
+function renderMsgs(arr){messages.innerHTML=arr.map(m=>`<div class="msg ${esc(m.author)}"><b>${m.author==='patient'?'Пациент':'Акмал'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет</div>'}
+async function sendMsg(){const text=msg.value.trim();if(!text||!id)return;const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text});if(r.error)return err(r.error.message);msg.value='';load()}
 load();
 </script>
 </body>
