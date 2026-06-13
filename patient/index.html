@@ -6,62 +6,153 @@
 <title>Akabane Patient</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:760px;margin:auto;padding:18px}.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}.title{font-size:24px;font-weight:900;margin:8px 0}.mut{color:#9696b8;line-height:1.5}textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit;min-height:90px}.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}.diag{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px;cursor:pointer}.diag-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.diag-details{display:none;margin-top:12px;border-top:1px solid #2a2a40;padding-top:10px}.diag.open .diag-details{display:block}.chev{color:#9696b8;font-weight:900}.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}.msg.patient{border-left:3px solid #7c6af7}.msg.doctor{border-left:3px solid #e0b852}.pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800}.red{background:#351515;color:#ff8b8b}.blue{background:#15223d;color:#86aaff}.green{background:#12301d;color:#7be89f}.err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0;white-space:pre-wrap}.table{width:100%;border-collapse:collapse;margin-top:8px}.table td,.table th{border-bottom:1px solid #2a2a40;padding:8px;text-align:left;font-size:13px}.table th{color:#9696b8}.section-title{font-size:13px;color:#7c6af7;text-transform:uppercase;font-weight:900;margin-top:12px;margin-bottom:6px}.small{font-size:13px}
+body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+.app{max-width:760px;margin:auto;padding:18px}
+.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}
+.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}
+.title{font-size:24px;font-weight:900;margin:8px 0}
+.mut{color:#9696b8;line-height:1.5}
+textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit;min-height:90px}
+.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}
+.diag{padding:14px;border-radius:16px;background:#1a1a2a;border:1px solid #2a2a40;margin-top:10px;cursor:pointer}
+.diag-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.diag-details{display:none;margin-top:12px;border-top:1px solid #2a2a40;padding-top:10px}
+.diag.open .diag-details{display:block}
+.chev{color:#9696b8;font-weight:900;font-size:18px}
+.msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}
+.msg.patient{border-left:3px solid #7c6af7}
+.msg.doctor{border-left:3px solid #e0b852}
+.pill{display:inline-block;padding:5px 9px;border-radius:8px;margin:3px;font-size:12px;font-weight:800}
+.red{background:#351515;color:#ff8b8b}
+.blue{background:#15223d;color:#86aaff}
+.green{background:#12301d;color:#7be89f}
+.err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0;white-space:pre-wrap}
+.table{width:100%;border-collapse:collapse;margin-top:8px}
+.table td,.table th{border-bottom:1px solid #2a2a40;padding:8px;text-align:left;font-size:13px;vertical-align:top}
+.table th{color:#9696b8}
+.section-title{font-size:13px;color:#7c6af7;text-transform:uppercase;font-weight:900;margin-top:12px;margin-bottom:6px}
+.small{font-size:13px}
+@media(max-width:650px){
+  .app{padding:12px}
+  .table{display:block;overflow-x:auto}
+  .diag-head{display:block}
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="card"><div class="brand">KUNGFU MAN · PATIENT</div><div class="title">Личный кабинет пациента</div><div id="patientInfo" class="mut">Загрузка...</div><div id="status"></div></div>
-  <div class="card"><div class="title">Мои диагностики</div><div id="diagnostics" class="mut">Загрузка...</div></div>
-  <div class="card"><div class="title">Сообщения</div><div id="messages"></div><textarea id="msg" placeholder="Написать Акмалу"></textarea><button class="btn" onclick="sendMsg()">Отправить</button></div>
+  <div class="card">
+    <div class="brand">KUNGFU MAN · PATIENT</div>
+    <div class="title">Личный кабинет пациента</div>
+    <div id="patientInfo" class="mut">Загрузка...</div>
+    <div id="status"></div>
+  </div>
+
+  <div class="card">
+    <div class="title">Мои диагностики</div>
+    <div id="diagnostics" class="mut">Загрузка...</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Сообщения</div>
+    <div id="messages"></div>
+    <textarea id="msg" placeholder="Написать Акмалу"></textarea>
+    <button class="btn" onclick="sendMsg()">Отправить</button>
+  </div>
 </div>
+
 <script>
 const SUPABASE_URL='https://ytalluctuccinghqaotw.supabase.co';
 const SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const id=new URLSearchParams(location.search).get('id');
+
 function esc(s){return String(s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
 function err(s){status.innerHTML='<div class="err">'+esc(s)+'</div>'}
-function fmtState(state){if(state==='excess')return 'Избыток';if(state==='deficiency')return 'Недостаток';if(state==='normal')return 'Норма';return state||'—'}
-function stateClass(state){if(state==='excess')return 'red';if(state==='deficiency')return 'blue';if(state==='normal')return 'green';return ''}
+
+function fmtState(state){
+  if(state==='excess') return 'Избыток';
+  if(state==='deficiency') return 'Недостаток';
+  if(state==='normal') return 'Норма';
+  return state || '—';
+}
+function stateClass(state){
+  const s=String(state||'').toLowerCase();
+  if(s==='excess'||s==='избыток') return 'red';
+  if(s==='deficiency'||s==='недостаток') return 'blue';
+  if(s==='normal'||s==='норма') return 'green';
+  return '';
+}
+function getAnalysis(r){
+  const a=r.analysis||{};
+  const results=Array.isArray(r.results)?r.results:[];
+  const excess=a.excess||r.excess||results.filter(y=>String(y.state||'').toLowerCase()==='excess'||y.state==='Избыток')||[];
+  const deficiency=a.deficiency||r.deficiency||results.filter(y=>String(y.state||'').toLowerCase()==='deficiency'||y.state==='Недостаток')||[];
+  const normalArr=a.normal||r.normal||results.filter(y=>String(y.state||'').toLowerCase()==='normal'||y.state==='Норма')||[];
+  const total=results.length || excess.length + deficiency.length + normalArr.length || 24;
+  const normal=normalArr.length || Math.max(0,total-excess.length-deficiency.length);
+  return {results,excess,deficiency,normal,total};
+}
+
 async function load(){
   if(!id){patientInfo.textContent='Нет ID пациента в ссылке.';diagnostics.textContent='';return}
   const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();
   if(p.error){err(p.error.message);return}
   if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}
   patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');
+
   const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
-  if(d.error)err(d.error.message);
+  if(d.error) err(d.error.message);
   renderDiags(d.data||[]);
+
   const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});
+  if(m.error) err(m.error.message);
   renderMsgs(m.data||[]);
 }
+
 function renderDiags(arr){
   diagnostics.innerHTML=arr.map(x=>{
     const r=x.result_json||{};
-    const a=r.analysis||{};
-    const results=r.results||[];
-    const ex=a.excess||r.excess||results.filter(y=>y.state==='excess')||[];
-    const df=a.deficiency||r.deficiency||results.filter(y=>y.state==='deficiency')||[];
-    const normalArr=a.normal||r.normal||results.filter(y=>y.state==='normal')||[];
-    const total=results.length||ex.length+df.length+normalArr.length||24;
-    const normal=normalArr.length||Math.max(0,total-ex.length-df.length);
-    const protocol=r.protocol||r.patientProtocol||r.summary||'';
-    const rows=results.map(y=>`<tr><td>${esc(y.organ||y.meridian||y.name||'—')}</td><td>${esc(y.side||'—')}</td><td>${esc(y.point||'—')}</td><td>${esc(y.time||y.seconds||y.sec||'—')}с</td><td><span class="pill ${stateClass(y.state)}">${esc(fmtState(y.state))}</span></td></tr>`).join('');
-    const details=rows?`<div class="section-title">Измерения</div><table class="table"><tr><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${rows}</table>`:'<div class="mut small">Подробные измерения не найдены в этой записи.</div>';
-    return `<div class="diag" onclick="toggleDiag(this)"><div class="diag-head"><div><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div></div><div class="chev">⌄</div></div><div><span class="pill red">Избыток ${ex.length}</span><span class="pill blue">Недостаток ${df.length}</span><span class="pill green">Норма ${normal}</span></div><div class="diag-details">${protocol?`<div class="section-title">Итог</div><div class="mut">${esc(protocol)}</div>`:''}${details}</div></div>`
+    const an=getAnalysis(r);
+    const rows=an.results.map((y,idx)=>{
+      const organ=y.organ||y.meridian||y.name||y.channel||'—';
+      const side=y.side||y.lr||'—';
+      const point=y.point||y.acupoint||'—';
+      const sec=y.time||y.seconds||y.sec||y.value||'—';
+      const state=y.state||y.status||'—';
+      return `<tr><td>${idx+1}</td><td>${esc(organ)}</td><td>${esc(side)}</td><td>${esc(point)}</td><td>${esc(sec)}${sec==='—'?'':'с'}</td><td><span class="pill ${stateClass(state)}">${esc(fmtState(state))}</span></td></tr>`;
+    }).join('');
+
+    const protocol=r.protocol||r.patientProtocol||r.recommendation||r.summary||'';
+    const details=rows
+      ? `<div class="section-title">Измерения</div><table class="table"><tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${rows}</table>`
+      : `<div class="mut small">Подробные измерения не найдены в этой записи.</div>`;
+
+    return `<div class="diag" onclick="toggleDiag(this)">
+      <div class="diag-head">
+        <div><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div></div>
+        <div class="chev">⌄</div>
+      </div>
+      <div><span class="pill red">Избыток ${an.excess.length}</span><span class="pill blue">Недостаток ${an.deficiency.length}</span><span class="pill green">Норма ${an.normal}</span></div>
+      <div class="diag-details">${protocol?`<div class="section-title">Итог</div><div class="mut">${esc(protocol)}</div>`:''}${details}</div>
+    </div>`;
   }).join('')||'Диагностик пока нет';
 }
+
 function toggleDiag(el){el.classList.toggle('open')}
+
 function renderMsgs(arr){
   messages.innerHTML=arr.map(m=>`<div class="msg ${esc(m.author)}"><b>${m.author==='patient'?'Пациент':'Акмал'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет</div>';
 }
+
 async function sendMsg(){
-  const text=msg.value.trim();if(!text||!id)return;
+  const text=msg.value.trim(); if(!text||!id)return;
   const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text});
   if(r.error)return err(r.error.message);
-  msg.value='';load();
+  msg.value=''; load();
 }
+
 load();
 </script>
-</body></html>
+</body>
+</html>
