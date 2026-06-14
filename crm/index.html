@@ -34,6 +34,7 @@ label{font-size:12px;color:var(--mut);font-weight:800;text-transform:uppercase;l
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.grid5{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 1fr;gap:10px}
 .patient{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}
 .patient-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#3b2b10,#7c6af7);display:flex;align-items:center;justify-content:center;font-weight:950;color:white;flex-shrink:0;border:1px solid rgba(224,184,82,.45)}
@@ -61,7 +62,9 @@ label{font-size:12px;color:var(--mut);font-weight:800;text-transform:uppercase;l
 .session{background:#10101a;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px}
 .topbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .small{font-size:12px}
-@media(max-width:760px){.app{padding:12px}.grid,.grid3,.grid4,.topbar{grid-template-columns:1fr}.patient-head{display:block}.patient-main{margin-bottom:10px}}
+.phone-link{color:#d6d6ff;text-decoration:none}.phone-link:hover{text-decoration:underline}
+@media(max-width:900px){.grid5{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.app{padding:12px}.grid,.grid3,.grid4,.grid5,.topbar{grid-template-columns:1fr}.patient-head{display:block}.patient-main{margin-bottom:10px}}
 </style>
 </head>
 
@@ -112,7 +115,7 @@ label{font-size:12px;color:var(--mut);font-weight:800;text-transform:uppercase;l
     <h2>Новый пациент</h2>
     <div class="grid">
       <div><label>ФИО</label><input id="name" placeholder="ФИО пациента"></div>
-      <div><label>Телефон</label><input id="phone" placeholder="Телефон"></div>
+      <div><label>Телефон</label><input id="phone" placeholder="+992 ..."></div>
     </div>
     <div class="grid">
       <div>
@@ -187,6 +190,7 @@ function fmtDate(v){return v ? new Date(v).toLocaleString() : '—';}
 function toDatetimeLocal(v){if(!v)return''; const d=new Date(v); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16);}
 function fromDatetimeLocal(v){return v ? new Date(v).toISOString() : null;}
 function statusBadge(status){const s=status||'new';return `<span class="badge status-${s}">${STATUS_LABELS[s]||s}</span>`;}
+function phoneHref(phone){return String(phone||'').replace(/[^\d+]/g,'');}
 
 function updateTitle(){
   const unread = statePatients.filter(p=>isNewForDoctor(p.id)).length;
@@ -241,13 +245,18 @@ function renderPatients(){
     const incoming = incomingCount(p.id);
     const sessions = patientSessions(p.id);
 
+    const phone = p.phone || '';
+
     return `<div class="patient ${selectedPatientId===p.id?'selected':''}">
       <div class="patient-head">
         <div class="patient-main">
           <div class="avatar">${esc(initials(p.full_name))}</div>
           <div>
             <b>${esc(p.full_name || 'Без имени')}</b>
-            <div class="mut">${esc(p.phone || 'Без телефона')} · создан ${new Date(p.created_at).toLocaleString()}</div>
+            <div class="mut">
+              ${phone ? `<a class="phone-link" href="tel:${esc(phoneHref(phone))}">${esc(phone)}</a>` : 'Без телефона'}
+              · создан ${new Date(p.created_at).toLocaleString()}
+            </div>
             ${p.note ? `<div class="mut">Заметки: ${esc(p.note)}</div>` : ''}
             ${last ? `<div class="mut">Последнее сообщение: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message)}</div>` : ''}
             <div class="mut">Следующий визит: ${esc(fmtDate(p.next_visit))}</div>
@@ -263,7 +272,11 @@ function renderPatients(){
       </div>
 
       <div class="section">
-        <div class="grid4">
+        <div class="grid5">
+          <div>
+            <label>Телефон</label>
+            <input id="ph_${p.id}" value="${esc(phone)}" placeholder="+992 ...">
+          </div>
           <div>
             <label>Статус</label>
             <select id="st_${p.id}">
@@ -388,6 +401,7 @@ async function createPatient(){
 
 async function savePatientMeta(id){
   try{
+    const phone = document.getElementById(`ph_${id}`).value.trim();
     const note = document.getElementById(`nt_${id}`).value.trim();
     const status = document.getElementById(`st_${id}`).value;
     const next_visit = fromDatetimeLocal(document.getElementById(`nv_${id}`).value);
@@ -396,7 +410,7 @@ async function savePatientMeta(id){
     const paid = paid_amount > 0;
 
     const r = await sb.from('patients').update({
-      note, status, next_visit, paid_amount, paid, therapy_sessions, payment_date: paid ? new Date().toISOString() : null, updated_at: new Date().toISOString()
+      phone, note, status, next_visit, paid_amount, paid, therapy_sessions, payment_date: paid ? new Date().toISOString() : null, updated_at: new Date().toISOString()
     }).eq('id', id);
 
     if(r.error) throw r.error;
