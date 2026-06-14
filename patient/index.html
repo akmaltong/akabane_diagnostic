@@ -145,19 +145,62 @@ function classNameByStatus(status){
   return '';
 }
 
+function parseTimeValue(value){
+  if(value===undefined || value===null || value==='') return null;
+
+  if(typeof value==='number'){
+    return Number.isNaN(value) ? null : value;
+  }
+
+  if(typeof value==='string'){
+    // Поддерживает: "3", "3.0", "3.0с", "3 сек", "3 sec", "3,5"
+    const cleaned=value.replace(',', '.');
+    const match=cleaned.match(/-?\\d+(?:\\.\\d+)?/);
+    if(match){
+      const n=parseFloat(match[0]);
+      return Number.isNaN(n) ? null : n;
+    }
+  }
+
+  if(typeof value==='object'){
+    const nestedKeys=['time','seconds','sec','value','count','duration','text','label'];
+    for(const k of nestedKeys){
+      if(value[k]!==undefined){
+        const n=parseTimeValue(value[k]);
+        if(n!==null) return n;
+      }
+    }
+  }
+
+  return null;
+}
+
 function getTimeValue(row){
   const keys=[
     'time','seconds','sec','value','count','countSeconds','duration',
     'burnTime','burn_time','moxaTime','moxa_time',
     'timeSec','time_sec','secondsCount','seconds_count',
-    'leftTime','rightTime','t'
+    'leftTime','rightTime','t',
+    'warmTime','warm_time','heatingTime','heating_time',
+    'burn','moxa','timer','secondsText','timeText','displayTime',
+    'timeLabel','durationText','resultTime'
   ];
+
   for(const k of keys){
     if(row && row[k]!==undefined && row[k]!==null && row[k]!==''){
-      const n=Number(row[k]);
-      if(!Number.isNaN(n)) return n;
+      const n=parseTimeValue(row[k]);
+      if(n!==null) return n;
     }
   }
+
+  // Последний шанс: ищем число в любом текстовом поле строки.
+  if(row && typeof row==='object'){
+    for(const v of Object.values(row)){
+      const n=parseTimeValue(v);
+      if(n!==null) return n;
+    }
+  }
+
   return null;
 }
 
