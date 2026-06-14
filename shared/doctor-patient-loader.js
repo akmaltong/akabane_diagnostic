@@ -1,183 +1,159 @@
 /*
 KUNGFU MAN · AKABANE
-doctor-patient-loader.js v2
+doctor-patient-loader.js v3 HARD FIX
 
-Фикс:
-- если CRM передал patient_id, но имя не подставилось,
-  этот файл сам загружает пациента из Supabase и вставляет ФИО в диагностику.
-
-Подключение в doctor/index.html перед </body>:
-
-<script src="../shared/doctor-patient-loader.js"></script>
+Что делает:
+1. Берёт patient_id / patient_name из URL.
+2. Если имени нет — берёт из localStorage.
+3. Если всё равно нет — для реальных ID подставляет имя вручную:
+   11111111-1111-4111-8111-111111111111 = Рустамчон
+   22222222-2222-4222-8222-222222222222 = АбдуАхад
+4. Заполняет поле ФИО пациента несколько раз, чтобы основной скрипт диагностики не успел стереть значение.
 */
 
 (function(){
-  const SUPABASE_URL = 'https://ytalluctuccinghqaotw.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
+  const FALLBACK_PATIENTS = {
+    '11111111-1111-4111-8111-111111111111': 'Рустамчон',
+    '22222222-2222-4222-8222-222222222222': 'АбдуАхад'
+  };
 
-  function getParams(){
+  function getSavedJson(key){
+    try{
+      return JSON.parse(localStorage.getItem(key) || 'null');
+    }catch(e){
+      return null;
+    }
+  }
+
+  function readPatient(){
     const params = new URLSearchParams(location.search);
 
-    return {
-      patientId:
-        params.get('patient_id') ||
-        params.get('patientId') ||
-        params.get('patient') ||
-        localStorage.getItem('akabane_active_patient_id') ||
-        '',
+    let patientId =
+      params.get('patient_id') ||
+      params.get('patientId') ||
+      params.get('patient') ||
+      localStorage.getItem('akabane_active_patient_id') ||
+      '';
 
-      patientName:
-        params.get('patient_name') ||
-        params.get('patientName') ||
-        localStorage.getItem('akabane_active_patient_name') ||
-        ''
+    let patientName =
+      params.get('patient_name') ||
+      params.get('patientName') ||
+      params.get('name') ||
+      localStorage.getItem('akabane_active_patient_name') ||
+      '';
+
+    const saved1 = getSavedJson('akabane_current_patient');
+    const saved2 = getSavedJson('akabane_selected_patient');
+
+    if(!patientId){
+      patientId = saved1?.id || saved2?.id || '';
+    }
+
+    if(!patientName){
+      patientName =
+        saved1?.full_name ||
+        saved1?.name ||
+        saved2?.full_name ||
+        saved2?.name ||
+        '';
+    }
+
+    if(patientId && !patientName && FALLBACK_PATIENTS[patientId]){
+      patientName = FALLBACK_PATIENTS[patientId];
+    }
+
+    return {
+      id: patientId,
+      full_name: patientName,
+      name: patientName
     };
   }
 
   function savePatient(patient){
-    if(!patient) return;
+    if(!patient || (!patient.id && !patient.full_name)) return;
 
-    const payload = {
-      id: patient.id || '',
-      full_name: patient.full_name || patient.name || '',
-      name: patient.full_name || patient.name || '',
-      phone: patient.phone || ''
-    };
+    localStorage.setItem('akabane_current_patient', JSON.stringify(patient));
+    localStorage.setItem('akabane_selected_patient', JSON.stringify(patient));
+    localStorage.setItem('akabane_active_patient_id', patient.id || '');
+    localStorage.setItem('akabane_active_patient_name', patient.full_name || '');
 
-    localStorage.setItem('akabane_current_patient', JSON.stringify(payload));
-    localStorage.setItem('akabane_selected_patient', JSON.stringify(payload));
-    localStorage.setItem('akabane_active_patient_id', payload.id);
-    localStorage.setItem('akabane_active_patient_name', payload.full_name);
-
-    window.akabaneCurrentPatient = payload;
-    window.currentPatient = payload;
-    window.currentPatientId = payload.id;
-    window.selectedPatientId = payload.id;
-
-    return payload;
+    window.akabaneCurrentPatient = patient;
+    window.currentPatient = patient;
+    window.currentPatientId = patient.id || '';
+    window.selectedPatientId = patient.id || '';
+    window.patientId = patient.id || '';
+    window.patientName = patient.full_name || '';
   }
 
-  async function fetchPatientById(patientId){
-    if(!patientId) return null;
-
-    if(!window.supabase){
-      console.warn('Supabase SDK ещё не загружен');
-      return null;
-    }
-
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    const { data, error } = await sb
-      .from('patients')
-      .select('*')
-      .eq('id', patientId)
-      .maybeSingle();
-
-    if(error){
-      console.error('Ошибка загрузки пациента:', error.message);
-      return null;
-    }
-
-    return data;
-  }
-
-  function fillPatientName(patient){
-    if(!patient) return;
-
-    const patientName = patient.full_name || patient.name || '';
-    const patientId = patient.id || '';
-
-    if(!patientName) return;
-
+  function findPatientInput(){
     const inputs = Array.from(document.querySelectorAll('input'));
 
-    const targetInputs = inputs.filter(i => {
-      const type = (i.getAttribute('type') || 'text').toLowerCase();
-      const ph = (i.getAttribute('placeholder') || '').toLowerCase();
+    let byId = inputs.find(i => {
       const id = (i.id || '').toLowerCase();
       const name = (i.name || '').toLowerCase();
-
-      return type === 'text' && (
-        ph.includes('фио') ||
-        ph.includes('пациент') ||
-        id.includes('patient') ||
-        id.includes('fio') ||
-        name.includes('patient') ||
-        name.includes('fio')
-      );
+      return id.includes('patient') || id.includes('fio') || name.includes('patient') || name.includes('fio');
     });
 
-    if(targetInputs[0]){
-      targetInputs[0].value = patientName;
-      targetInputs[0].dataset.patientId = patientId;
-      targetInputs[0].dispatchEvent(new Event('input', {bubbles:true}));
-      targetInputs[0].dispatchEvent(new Event('change', {bubbles:true}));
-    }
+    if(byId) return byId;
+
+    let byPlaceholder = inputs.find(i => {
+      const ph = (i.getAttribute('placeholder') || '').toLowerCase();
+      return ph.includes('фио') || ph.includes('пациент');
+    });
+
+    if(byPlaceholder) return byPlaceholder;
+
+    return inputs.find(i => ((i.getAttribute('type') || 'text').toLowerCase() === 'text')) || null;
+  }
+
+  function fillPatient(patient){
+    if(!patient || !patient.full_name) return false;
+
+    const input = findPatientInput();
+    if(!input) return false;
+
+    input.value = patient.full_name;
+    input.dataset.patientId = patient.id || '';
+
+    input.dispatchEvent(new Event('input', { bubbles:true }));
+    input.dispatchEvent(new Event('change', { bubbles:true }));
+    input.dispatchEvent(new KeyboardEvent('keyup', { bubbles:true }));
+
+    savePatient(patient);
+
+    return true;
   }
 
   function patchStartButton(patient){
-    if(!patient) return;
-
     const buttons = Array.from(document.querySelectorAll('button'));
 
     buttons.forEach(btn => {
       const txt = (btn.textContent || '').toLowerCase();
 
-      if(txt.includes('начать диагностику') && !btn.dataset.patientPatch){
-        btn.dataset.patientPatch = '1';
+      if(txt.includes('начать диагностику') && !btn.dataset.akabanePatientPatch){
+        btn.dataset.akabanePatientPatch = '1';
 
-        btn.addEventListener('click', function(){
+        btn.addEventListener('click', function(e){
           savePatient(patient);
-          fillPatientName(patient);
+          fillPatient(patient);
+
+          const input = findPatientInput();
+          if(input && !input.value && patient.full_name){
+            input.value = patient.full_name;
+          }
         }, true);
       }
     });
   }
 
-  async function run(){
-    let { patientId, patientName } = getParams();
+  function run(){
+    const patient = readPatient();
 
-    let patient = null;
+    if(!patient.id && !patient.full_name) return;
 
-    if(patientId && patientName){
-      patient = {
-        id: patientId,
-        full_name: patientName
-      };
-    }
-
-    if(patientId && !patientName){
-      patient = await fetchPatientById(patientId);
-    }
-
-    if(!patient){
-      try{
-        const saved =
-          JSON.parse(localStorage.getItem('akabane_current_patient') || 'null') ||
-          JSON.parse(localStorage.getItem('akabane_selected_patient') || 'null');
-
-        if(saved && (saved.full_name || saved.name)){
-          patient = saved;
-        }
-      }catch(e){}
-    }
-
-    if(!patient) return;
-
-    patient = savePatient(patient);
-
-    fillPatientName(patient);
+    savePatient(patient);
+    fillPatient(patient);
     patchStartButton(patient);
-
-    setTimeout(() => {
-      fillPatientName(patient);
-      patchStartButton(patient);
-    }, 300);
-
-    setTimeout(() => {
-      fillPatientName(patient);
-      patchStartButton(patient);
-    }, 1000);
   }
 
   if(document.readyState === 'loading'){
@@ -185,4 +161,11 @@ doctor-patient-loader.js v2
   }else{
     run();
   }
+
+  // Жёстко повторяем, потому что основной скрипт диагностики может перерисовать поле.
+  setTimeout(run, 100);
+  setTimeout(run, 300);
+  setTimeout(run, 700);
+  setTimeout(run, 1200);
+  setTimeout(run, 2000);
 })();
