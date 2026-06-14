@@ -79,14 +79,9 @@ th{color:#aaa7d8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
 <div class="app">
   <div class="card">
     <div class="brand">KUNGFU MAN · PATIENT</div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
-      <div>
-        <div class="title">Личный кабинет пациента</div>
-        <div id="patientInfo" class="mut">Загрузка...</div>
-        <div id="status"></div>
-      </div>
-      <a id="diagBtn" href="#" style="display:none;text-decoration:none;background:#7c6af7;color:#fff;border-radius:14px;padding:12px 18px;font-weight:900;font-size:14px;white-space:nowrap;align-self:flex-start">⚡ Пройти диагностику</a>
-    </div>
+    <div class="title">Личный кабинет пациента</div>
+    <div id="patientInfo" class="mut">Загрузка...</div>
+    <div id="status"></div>
   </div>
 
   <div class="card">
@@ -200,7 +195,7 @@ function parseTime(v){
     }
   }
   if(typeof v==='object'){
-    const keys=['time','seconds','sec','value','count','duration','text','label'];
+    const keys=['reaction_time','time','seconds','sec','value','count','duration','text','label'];
     for(const k of keys){
       if(v[k]!==undefined){
         const n=parseTime(v[k]);
@@ -212,7 +207,7 @@ function parseTime(v){
 }
 function getTime(row){
   const keys=[
-    'time','seconds','sec','value','count','countSeconds','duration',
+    'reaction_time','time','seconds','sec','value','count','countSeconds','duration',
     'burnTime','burn_time','moxaTime','moxa_time',
     'timeSec','time_sec','secondsCount','seconds_count',
     'warmTime','warm_time','heatingTime','heating_time',
@@ -313,7 +308,7 @@ function renderDiagnostics(items){
               <td>${esc(r.meridian)}</td>
               <td>${esc(r.side)}</td>
               <td>${esc(r.point)}</td>
-              <td>${r.time===null?'—':esc(r.time+' с')}</td>
+              <td>${r.time===null?'—':esc(Number(r.time).toFixed(1)+' с')}</td>
               <td><span class="badge ${statusClass(r.status)}">${esc(r.status)}</span></td>
             </tr>`).join('')}
           </tbody>
@@ -392,8 +387,6 @@ async function load(){
     }
 
     document.getElementById('patientInfo').innerHTML='<b>'+esc(p.data.full_name)+'</b>'+(p.data.phone?'<br>'+esc(p.data.phone):'');
-    const diagBtn=document.getElementById('diagBtn');
-    if(diagBtn){diagBtn.href='../doctor/?patient='+encodeURIComponent(id)+'&patient_name='+encodeURIComponent(p.data.full_name||'');diagBtn.style.display='block';}
 
     const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
     if(d.error) throw d.error;
