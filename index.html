@@ -16,9 +16,7 @@
   --mut:#a9a9c8;
   --violet:#7c6af7;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   min-height:100vh;
@@ -31,12 +29,10 @@ body{
   align-items:center;
   justify-content:center;
 }
-
 .app{
   width:min(980px,94vw);
   padding:28px 0;
 }
-
 .hero-brand{
   height:320px;
   border:1px solid rgba(224,184,82,.42);
@@ -51,30 +47,26 @@ body{
   box-shadow:0 34px 90px rgba(0,0,0,.55);
   margin-bottom:22px;
 }
-
 .hero-brand img{
-  width:760px;
-  max-width:92%;
-  height:auto;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
   display:block;
-  transform:translateY(-18px);
   filter:drop-shadow(0 0 22px rgba(224,184,82,.16));
 }
-
 .card{
   background:linear-gradient(180deg,var(--card),#10101a);
   border:1px solid var(--line);
   border-radius:24px;
   padding:26px;
 }
-
 .brand{
   color:var(--gold);
   font-weight:900;
   letter-spacing:.12em;
   font-size:15px;
 }
-
 h1{
   font-size:38px;
   line-height:1.05;
@@ -82,20 +74,17 @@ h1{
   font-weight:950;
   letter-spacing:-.03em;
 }
-
 p{
   color:var(--mut);
   line-height:1.6;
   margin:0 0 22px;
   max-width:760px;
 }
-
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
   gap:12px;
 }
-
 a{
   display:block;
   text-align:center;
@@ -107,17 +96,23 @@ a{
   font-weight:900;
   border:1px solid transparent;
 }
-
 a.secondary{
   background:#1a1a2a;
   border-color:var(--line);
 }
-
 @media(max-width:700px){
   body{align-items:flex-start}
   .app{padding:16px 0}
-  .hero-brand{height:932px;border-radius:22px}
-  .hero-brand img{width:2500px;max-width:115%;transform:translateY(-10px)}
+  .hero-brand{
+    height:200px;
+    border-radius:22px;
+  }
+  .hero-brand img{
+    width:100%;
+    height:100%;
+    max-width:unset;
+    transform:none;
+  }
   .card{padding:20px;border-radius:20px}
   h1{font-size:30px}
   .grid{grid-template-columns:1fr}
@@ -126,23 +121,19 @@ a.secondary{
 </head>
 <body>
 <div class="app">
-
   <div class="hero-brand">
     <img src="assets/kungfuman-logo.png" alt="KUNGFU MAN">
   </div>
-
   <div class="card">
     <div class="brand">KUNGFU MAN · AKABANE</div>
     <h1>Диагностика Акабане</h1>
     <p>Кабинет специалиста, диагностика, личный кабинет пациента, результаты, рекомендации и связь с врачом.</p>
-
     <div class="grid">
       <a href="crm/">CRM</a>
       <a class="secondary" href="doctor/">Диагностика</a>
       <a class="secondary" href="patient/">Кабинет пациента</a>
     </div>
   </div>
-
 </div>
 </body>
 </html>
