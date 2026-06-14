@@ -119,19 +119,17 @@ function copyCard(){const card=document.getElementById('cardNumber').textContent
 function scrollToChat(){document.getElementById('chatCard').scrollIntoView({behavior:'smooth',block:'start'})}
 
 function normalizeStatus(status,time){
+  // Если есть время, оно главное. Старые сохранённые normal/deficiency игнорируем.
+  if(time!==null && !Number.isNaN(time)){
+    return classifyByTime(time);
+  }
+
   let s=String(status??'').trim().toLowerCase();
 
   if(s==='excess'||s==='izbytok'||s==='high'||s==='hyper'||s==='избыток'||s==='избыток энергии') return 'Избыток энергии';
   if(s==='normal'||s==='norm'||s==='norma'||s==='норма') return 'Норма';
   if(s==='deficiency'||s==='low'||s==='hypo'||s==='nedostatok'||s==='недостаток'||s==='недостаток энергии') return 'Недостаток энергии';
   if(s==='severe'||s==='severe_deficiency'||s==='expressed_deficiency'||s==='critical'||s==='выраженный недостаток') return 'Выраженный недостаток';
-
-  if(time!==null && !Number.isNaN(time)){
-    if(time<=5) return 'Избыток энергии';
-    if(time<=7) return 'Норма';
-    if(time<=13) return 'Недостаток энергии';
-    return 'Выраженный недостаток';
-  }
 
   return status ? String(status) : '—';
 }
