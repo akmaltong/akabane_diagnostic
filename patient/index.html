@@ -79,9 +79,14 @@ th{color:#aaa7d8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
 <div class="app">
   <div class="card">
     <div class="brand">KUNGFU MAN · PATIENT</div>
-    <div class="title">Личный кабинет пациента</div>
-    <div id="patientInfo" class="mut">Загрузка...</div>
-    <div id="status"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+      <div>
+        <div class="title">Личный кабинет пациента</div>
+        <div id="patientInfo" class="mut">Загрузка...</div>
+        <div id="status"></div>
+      </div>
+      <a id="diagBtn" href="#" style="display:none;text-decoration:none;background:#7c6af7;color:#fff;border-radius:14px;padding:12px 18px;font-weight:900;font-size:14px;white-space:nowrap;align-self:flex-start">⚡ Пройти диагностику</a>
+    </div>
   </div>
 
   <div class="card">
@@ -104,7 +109,7 @@ th{color:#aaa7d8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
     <div class="offer-body">
       <div class="pay-card">
         <div class="chip"></div>
-        <div class="card-number" id="cardNumber">4420 2000 2110 0871</div>
+        <div class="card-number" id="cardNumber">4439 2000 2119 9871</div>
         <div class="card-owner">AMIR OCHILOV</div>
       </div>
       <div class="copy-row">
@@ -387,6 +392,8 @@ async function load(){
     }
 
     document.getElementById('patientInfo').innerHTML='<b>'+esc(p.data.full_name)+'</b>'+(p.data.phone?'<br>'+esc(p.data.phone):'');
+    const diagBtn=document.getElementById('diagBtn');
+    if(diagBtn){diagBtn.href='../doctor/?patient='+encodeURIComponent(id)+'&patient_name='+encodeURIComponent(p.data.full_name||'');diagBtn.style.display='block';}
 
     const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
     if(d.error) throw d.error;
@@ -401,7 +408,20 @@ async function load(){
   }
 }
 load();
-setInterval(load,10000);
+
+// Realtime — сообщения от врача и диагностики появляются мгновенно
+try{
+  if(id){
+    const sbRT=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    sbRT.channel('patient-rt-'+id)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'patient_id=eq.'+id},()=>load())
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'diagnostics',filter:'patient_id=eq.'+id},()=>load())
+      .subscribe();
+  }
+}catch(e){console.warn('Realtime недоступен:',e)}
+
+// Fallback polling каждые 30с
+setInterval(load,30000);
 </script>
 </body>
 </html>
