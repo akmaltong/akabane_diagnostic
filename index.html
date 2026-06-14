@@ -40,7 +40,6 @@ body{
   margin-bottom:22px;
   position:relative;
 }
-/* Радиальное свечение поверх */
 .hero-brand::before{
   content:'';
   position:absolute;
@@ -53,10 +52,10 @@ body{
   width:100%;
   height:100%;
   object-fit:cover;
-  /* Сдвигаем вверх чтобы обрезались нижние поля, а лого было по центру.
-     50% = центр, 35% = чуть выше центра PNG */
   object-position:center 35%;
   display:block;
+  transform:scale(1.35);
+  transform-origin:center 40%;
 }
 .card{
   background:linear-gradient(180deg,var(--card),#10101a);
@@ -107,6 +106,7 @@ a.secondary{
   body{align-items:flex-start}
   .app{padding:16px 0}
   .hero-brand{height:200px;border-radius:22px}
+  .hero-brand img{transform:scale(1.3);transform-origin:center 40%}
   .card{padding:20px;border-radius:20px}
   h1{font-size:30px}
   .grid{grid-template-columns:1fr}
