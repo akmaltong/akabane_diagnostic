@@ -35,15 +35,28 @@ body{
   height:320px;
   border:1px solid rgba(224,184,82,.42);
   border-radius:28px;
-  background-color:#050507;
-  background-image:
-    radial-gradient(circle at center,rgba(224,184,82,.12),transparent 52%),
-    url('assets/kungfuman-logo.png');
-  background-repeat:no-repeat;
-  background-position:center center;
-  background-size:85%;
+  overflow:hidden;
   box-shadow:0 34px 90px rgba(0,0,0,.55);
   margin-bottom:22px;
+  position:relative;
+}
+/* Радиальное свечение поверх */
+.hero-brand::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at center,rgba(224,184,82,.10),transparent 60%);
+  z-index:1;
+  pointer-events:none;
+}
+.hero-brand img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  /* Сдвигаем вверх чтобы обрезались нижние поля, а лого было по центру.
+     50% = центр, 35% = чуть выше центра PNG */
+  object-position:center 35%;
+  display:block;
 }
 .card{
   background:linear-gradient(180deg,var(--card),#10101a);
@@ -93,11 +106,7 @@ a.secondary{
 @media(max-width:700px){
   body{align-items:flex-start}
   .app{padding:16px 0}
-  .hero-brand{
-    height:200px;
-    border-radius:22px;
-    background-size:95%;
-  }
+  .hero-brand{height:200px;border-radius:22px}
   .card{padding:20px;border-radius:20px}
   h1{font-size:30px}
   .grid{grid-template-columns:1fr}
@@ -106,7 +115,9 @@ a.secondary{
 </head>
 <body>
 <div class="app">
-  <div class="hero-brand" role="img" aria-label="KUNGFU MAN"></div>
+  <div class="hero-brand">
+    <img src="assets/kungfuman-logo.png" alt="KUNGFU MAN">
+  </div>
   <div class="card">
     <div class="brand">KUNGFU MAN · AKABANE</div>
     <h1>Диагностика Акабане</h1>
