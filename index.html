@@ -8,10 +8,8 @@
 :root{
   --bg:#09090d;
   --card:#13131f;
-  --card2:#171724;
   --line:#2a2a40;
   --gold:#e0b852;
-  --gold2:#9b7430;
   --text:#f2f2f6;
   --mut:#a9a9c8;
   --violet:#7c6af7;
@@ -37,23 +35,16 @@ body{
   height:320px;
   border:1px solid rgba(224,184,82,.42);
   border-radius:28px;
-  background:
+  background-color:#050507;
+  background-image:
     radial-gradient(circle at center,rgba(224,184,82,.12),transparent 52%),
-    #050507;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
+    url('assets/kungfuman-logo.png');
+  background-repeat:no-repeat;
+  background-position:center center;
+  /* Подбери значение scale: 120% показывает центральную часть крупнее */
+  background-size:60%;
   box-shadow:0 34px 90px rgba(0,0,0,.55);
   margin-bottom:22px;
-}
-.hero-brand img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:center;
-  display:block;
-  filter:drop-shadow(0 0 22px rgba(224,184,82,.16));
 }
 .card{
   background:linear-gradient(180deg,var(--card),#10101a);
@@ -106,12 +97,7 @@ a.secondary{
   .hero-brand{
     height:200px;
     border-radius:22px;
-  }
-  .hero-brand img{
-    width:100%;
-    height:100%;
-    max-width:unset;
-    transform:none;
+    background-size:80%;
   }
   .card{padding:20px;border-radius:20px}
   h1{font-size:30px}
@@ -121,9 +107,7 @@ a.secondary{
 </head>
 <body>
 <div class="app">
-  <div class="hero-brand">
-    <img src="assets/kungfuman-logo.png" alt="KUNGFU MAN">
-  </div>
+  <div class="hero-brand" role="img" aria-label="KUNGFU MAN"></div>
   <div class="card">
     <div class="brand">KUNGFU MAN · AKABANE</div>
     <h1>Диагностика Акабане</h1>
