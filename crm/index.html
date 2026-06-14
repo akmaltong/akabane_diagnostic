@@ -56,9 +56,7 @@ textarea{min-height:90px}
   <div class="card">
     <h2>Чат врача</h2>
     <div id="selectedPatient" class="mut">Выберите пациента из списка или входящих сообщений.</div>
-    <div id="chatBox" class="chat-box">
-      <div class="empty">Диалог не выбран</div>
-    </div>
+    <div id="chatBox" class="chat-box"><div class="empty">Диалог не выбран</div></div>
     <textarea id="replyText" placeholder="Ответ пациенту"></textarea>
     <div class="grid">
       <button class="btn" onclick="sendDoctorReply()">Отправить ответ</button>
@@ -100,78 +98,26 @@ const chatBoxEl = document.getElementById('chatBox');
 const selectedPatientEl = document.getElementById('selectedPatient');
 const replyTextEl = document.getElementById('replyText');
 
-function esc(s){
-  return String(s ?? '').replace(/[&<>]/g, m => ({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;'
-  }[m]));
-}
-
-function shortId(id){
-  return String(id || '').slice(0,8);
-}
-
-function patientUrl(id){
-  return `${location.origin}/akabane_diagnostic/patient/?id=${encodeURIComponent(id)}`;
-}
-
-function doctorUrl(id){
-  return `${location.origin}/akabane_diagnostic/doctor/?patient_id=${encodeURIComponent(id)}`;
-}
-
-function setStatus(text,type='ok'){
-  statusEl.innerHTML = `<div class="${type}">${esc(text)}</div>`;
-  setTimeout(() => statusEl.innerHTML = '', 3500);
-}
-
-function getPatient(id){
-  return statePatients.find(p => p.id === id);
-}
-
-function patientName(id){
-  return getPatient(id)?.full_name || 'Без имени';
-}
-
-function patientMessages(id){
-  return stateMessages
-    .filter(m => m.patient_id === id)
-    .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-}
-
-function lastMessage(id){
-  const arr = patientMessages(id);
-  return arr[arr.length - 1] || null;
-}
-
-function isNewForDoctor(id){
-  const last = lastMessage(id);
-  return last && last.author === 'patient';
-}
-
-function incomingCount(id){
-  return patientMessages(id).filter(m => m.author === 'patient').length;
-}
-
-function totalCount(id){
-  return patientMessages(id).length;
-}
+function esc(s){return String(s ?? '').replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+function shortId(id){return String(id || '').slice(0,8);}
+function patientUrl(id){return `${location.origin}/akabane_diagnostic/patient/?id=${encodeURIComponent(id)}`;}
+function doctorUrl(id){return `${location.origin}/akabane_diagnostic/doctor/?patient_id=${encodeURIComponent(id)}`;}
+function setStatus(text,type='ok'){statusEl.innerHTML = `<div class="${type}">${esc(text)}</div>`;setTimeout(() => statusEl.innerHTML = '', 3500);}
+function getPatient(id){return statePatients.find(p => p.id === id);}
+function patientName(id){return getPatient(id)?.full_name || 'Без имени';}
+function patientMessages(id){return stateMessages.filter(m => m.patient_id === id).sort((a,b) => new Date(a.created_at) - new Date(b.created_at));}
+function lastMessage(id){const arr = patientMessages(id); return arr[arr.length - 1] || null;}
+function isNewForDoctor(id){const last = lastMessage(id); return last && last.author === 'patient';}
+function incomingCount(id){return patientMessages(id).filter(m => m.author === 'patient').length;}
+function totalCount(id){return patientMessages(id).length;}
 
 async function load(keepScroll=false){
   try{
-    const p = await sb
-      .from('patients')
-      .select('*')
-      .order('created_at',{ascending:false});
-
+    const p = await sb.from('patients').select('*').order('created_at',{ascending:false});
     if(p.error) throw p.error;
     statePatients = p.data || [];
 
-    const m = await sb
-      .from('messages')
-      .select('*')
-      .order('created_at',{ascending:true});
-
+    const m = await sb.from('messages').select('*').order('created_at',{ascending:true});
     if(m.error) throw m.error;
     stateMessages = m.data || [];
 
@@ -224,20 +170,11 @@ function renderPatients(){
 }
 
 function renderInbox(){
-  const ids = [...new Set(
-    stateMessages
-      .filter(m => m.author === 'patient')
-      .map(m => m.patient_id)
-  )];
-
-  const incomingPatients = ids
-    .map(id => ({id, last:lastMessage(id)}))
-    .filter(x => x.last && x.last.author === 'patient')
-    .sort((a,b) => new Date(b.last.created_at) - new Date(a.last.created_at));
+  const ids = [...new Set(stateMessages.filter(m => m.author === 'patient').map(m => m.patient_id))];
+  const incomingPatients = ids.map(id => ({id, last:lastMessage(id)})).filter(x => x.last && x.last.author === 'patient').sort((a,b) => new Date(b.last.created_at) - new Date(a.last.created_at));
 
   inboxEl.innerHTML = incomingPatients.map(x => {
     const m = x.last;
-
     return `<div class="inbox-item">
       <div class="patient-head">
         <div>
@@ -247,7 +184,6 @@ function renderInbox(){
         </div>
         <span class="badge unread">Новое</span>
       </div>
-
       <div class="grid">
         <button class="btn" onclick="selectPatient('${x.id}')">Ответить</button>
         <button class="btn btn2" onclick="openCabinet('${x.id}')">Открыть кабинет</button>
@@ -267,7 +203,6 @@ function renderChat(keepScroll=false){
   selectedPatientEl.innerHTML = `Выбран пациент: <b>${esc(p?.full_name || 'Без имени')}</b>`;
 
   const arr = patientMessages(selectedPatientId);
-
   chatBoxEl.innerHTML = arr.map(m => `
     <div class="chat-msg ${esc(m.author)}">
       <div class="chat-author">${m.author === 'patient' ? 'Пациент' : 'Акмал'}</div>
@@ -276,33 +211,20 @@ function renderChat(keepScroll=false){
     </div>
   `).join('') || '<div class="empty">Сообщений пока нет</div>';
 
-  if(!keepScroll){
-    chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
-  }
+  if(!keepScroll) chatBoxEl.scrollTop = chatBoxEl.scrollHeight;
 }
 
 async function createPatient(){
   const full_name = document.getElementById('name').value.trim();
   const ph = document.getElementById('phone').value.trim();
-
-  if(!full_name){
-    setStatus('Введите ФИО пациента','err');
-    return;
-  }
+  if(!full_name){setStatus('Введите ФИО пациента','err');return;}
 
   try{
-    const r = await sb
-      .from('patients')
-      .insert({full_name, phone: ph})
-      .select()
-      .single();
-
+    const r = await sb.from('patients').insert({full_name, phone: ph}).select().single();
     if(r.error) throw r.error;
-
     document.getElementById('name').value = '';
     document.getElementById('phone').value = '';
     document.getElementById('note').value = '';
-
     setStatus('Пациент создан');
     await load();
   }catch(e){
@@ -315,37 +237,21 @@ async function deletePatient(id){
   const p = getPatient(id);
   const name = p?.full_name || 'Без имени';
 
-  if(!confirm(`Удалить пациента "${name}"?\n\nБудут удалены:\n— пациент\n— его диагностики\n— его сообщения`)){
-    return;
-  }
+  if(!confirm(`Удалить пациента "${name}"?\n\nБудут удалены:\n— пациент\n— его диагностики\n— его сообщения`)) return;
 
   setStatus('Удаляю пациента...');
 
   try{
-    const m = await sb
-      .from('messages')
-      .delete()
-      .eq('patient_id',id);
-
+    const m = await sb.from('messages').delete().eq('patient_id',id);
     if(m.error) throw new Error('messages: '+m.error.message);
 
-    const d = await sb
-      .from('diagnostics')
-      .delete()
-      .eq('patient_id',id);
-
+    const d = await sb.from('diagnostics').delete().eq('patient_id',id);
     if(d.error) throw new Error('diagnostics: '+d.error.message);
 
-    const pdel = await sb
-      .from('patients')
-      .delete()
-      .eq('id',id);
-
+    const pdel = await sb.from('patients').delete().eq('id',id);
     if(pdel.error) throw new Error('patients: '+pdel.error.message);
 
-    if(selectedPatientId === id){
-      selectedPatientId = null;
-    }
+    if(selectedPatientId === id) selectedPatientId = null;
 
     setStatus(`Пациент "${name}" удалён`);
     await load();
@@ -356,28 +262,18 @@ async function deletePatient(id){
 }
 
 async function clearSelectedChat(){
-  if(!selectedPatientId){
-    setStatus('Выберите пациента','err');
-    return;
-  }
+  if(!selectedPatientId){setStatus('Выберите пациента','err');return;}
 
   const p = getPatient(selectedPatientId);
   const name = p?.full_name || 'Без имени';
 
-  if(!confirm(`Очистить весь чат с пациентом "${name}"?\n\nДиагностики и пациент НЕ удаляются.`)){
-    return;
-  }
+  if(!confirm(`Очистить весь чат с пациентом "${name}"?\n\nДиагностики и пациент НЕ удаляются.`)) return;
 
   setStatus('Очищаю чат...');
 
   try{
-    const r = await sb
-      .from('messages')
-      .delete()
-      .eq('patient_id', selectedPatientId);
-
+    const r = await sb.from('messages').delete().eq('patient_id', selectedPatientId);
     if(r.error) throw r.error;
-
     setStatus('Чат очищен');
     await load();
   }catch(e){
@@ -397,27 +293,12 @@ function selectPatient(id){
 async function sendDoctorReply(){
   const text = replyTextEl.value.trim();
 
-  if(!selectedPatientId){
-    setStatus('Выберите пациента','err');
-    return;
-  }
-
-  if(!text){
-    setStatus('Введите текст ответа','err');
-    return;
-  }
+  if(!selectedPatientId){setStatus('Выберите пациента','err');return;}
+  if(!text){setStatus('Введите текст ответа','err');return;}
 
   try{
-    const r = await sb
-      .from('messages')
-      .insert({
-        patient_id:selectedPatientId,
-        author:'doctor',
-        message:text
-      });
-
+    const r = await sb.from('messages').insert({patient_id:selectedPatientId,author:'doctor',message:text});
     if(r.error) throw r.error;
-
     replyTextEl.value = '';
     setStatus('Ответ отправлен');
     await load();
@@ -427,8 +308,33 @@ async function sendDoctorReply(){
   }
 }
 
+/*
+  ВАЖНО:
+  Раньше пациент терялся.
+  Теперь перед переходом CRM кладёт выбранного пациента в localStorage
+  и дополнительно передаёт patient_id + patient_name в URL.
+*/
 function openDiagnostic(id){
-  location.href = doctorUrl(id);
+  const p = getPatient(id);
+  if(!p){
+    setStatus('Пациент не найден','err');
+    return;
+  }
+
+  const payload = {
+    id: p.id,
+    full_name: p.full_name || '',
+    phone: p.phone || '',
+    created_at: p.created_at || ''
+  };
+
+  localStorage.setItem('akabane_current_patient', JSON.stringify(payload));
+  localStorage.setItem('akabane_selected_patient', JSON.stringify(payload));
+  localStorage.setItem('akabane_active_patient_id', p.id);
+  localStorage.setItem('akabane_active_patient_name', p.full_name || '');
+
+  location.href =
+    `${location.origin}/akabane_diagnostic/doctor/?patient_id=${encodeURIComponent(p.id)}&patient_name=${encodeURIComponent(p.full_name || '')}`;
 }
 
 function openCabinet(id){
