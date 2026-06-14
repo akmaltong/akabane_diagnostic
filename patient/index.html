@@ -43,6 +43,23 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
 .payment-list li:before{content:'✓';color:#e0b852;font-weight:900;margin-right:8px}
 .payment-total{background:#211b10;border:1px solid rgba(224,184,82,.45);border-radius:16px;padding:16px;margin-top:14px}
 .payment-total small{display:block;color:#c9b77c;margin-bottom:4px}.payment-total b{font-size:32px;color:#e0b852}
+
+.pay-card{background:linear-gradient(135deg,#1e1a35,#2d1f4a);border:1px solid rgba(224,184,82,.45);border-radius:18px;padding:20px;margin-top:12px;position:relative;overflow:hidden;cursor:pointer}
+.pay-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:rgba(224,184,82,.07)}
+.pay-card-chip{width:36px;height:26px;border-radius:5px;background:linear-gradient(135deg,#e0b852,#9b7430);margin-bottom:18px}
+.pay-card-number{font-size:20px;font-weight:700;letter-spacing:.15em;color:#fff;font-family:monospace;margin-bottom:16px}
+.pay-card-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.pay-card-label{font-size:10px;color:rgba(224,184,82,.7);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.pay-card-name{font-size:14px;font-weight:700;color:#fff;letter-spacing:.08em}
+.pay-card-copy{background:rgba(224,184,82,.15);border:1px solid rgba(224,184,82,.4);color:#e0b852;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pay-card-copy:active{background:rgba(224,184,82,.3)}
+.pay-card-copied{display:none;position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#12301d;border:1px solid #247548;color:#7be89f;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:700;white-space:nowrap}
+.pay-card-copied.show{display:block}
+.no-id-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:24px}
+.no-id-screen .icon{font-size:48px;margin-bottom:16px}
+.no-id-screen h2{font-size:22px;font-weight:900;margin:0 0 10px}
+.no-id-screen p{color:#9696b8;line-height:1.6;max-width:320px;margin:0}
+
 @media(max-width:650px){.app{padding:12px}.table{display:block;overflow-x:auto}.diag-head{display:block}.pdf-actions,.price-grid{grid-template-columns:1fr}}
 @media print{
   body{background:white;color:#111}.app{max-width:none;padding:0}.card,.diag,.interpretation,.recommendations,.main-picture,.asym,.payment-card,.price-box,.payment-total{background:white!important;color:#111!important;border-color:#ddd!important}
@@ -91,6 +108,21 @@ textarea{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2
         <b>900 сомони</b>
         <div class="mut">Полная оплата программы производится до начала курса.</div>
       </div>
+
+      <div class="section-title">Реквизиты для оплаты</div>
+      <div class="pay-card">
+        <div class="pay-card-chip"></div>
+        <div class="pay-card-number" id="cardNumber" onclick="copyCard()">4439 2000 2119 9871</div>
+        <div class="pay-card-bottom">
+          <div>
+            <div class="pay-card-label">Получатель</div>
+            <div class="pay-card-name">AMIR OCHILOV</div>
+          </div>
+          <button class="pay-card-copy" onclick="copyCard()">Скопировать</button>
+        </div>
+        <div id="copiedMsg" class="pay-card-copied">Скопировано ✓</div>
+      </div>
+      <div class="mut" style="margin-top:10px;font-size:13px">После оплаты отправьте скриншот чека в чат ниже — Акмал подтвердит запись.</div>
 
       <div class="section-title">В программу входит</div>
       <ul class="payment-list">
@@ -147,7 +179,17 @@ function recommendations(rows,c){let rec=[]; if(c.sdf>0) rec.push('Провер�
 function printReport(){window.print()}
 function togglePayment(){document.getElementById('paymentCard').classList.toggle('open')}
 
-async function load(){if(!id){patientInfo.textContent='Нет ID пациента в ссылке.';diagnostics.textContent='';return}const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();if(p.error){err(p.error.message);return}if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});if(d.error)err(d.error.message);renderDiags(d.data||[]);const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});if(m.error)err(m.error.message);renderMsgs(m.data||[])}
+function copyCard(){
+  const num = '4439200021199871';
+  navigator.clipboard?.writeText(num).catch(()=>{});
+  const msg = document.getElementById('copiedMsg');
+  msg.classList.add('show');
+  setTimeout(()=>msg.classList.remove('show'), 2000);
+}
+async function load(){if(!id){
+  document.querySelector('.app').innerHTML=`<div class="no-id-screen"><div class="icon">🔒</div><h2>Личный кабинет</h2><p>Эта страница открывается по персональной ссылке, которую отправляет специалист. Обратитесь к Акмалу для получения доступа.</p></div>`;
+  return;
+}const p=await sb.from('patients').select('*').eq('id',id).maybeSingle();if(p.error){err(p.error.message);return}if(!p.data){patientInfo.textContent='Пациент не найден или доступ закрыт.';diagnostics.textContent='';return}patientInfo.innerHTML='<b>'+esc(p.data.full_name)+'</b><br>'+esc(p.data.phone||'');const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});if(d.error)err(d.error.message);renderDiags(d.data||[]);const m=await sb.from('messages').select('*').eq('patient_id',id).order('created_at',{ascending:true});if(m.error)err(m.error.message);renderMsgs(m.data||[])}
 function renderDiags(arr){diagnostics.innerHTML=arr.map(x=>{const r=x.result_json||{};const rows=buildRows(r);const c=countRows(rows);const tableRows=rows.map(y=>`<tr><td>${y.id}</td><td>${esc(y.organ)}</td><td>${esc(y.side)}</td><td>${esc(y.point)}</td><td>${esc(fmtTime(y.time))}</td><td><span class="pill ${y.state.className}">${esc(y.state.label)}</span></td></tr>`).join('');return `<div class="diag" onclick="toggleDiag(this)"><div class="diag-head"><div><b>${new Date(x.created_at).toLocaleString()}</b><div class="mut">${esc(r.patientName||r.patient||'Диагностика Акабане')}</div></div><div class="chev">⌄</div></div><div><span class="pill red">Избыток ${c.ex} (${pct(c.ex)}%)</span><span class="pill green">Норма ${c.nm} (${pct(c.nm)}%)</span><span class="pill blue">Недостаток ${c.df} (${pct(c.df)}%)</span><span class="pill orange">Выраженный ${c.sdf} (${pct(c.sdf)}%)</span>${c.un?`<span class="pill gray">Не измерено ${c.un}</span>`:''}</div><div class="diag-details">${mainPicture(c)}<div class="section-title">Итог</div><div class="mut">Избыток ${c.ex} (${pct(c.ex)}%), Норма ${c.nm} (${pct(c.nm)}%), Недостаток ${c.df} (${pct(c.df)}%), Выраженный недостаток ${c.sdf} (${pct(c.sdf)}%).</div>${interpretation(rows,c)}${recommendations(rows,c)}${asymmetry(rows)}<div class="pdf-actions"><button class="btn" onclick="event.stopPropagation();printReport()">Скачать / сохранить PDF</button><button class="btn btn2" onclick="event.stopPropagation();navigator.clipboard?.writeText(location.href)">Скопировать ссылку</button></div><div class="section-title">Измерения</div><table class="table"><tr><th>№</th><th>Меридиан</th><th>Сторона</th><th>Точка</th><th>Время</th><th>Состояние</th></tr>${tableRows}</table></div></div>`}).join('')||'Диагностик пока нет'}
 function toggleDiag(el){el.classList.toggle('open')}
 function renderMsgs(arr){messages.innerHTML=arr.map(m=>`<div class="msg ${esc(m.author)}"><b>${m.author==='patient'?'Пациент':'Акмал'}</b><div>${esc(m.message)}</div><div class="mut">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="mut">Сообщений пока нет</div>'}
