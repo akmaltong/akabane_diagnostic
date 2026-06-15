@@ -507,30 +507,30 @@ function openPatientCabinet(){
 // DATA
 // ═══════════════════════════════════════════
 const MERIDIANS = [
-  {id:1,  name:"Тай-инь",  organ:"Лёгкие",                      side:"Левая",  min:2, max:4},
-  {id:2,  name:"Тай-инь",  organ:"Лёгкие",                      side:"Правая", min:2, max:4},
-  {id:3,  name:"Ян-мин",   organ:"Толстая кишка",               side:"Левая",  min:2, max:4},
-  {id:4,  name:"Ян-мин",   organ:"Толстая кишка",               side:"Правая", min:2, max:4},
-  {id:5,  name:"Ян-мин",   organ:"Желудок",                     side:"Левая",  min:2, max:4},
-  {id:6,  name:"Ян-мин",   organ:"Желудок",                     side:"Правая", min:2, max:4},
-  {id:7,  name:"Тай-инь",  organ:"Селезёнка/Поджелудочная",    side:"Левая",  min:2, max:4},
-  {id:8,  name:"Тай-инь",  organ:"Селезёнка/Поджелудочная",    side:"Правая", min:2, max:4},
-  {id:9,  name:"Шао-инь",  organ:"Сердце",                      side:"Левая",  min:2, max:4},
-  {id:10, name:"Шао-инь",  organ:"Сердце",                      side:"Правая", min:2, max:4},
-  {id:11, name:"Тай-ян",   organ:"Тонкая кишка",                side:"Левая",  min:2, max:4},
-  {id:12, name:"Тай-ян",   organ:"Тонкая кишка",                side:"Правая", min:2, max:4},
-  {id:13, name:"Тай-ян",   organ:"Мочевой пузырь",              side:"Левая",  min:2, max:4},
-  {id:14, name:"Тай-ян",   organ:"Мочевой пузырь",              side:"Правая", min:2, max:4},
-  {id:15, name:"Шао-инь",  organ:"Почки",                       side:"Левая",  min:2, max:4},
-  {id:16, name:"Шао-инь",  organ:"Почки",                       side:"Правая", min:2, max:4},
-  {id:17, name:"Цзюе-инь", organ:"Перикард",                    side:"Левая",  min:2, max:4},
-  {id:18, name:"Цзюе-инь", organ:"Перикард",                    side:"Правая", min:2, max:4},
-  {id:19, name:"Шао-ян",   organ:"Тройной обогреватель",        side:"Левая",  min:2, max:4},
-  {id:20, name:"Шао-ян",   organ:"Тройной обогреватель",        side:"Правая", min:2, max:4},
-  {id:21, name:"Шао-ян",   organ:"Жёлчный пузырь",              side:"Левая",  min:2, max:4},
-  {id:22, name:"Шао-ян",   organ:"Жёлчный пузырь",              side:"Правая", min:2, max:4},
-  {id:23, name:"Цзюе-инь", organ:"Печень",                      side:"Левая",  min:2, max:4},
-  {id:24, name:"Цзюе-инь", organ:"Печень",                      side:"Правая", min:2, max:4},
+  {id:1,  name:"Тай-инь",  organ:"Лёгкие",                      side:"Левая",  min:5, max:7},
+  {id:2,  name:"Тай-инь",  organ:"Лёгкие",                      side:"Правая", min:5, max:7},
+  {id:3,  name:"Ян-мин",   organ:"Толстая кишка",               side:"Левая",  min:5, max:7},
+  {id:4,  name:"Ян-мин",   organ:"Толстая кишка",               side:"Правая", min:5, max:7},
+  {id:5,  name:"Ян-мин",   organ:"Желудок",                     side:"Левая",  min:5, max:7},
+  {id:6,  name:"Ян-мин",   organ:"Желудок",                     side:"Правая", min:5, max:7},
+  {id:7,  name:"Тай-инь",  organ:"Селезёнка/Поджелудочная",    side:"Левая",  min:5, max:7},
+  {id:8,  name:"Тай-инь",  organ:"Селезёнка/Поджелудочная",    side:"Правая", min:5, max:7},
+  {id:9,  name:"Шао-инь",  organ:"Сердце",                      side:"Левая",  min:5, max:7},
+  {id:10, name:"Шао-инь",  organ:"Сердце",                      side:"Правая", min:5, max:7},
+  {id:11, name:"Тай-ян",   organ:"Тонкая кишка",                side:"Левая",  min:5, max:7},
+  {id:12, name:"Тай-ян",   organ:"Тонкая кишка",                side:"Правая", min:5, max:7},
+  {id:13, name:"Тай-ян",   organ:"Мочевой пузырь",              side:"Левая",  min:5, max:7},
+  {id:14, name:"Тай-ян",   organ:"Мочевой пузырь",              side:"Правая", min:5, max:7},
+  {id:15, name:"Шао-инь",  organ:"Почки",                       side:"Левая",  min:5, max:7},
+  {id:16, name:"Шао-инь",  organ:"Почки",                       side:"Правая", min:5, max:7},
+  {id:17, name:"Цзюе-инь", organ:"Перикард",                    side:"Левая",  min:5, max:7},
+  {id:18, name:"Цзюе-инь", organ:"Перикард",                    side:"Правая", min:5, max:7},
+  {id:19, name:"Шао-ян",   organ:"Тройной обогреватель",        side:"Левая",  min:5, max:7},
+  {id:20, name:"Шао-ян",   organ:"Тройной обогреватель",        side:"Правая", min:5, max:7},
+  {id:21, name:"Шао-ян",   organ:"Жёлчный пузырь",              side:"Левая",  min:5, max:7},
+  {id:22, name:"Шао-ян",   organ:"Жёлчный пузырь",              side:"Правая", min:5, max:7},
+  {id:23, name:"Цзюе-инь", organ:"Печень",                      side:"Левая",  min:5, max:7},
+  {id:24, name:"Цзюе-инь", organ:"Печень",                      side:"Правая", min:5, max:7},
 ];
 
 // Embedded photo atlas — one image is used for left and right side
@@ -1113,15 +1113,16 @@ function finishTest() {
 }
 
 function analyzeResults(results) {
-  const excess = [], deficiency = [];
+  const excess = [], deficiency = [], severe = [];
   for (const r of results) {
     const m = MERIDIANS.find(x => x.id === r.meridian_id);
     if (!m) continue;
     const label = m.organ + ' (' + m.side + ')';
-    if (r.reaction_time < m.min) excess.push(label);
-    else if (r.reaction_time > m.max) deficiency.push(label);
+    if (r.reaction_time <= 4) excess.push(label);
+    else if (r.reaction_time >= 14) severe.push(label);
+    else if (r.reaction_time >= 8) deficiency.push(label);
   }
-  return { excess, deficiency };
+  return { excess, deficiency, severe };
 }
 
 function showLastResults() {
@@ -1138,8 +1139,9 @@ function showLastResults() {
 
   const ex = s.analysis.excess || [];
   const def = s.analysis.deficiency || [];
-  const normal = Math.max(0, (s.results || []).length - ex.length - def.length);
-  const totalDisbalance = ex.length + def.length;
+  const sev = s.analysis.severe || [];
+  const normal = Math.max(0, (s.results || []).length - ex.length - def.length - sev.length);
+  const totalDisbalance = ex.length + def.length + sev.length;
   const patient = s.patient || 'Без имени';
   const date = s.date || '';
 
@@ -1160,6 +1162,9 @@ function showLastResults() {
         </div>
         <div style="display:flex;justify-content:space-between;gap:8px;background:rgba(82,128,224,.12);border:1px solid rgba(82,128,224,.28);border-radius:8px;padding:7px 9px">
           <span style="font-size:12px;color:#7aadff;font-weight:700">Недостаток</span><b style="color:#7aadff">${def.length}</b>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:8px;background:rgba(255,140,0,.12);border:1px solid rgba(255,140,0,.3);border-radius:8px;padding:7px 10px">
+        <span style="font-size:12px;color:#ffb56a;font-weight:700">Гипернедостаток</span><b style="color:#ffb56a">${sev.length}</b>
         </div>
         <div style="display:flex;justify-content:space-between;gap:8px;background:rgba(82,201,122,.10);border:1px solid rgba(82,201,122,.24);border-radius:8px;padding:7px 9px">
           <span style="font-size:12px;color:var(--green);font-weight:700">Норма</span><b style="color:var(--green)">${normal}</b>
@@ -1184,6 +1189,7 @@ function showResults() {
 function renderResultsContent(session, container) {
   const ex = session.analysis.excess || [];
   const def = session.analysis.deficiency || [];
+  const sev = session.analysis.severe || [];
   let html = `<div style="font-size:13px;color:var(--text3);margin-bottom:12px">${session.patient} · ${session.date}</div>`;
   html += `<div class="btn-row" style="margin-bottom:12px">
     <button class="btn btn-primary" onclick="openPatientReport()">📄 PDF-отчёт</button>
@@ -1200,10 +1206,11 @@ function renderResultsContent(session, container) {
   for (const r of session.results) {
     const m = MERIDIANS.find(x => x.id === r.meridian_id);
     if (!m) continue;
-    const isExcess = r.reaction_time < m.min;
-    const isDef = r.reaction_time > m.max;
-    const cls = isExcess ? 'time-excess' : isDef ? 'time-deficiency' : 'time-normal';
-    const icon = isExcess ? '🔻' : isDef ? '🔺' : '✅';
+    const isExcess = r.reaction_time <= 4;
+    const isSevere = r.reaction_time >= 14;
+    const isDef = !isExcess && !isSevere && r.reaction_time >= 8;
+    const cls = isExcess ? 'time-excess' : (isDef || isSevere) ? 'time-deficiency' : 'time-normal';
+    const icon = isExcess ? '🔻' : isSevere ? '🔻🔻' : isDef ? '🔺' : '✅';
     html += `<div class="measure-row">
       <span class="measure-organ">${r.organ}</span>
       <span class="measure-side">${r.side.slice(0,1)}</span>
@@ -1238,7 +1245,18 @@ function renderResultsContent(session, container) {
     html += `</div></div>`;
   }
 
-  if (!ex.length && !def.length) {
+  if (sev.length) {
+    html += `<div class="results-section">
+    <div class="results-section-title"><span style="color:#ffb56a">🔻🔻</span> Тонизация (Гипернедостаток ≥14)</div>
+    <div class="tags-wrap">`;
+    for (const d of sev) {
+      const organ = d.split(' (')[0];
+      const pt = TREATMENT[organ] ? TREATMENT[organ].tonification : '?';
+      html += renderPointLink(pt, 'tag-orange') + `<span class="tag tag-orange" style="opacity:.75">${organ}</span>`;
+    }
+    html += `</div></div>`;
+  }
+  if (!ex.length && !def.length && !sev.length) {
     html += `<div class="results-section"><div class="tags-wrap"><span class="tag tag-green">✅ Все меридианы в норме</span></div></div>`;
   }
 
@@ -1303,6 +1321,7 @@ function generateProtocol(analysis) {
   let text = '';
   const ex = analysis.excess || [];
   const def = analysis.deficiency || [];
+  const sev = analysis.severe || [];
   if (ex.length) {
     text += 'СЕДАЦИЯ МЕРИДИАНОВ С ИЗБЫТКОМ:\n';
     for (const item of ex) {
@@ -1322,7 +1341,16 @@ function generateProtocol(analysis) {
       text += `• ${organ} (${side}): точка ${pt}\n`;
     }
   }
-  if (!ex.length && !def.length) text = 'Все меридианы в норме. Дисбаланс не выявлен.';
+  if (sev.length) {
+    text += 'ТОНИЗАЦИЯ МЕРИДИАНОВ С ГИПЕРНЕДОСТАТКОМ (≥14):\n';
+    for (const item of sev) {
+      const organ = item.split(' (')[0];
+      const side = item.match(/\(([^)]+)\)/)?.[1] || '';
+      const pt = TREATMENT[organ] ? TREATMENT[organ].tonification : '?';
+      text += `• ${organ} (${side}): точка ${pt}\n`;
+    }
+  }
+  if (!ex.length && !def.length && !sev.length) text = 'Все меридианы в норме. Дисбаланс не выявлен.';
   return text;
 }
 
@@ -1340,17 +1368,19 @@ function generateMD(session) {
   const s = loadSettings();
   const ex = session.analysis.excess || [];
   const def = session.analysis.deficiency || [];
+  const sev = session.analysis.severe || [];
   let md = `# РЕЗУЛЬТАТЫ ДИАГНОСТИКИ ПО МЕТОДУ АКАБАНЕ\n\n`;
   if (s.clinic) md += `- **Клиника:** ${s.clinic}\n`;
   if (s.doctor) md += `- **Врач:** ${s.doctor}\n`;
   md += `- **Пациент:** ${session.patient}\n- **Дата:** ${session.date}\n\n---\n\n## АНАЛИЗ МЕРИДИАНОВ\n\n`;
   if (ex.length) { md += `### 🔻 ИЗБЫТОК (седация)\n`; ex.forEach(e => md += `- ${e}\n`); md += '\n'; }
   if (def.length) { md += `### 🔺 НЕДОСТАТОК (тонизация)\n`; def.forEach(d => md += `- ${d}\n`); md += '\n'; }
-  if (!ex.length && !def.length) md += `### ✅ Норма — дисбаланс не выявлен\n\n`;
+  if (sev.length) { md += `### 🔻🔻 ГИПЕРНЕДОСТАТОК ≥14 (тонизация)\n`; sev.forEach(d => md += `- ${d}\n`); md += '\n'; }
+  if (!ex.length && !def.length && !sev.length) md += `### ✅ Норма — дисбаланс не выявлен\n\n`;
   md += `---\n\n## ИЗМЕРЕНИЯ\n\n`;
   for (const r of session.results) {
     const m = MERIDIANS.find(x=>x.id===r.meridian_id);
-    const status = r.reaction_time < (m?.min||2) ? '⬇ Избыток' : r.reaction_time > (m?.max||4) ? '⬆ Недостаток' : '✅ Норма';
+    const status = r.reaction_time <= 4 ? '⬇ Избыток' : r.reaction_time >= 14 ? '⬇⬇ Гипернедостаток' : r.reaction_time >= 8 ? '⬆ Недостаток' : '✅ Норма';
     md += `- ${r.organ} (${r.side}): **${r.reaction_time.toFixed(1)}с** — ${status}\n`;
   }
   md += `\n---\n\n## ПРОТОКОЛ\n\n${generateProtocol(session.analysis)}\n\n---\n*Сгенерировано автоматически*`;
@@ -1608,6 +1638,11 @@ function getSessionTherapyItems(session) {
     const side = item.match(/\(([^)]+)\)/)?.[1] || '';
     push('Тонизация', organ, side, TREATMENT[organ]?.tonification);
   }
+  for (const item of (session.analysis.severe || [])) {
+    const organ = item.split(' (')[0];
+    const side = item.match(/\(([^)]+)\)/)?.[1] || '';
+    push('Тонизация', organ, side, TREATMENT[organ]?.tonification);
+  }
   return items;
 }
 
@@ -1678,6 +1713,7 @@ function reportChartDataURL(session) {
 function generatePatientPlainText(session) {
   const ex = session.analysis.excess || [];
   const def = session.analysis.deficiency || [];
+  const sev = session.analysis.severe || [];
   const therapy = getSessionTherapyItems(session);
   const sed = [...new Set(therapy.filter(x=>x.kind==='Седация').map(x=>x.point))];
   const ton = [...new Set(therapy.filter(x=>x.kind==='Тонизация').map(x=>x.point))];
@@ -1763,10 +1799,12 @@ function renderHistory() {
   el.innerHTML = filtered.map(s => {
     const ex = (s.analysis.excess||[]).length;
     const def = (s.analysis.deficiency||[]).length;
+    const sev = (s.analysis.severe||[]).length;
     const tagsHtml = [
       ex ? `<span class="tag tag-red">⬇ Избыток: ${ex}</span>` : '',
       def ? `<span class="tag tag-blue">⬆ Недостаток: ${def}</span>` : '',
-      (!ex && !def) ? `<span class="tag tag-green">✅ Норма</span>` : ''
+      sev ? `<span class="tag tag-orange">⬇⬇ Гипернедостаток: ${sev}</span>` : '',
+      (!ex && !def && !sev) ? `<span class="tag tag-green">✅ Норма</span>` : ''
     ].join('');
     return `<div class="history-item" onclick="openHistorySession(${s.id})">
       <div class="history-name">${s.patient}</div>
