@@ -363,7 +363,7 @@ async function sendMsg(){
   if(!text && !f){err('Введите сообщение или прикрепите файл');return;}
   try{
     const uploaded=await uploadFile(f);
-    const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text,...uploaded});
+    const r=await sb.from('messages').insert({patient_id:id,author:'patient',message:text||'📎 Файл',...uploaded});
     if(r.error) throw r.error;
     document.getElementById('msg').value='';
     document.getElementById('file').value='';
