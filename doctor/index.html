@@ -1771,9 +1771,10 @@ function reportChartDataURL(session) {
 }
 
 function generatePatientPlainText(session) {
-  const ex = session.analysis.excess || [];
-  const def = session.analysis.deficiency || [];
-  const sev = session.analysis.severe || [];
+  const toLabel = e => typeof e === 'string' ? e : (e && (e.label || e.organ) ? (e.label || e.organ + (e.side ? ' (' + e.side + ')' : '')) : String(e || ''));
+  const ex = (session.analysis.excess || []).map(toLabel);
+  const def = (session.analysis.deficiency || []).map(toLabel);
+  const sev = (session.analysis.severe || []).map(toLabel);
   const therapy = getSessionTherapyItems(session);
   const sed = [...new Set(therapy.filter(x=>x.kind==='Седация').map(x=>x.point))];
   const ton = [...new Set(therapy.filter(x=>x.kind==='Тонизация').map(x=>x.point))];
