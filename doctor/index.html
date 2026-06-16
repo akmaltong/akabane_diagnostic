@@ -282,8 +282,8 @@ async function loadCloudHistory(patientId) {
       if (!session.date && diag.created_at) session.date = new Date(diag.created_at).toLocaleString('ru-RU');
       if (!session.patient && window.currentAkabanePatient) session.patient = window.currentAkabanePatient.name || 'Без имени';
       if (!session.patientId) session.patientId = diag.patient_id || patientId;
-      if (!session.analysis) session.analysis = analyzeResults(session.results || []);
       if (!session.results) session.results = [];
+      session.analysis = (session.results.length > 0) ? analyzeResults(session.results) : (session.analysis || { excess: [], deficiency: [], severe: [] });
       const exists = local.some(s => s.id === session.id);
       if (!exists) { local.push(session); added++; }
     }
@@ -1221,9 +1221,10 @@ function showResults() {
 }
 
 function renderResultsContent(session, container) {
-  const ex = session.analysis.excess || [];
-  const def = session.analysis.deficiency || [];
-  const sev = session.analysis.severe || [];
+  const toLabel = e => typeof e === 'string' ? e : (e && (e.label || e.organ || e.name) ? (e.label || e.organ + (e.side ? ' (' + e.side + ')' : '')) : String(e || ''));
+  const ex = (session.analysis.excess || []).map(toLabel);
+  const def = (session.analysis.deficiency || []).map(toLabel);
+  const sev = (session.analysis.severe || []).map(toLabel);
   let html = `<div style="font-size:13px;color:var(--text3);margin-bottom:12px">${session.patient} · ${session.date}</div>`;
   html += `<div class="btn-row" style="margin-bottom:12px">
     <button class="btn btn-primary" onclick="openPatientReport()">📄 PDF-отчёт</button>
