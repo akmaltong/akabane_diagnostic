@@ -405,8 +405,7 @@ load();
 // Realtime — сообщения от врача и диагностики появляются мгновенно
 try{
   if(id){
-    const sbRT=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-    sbRT.channel('patient-rt-'+id)
+    sb.channel('patient-rt-'+id)
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'patient_id=eq.'+id},()=>load())
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'diagnostics',filter:'patient_id=eq.'+id},()=>load())
       .subscribe();
