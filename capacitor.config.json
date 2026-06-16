@@ -1,0 +1,12 @@
+{
+  "appId": "com.akmal.akabane",
+  "appName": "Акабане",
+  "webDir": "cap-web",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "minWebViewVersion": 60
+  }
+}
