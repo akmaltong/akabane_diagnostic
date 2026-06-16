@@ -1155,7 +1155,10 @@ function analyzeResults(results) {
 }
 
 function patientHistory() {
-  const all = loadHistory();
+  const all = loadHistory().map(s => {
+    if (s.results && s.results.length > 0) s.analysis = analyzeResults(s.results);
+    return s;
+  });
   const pid = window.currentAkabanePatient && window.currentAkabanePatient.id;
   return pid ? all.filter(s => s.patientId === pid) : all;
 }
