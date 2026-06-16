@@ -233,6 +233,7 @@ async function initPatientFromUrl() {
     window.currentAkabanePatient = { id: pid || (pname ? upsertLocalPatient(pname).id : ''), name: pname || 'Без имени' };
     if (pid && pname) bindLocalPatientId(pname, pid);
     if (pname) toast('Пациент выбран: ' + pname);
+    if (pid) await loadCloudHistory(pid);
   }
 }
 async function ensureCloudPatient(name) {
@@ -265,6 +266,33 @@ async function saveSessionToCloud(session) {
   try {
     await akabaneSupabase.from('diagnostics').insert({ patient_id: session.patientId, result_json: session });
   } catch(e) { console.warn('Supabase diagnostic save failed:', e); }
+}
+async function loadCloudHistory(patientId) {
+  if (!akabaneSupabase || !patientId) return;
+  try {
+    const r = await akabaneSupabase.from('diagnostics').select('id,created_at,result_json').eq('patient_id', patientId).order('created_at', {ascending: false});
+    if (r.error || !r.data || !r.data.length) return;
+    const local = loadHistory();
+    let added = 0;
+    for (const diag of r.data) {
+      let session = diag.result_json;
+      if (!session) continue;
+      if (!session.id) session.id = diag.id;
+      if (!session.date && diag.created_at) session.date = new Date(diag.created_at).toLocaleString('ru-RU');
+      if (!session.patient && window.currentAkabanePatient) session.patient = window.currentAkabanePatient.name || 'Без имени';
+      if (!session.patientId) session.patientId = patientId;
+      if (!session.analysis) session.analysis = analyzeResults(session.results || []);
+      if (!session.results) session.results = [];
+      const exists = local.some(s => s.id === session.id);
+      if (!exists) { local.push(session); added++; }
+    }
+    if (added > 0) {
+      local.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      saveHistory(local);
+      showLastResults();
+      toast(added + ' диагностик загружено из облака');
+    }
+  } catch(e) { console.warn('Cloud history load failed:', e); }
 }
 function openCRM(){ window.location.href = '../crm/'; }
 function openPatientCabinet(){
