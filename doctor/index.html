@@ -1760,6 +1760,19 @@ function generatePatientPlainText(session) {
   return `ДИАГНОСТИКА АКАБАНЕ\n\nПациент: ${session.patient}\nДата: ${session.date}\n\nОБЩАЯ КАРТИНА\nИзбыток: ${ex.length ? ex.join(', ') : 'не выявлен'}\nНедостаток: ${def.length ? def.join(', ') : 'не выявлен'}\n\nПРОТОКОЛ\nСедация: ${sed.length ? sed.join(', ') : 'не требуется'}\nТонизация: ${ton.length ? ton.join(', ') : 'не требуется'}\n\nРекомендация: курс коррекции с повторной диагностикой в динамике.\n\nАкмал Тонг`;
 }
 
+function sharePatientSummary() {
+  const session = currentReportSession || getActiveSession();
+  if (!session) { toast('Нет данных'); return; }
+  const text = generatePatientPlainText(session);
+  if (navigator.share) {
+    navigator.share({ title: 'Результаты диагностики', text }).catch(() => {});
+  } else if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast('Текст скопирован в буфер')).catch(() => { downloadText(text, `akabane_patient_${Date.now()}.txt`); toast('Текст скачан'); });
+  } else {
+    downloadText(text, `akabane_patient_${Date.now()}.txt`); toast('Текст скачан');
+  }
+}
+
 function copyPatientSummary() {
   const session = currentReportSession || getActiveSession();
   if (!session) { toast('Нет данных'); return; }
