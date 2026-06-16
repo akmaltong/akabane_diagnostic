@@ -9,6 +9,7 @@ on:
       - 'shared/**'
       - 'assets/**'
       - 'capacitor.config.json'
+      - '.github/workflows/build-apk.yml'
 
 jobs:
   build:
@@ -37,24 +38,39 @@ jobs:
 
       - name: Prepare web assets
         run: |
+          rm -rf cap-web
           mkdir -p cap-web/shared
 
-          # Copy doctor app as root index
+          # Copy doctor app as root page
           cp doctor/index.html cap-web/index.html
 
-          # Copy shared scripts
-          cp shared/doctor-patient-loader.js cap-web/shared/
+          # Copy shared scripts (without ?v=3 query string)
+          cp shared/doctor-patient-loader.js cap-web/shared/doctor-patient-loader.js
 
-          # Fix relative path: ../shared/ -> shared/
+          # Fix: ../shared/doctor-patient-loader.js?v=3  →  shared/doctor-patient-loader.js
+          sed -i 's|\.\./shared/doctor-patient-loader\.js?v=[0-9]*|shared/doctor-patient-loader.js|g' cap-web/index.html
+          # Fallback: any remaining ../shared/ references
           sed -i 's|\.\./shared/|shared/|g' cap-web/index.html
 
           # Download Supabase JS for offline use
           curl -sL "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" \
             -o cap-web/supabase.min.js
 
-          # Replace CDN reference with local file
-          sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|supabase.min.js|g' \
+          # Replace CDN reference with local file (use ./ prefix for clarity)
+          sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|./supabase.min.js|g' \
             cap-web/index.html
+
+          # Remove PWA service worker registration (not needed in APK)
+          sed -i "s|if ('serviceWorker' in navigator)|if (false)|g" cap-web/index.html
+
+          # Verify paths are correct
+          echo "=== Script tags in cap-web/index.html ==="
+          grep -n "<script" cap-web/index.html | tail -10
+          echo "=== Files in cap-web ==="
+          find cap-web -type f | sort
+
+      - name: Init Capacitor
+        run: npx cap init Akabane com.akmal.akabane --web-dir cap-web
 
       - name: Add Android platform
         run: npx cap add android
