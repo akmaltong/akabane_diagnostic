@@ -8,6 +8,9 @@ on:
       - 'doctor/**'
       - 'shared/**'
       - 'assets/**'
+      - 'crm/**'
+      - 'patient/**'
+      - 'index.html'
       - 'capacitor.config.json'
       - '.github/workflows/build-apk.yml'
 
@@ -39,38 +42,46 @@ jobs:
       - name: Prepare web assets
         run: |
           rm -rf cap-web
-          mkdir -p cap-web/shared
+          mkdir -p cap-web
 
-          # Copy doctor app as root page
-          cp doctor/index.html cap-web/index.html
+          # Copy full project structure so all links work
+          cp index.html cap-web/index.html
+          cp -r assets/ cap-web/assets/
+          cp -r shared/ cap-web/shared/
+          cp -r doctor/ cap-web/doctor/
+          cp -r crm/ cap-web/crm/
+          cp -r patient/ cap-web/patient/
 
-          # Copy shared scripts (without ?v=3 query string)
-          cp shared/doctor-patient-loader.js cap-web/shared/doctor-patient-loader.js
-
-          # Fix: ../shared/doctor-patient-loader.js?v=3  →  shared/doctor-patient-loader.js
-          sed -i 's|\.\./shared/doctor-patient-loader\.js?v=[0-9]*|shared/doctor-patient-loader.js|g' cap-web/index.html
-          # Fallback: any remaining ../shared/ references
-          sed -i 's|\.\./shared/|shared/|g' cap-web/index.html
-
-          # Download Supabase JS for offline use
+          # Download Supabase JS once for offline use
           curl -sL "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" \
             -o cap-web/supabase.min.js
 
-          # Replace CDN reference with local file (use ./ prefix for clarity)
-          sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|./supabase.min.js|g' \
-            cap-web/index.html
+          # Replace CDN references with local file in all HTML pages
+          # From doctor/ subdir: ../supabase.min.js
+          sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|../supabase.min.js|g' \
+            cap-web/doctor/index.html
+          sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|../supabase.min.js|g' \
+            cap-web/crm/index.html
+          sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|../supabase.min.js|g' \
+            cap-web/patient/index.html
 
-          # Remove PWA service worker registration (not needed in APK)
-          sed -i "s|if ('serviceWorker' in navigator)|if (false)|g" cap-web/index.html
+          # Fix query string on shared script (breaks WebView file loading)
+          sed -i 's|shared/doctor-patient-loader\.js?v=[0-9]*|shared/doctor-patient-loader.js|g' \
+            cap-web/doctor/index.html
+          sed -i 's|\.\./shared/doctor-patient-loader\.js?v=[0-9]*|../shared/doctor-patient-loader.js|g' \
+            cap-web/doctor/index.html
 
-          # Split heavy data (4MB) into separate files for fast startup
+          # Disable PWA service worker (not needed in APK)
+          sed -i "s|if ('serviceWorker' in navigator)|if (false)|g" cap-web/doctor/index.html
+
+          # Extract heavy inline data from doctor page to separate files (4MB → 400KB)
           python3 << 'PYEOF'
-          import re, os
+          import os
 
-          with open('cap-web/index.html', 'r', encoding='utf-8') as f:
+          with open('cap-web/doctor/index.html', 'r', encoding='utf-8') as f:
               lines = f.readlines()
 
-          # --- 1. Extract ORGAN_IMAGES base64 block (lines starting with 'const ORGAN_IMAGES') ---
+          # Extract ORGAN_IMAGES block (multi-line, ~2.5MB base64)
           organ_start = None
           organ_end = None
           for i, line in enumerate(lines):
@@ -83,43 +94,40 @@ jobs:
 
           if organ_start is not None and organ_end is not None:
               organ_block = ''.join(lines[organ_start:organ_end+1])
-              with open('cap-web/organ-images.js', 'w', encoding='utf-8') as f:
+              with open('cap-web/doctor/organ-images.js', 'w', encoding='utf-8') as f:
                   f.write(organ_block)
-              # Replace block with empty object + comment
-              lines[organ_start] = 'const ORGAN_IMAGES = {}; /* loaded from organ-images.js */\n'
+              lines[organ_start] = 'const ORGAN_IMAGES = {};\n'
               for j in range(organ_start+1, organ_end+1):
                   lines[j] = ''
-              print(f'Extracted ORGAN_IMAGES ({organ_end-organ_start+1} lines → organ-images.js)')
+              print(f'Extracted ORGAN_IMAGES ({organ_end-organ_start} lines)')
 
-          # --- 2. Extract THERAPY_ATLAS single-line (the 1.5MB line) ---
+          # Extract THERAPY_ATLAS (single 1.5MB line)
           for i, line in enumerate(lines):
               if line.startswith('const THERAPY_ATLAS'):
-                  with open('cap-web/therapy-atlas.js', 'w', encoding='utf-8') as f:
+                  with open('cap-web/doctor/therapy-atlas.js', 'w', encoding='utf-8') as f:
                       f.write(line)
-                  lines[i] = 'const THERAPY_ATLAS = {}; /* loaded from therapy-atlas.js */\n'
-                  print(f'Extracted THERAPY_ATLAS (line {i+1}, {len(line)//1024}KB → therapy-atlas.js)')
+                  lines[i] = 'const THERAPY_ATLAS = {};\n'
+                  print(f'Extracted THERAPY_ATLAS (line {i+1})')
                   break
 
-          # --- 3. Inject external scripts BEFORE closing </head> ---
+          # Inject external scripts right before the main </head>
           inject = '<script src="organ-images.js"></script>\n<script src="therapy-atlas.js"></script>\n'
           for i, line in enumerate(lines):
               if '</head>' in line:
                   lines[i] = line.replace('</head>', inject + '</head>')
-                  print('Injected external script tags before </head>')
                   break
 
-          with open('cap-web/index.html', 'w', encoding='utf-8') as f:
+          with open('cap-web/doctor/index.html', 'w', encoding='utf-8') as f:
               f.writelines(lines)
 
-          size = os.path.getsize('cap-web/index.html')
-          print(f'Final cap-web/index.html size: {size//1024}KB')
+          size_mb = os.path.getsize('cap-web/doctor/index.html') / 1024 / 1024
+          print(f'doctor/index.html: {size_mb:.2f}MB')
           PYEOF
 
-          # Verify
-          echo "=== Script tags in cap-web/index.html ==="
-          grep -n "<script" cap-web/index.html | tail -10
-          echo "=== Files in cap-web ==="
-          find cap-web -type f | sort
+          echo "=== cap-web structure ==="
+          find cap-web -name "*.html" -o -name "*.js" | grep -v node_modules | sort
+          echo "=== doctor page size ==="
+          wc -c cap-web/doctor/index.html
 
       - name: Init Capacitor
         run: npx cap init Akabane com.akmal.akabane --web-dir cap-web
