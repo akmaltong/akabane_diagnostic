@@ -63,7 +63,59 @@ jobs:
           # Remove PWA service worker registration (not needed in APK)
           sed -i "s|if ('serviceWorker' in navigator)|if (false)|g" cap-web/index.html
 
-          # Verify paths are correct
+          # Split heavy data (4MB) into separate files for fast startup
+          python3 << 'PYEOF'
+          import re, os
+
+          with open('cap-web/index.html', 'r', encoding='utf-8') as f:
+              lines = f.readlines()
+
+          # --- 1. Extract ORGAN_IMAGES base64 block (lines starting with 'const ORGAN_IMAGES') ---
+          organ_start = None
+          organ_end = None
+          for i, line in enumerate(lines):
+              if line.strip().startswith('const ORGAN_IMAGES'):
+                  organ_start = i
+              elif organ_start is not None and organ_end is None:
+                  if line.strip() == '};':
+                      organ_end = i
+                      break
+
+          if organ_start is not None and organ_end is not None:
+              organ_block = ''.join(lines[organ_start:organ_end+1])
+              with open('cap-web/organ-images.js', 'w', encoding='utf-8') as f:
+                  f.write(organ_block)
+              # Replace block with empty object + comment
+              lines[organ_start] = 'const ORGAN_IMAGES = {}; /* loaded from organ-images.js */\n'
+              for j in range(organ_start+1, organ_end+1):
+                  lines[j] = ''
+              print(f'Extracted ORGAN_IMAGES ({organ_end-organ_start+1} lines → organ-images.js)')
+
+          # --- 2. Extract THERAPY_ATLAS single-line (the 1.5MB line) ---
+          for i, line in enumerate(lines):
+              if line.startswith('const THERAPY_ATLAS'):
+                  with open('cap-web/therapy-atlas.js', 'w', encoding='utf-8') as f:
+                      f.write(line)
+                  lines[i] = 'const THERAPY_ATLAS = {}; /* loaded from therapy-atlas.js */\n'
+                  print(f'Extracted THERAPY_ATLAS (line {i+1}, {len(line)//1024}KB → therapy-atlas.js)')
+                  break
+
+          # --- 3. Inject external scripts BEFORE closing </head> ---
+          inject = '<script src="organ-images.js"></script>\n<script src="therapy-atlas.js"></script>\n'
+          for i, line in enumerate(lines):
+              if '</head>' in line:
+                  lines[i] = line.replace('</head>', inject + '</head>')
+                  print('Injected external script tags before </head>')
+                  break
+
+          with open('cap-web/index.html', 'w', encoding='utf-8') as f:
+              f.writelines(lines)
+
+          size = os.path.getsize('cap-web/index.html')
+          print(f'Final cap-web/index.html size: {size//1024}KB')
+          PYEOF
+
+          # Verify
           echo "=== Script tags in cap-web/index.html ==="
           grep -n "<script" cap-web/index.html | tail -10
           echo "=== Files in cap-web ==="
