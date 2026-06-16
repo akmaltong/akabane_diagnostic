@@ -56,6 +56,11 @@ jobs:
           curl -sL "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" \
             -o cap-web/supabase.min.js
 
+          # Fix navigation links: Capacitor WebView doesn't resolve dir/ → dir/index.html
+          sed -i 's|href="crm/"|href="crm/index.html"|g' cap-web/index.html
+          sed -i 's|href="doctor/"|href="doctor/index.html"|g' cap-web/index.html
+          sed -i 's|href="patient/"|href="patient/index.html"|g' cap-web/index.html
+
           # Replace CDN references with local file in all HTML pages
           # From doctor/ subdir: ../supabase.min.js
           sed -i 's|https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2|../supabase.min.js|g' \
@@ -66,8 +71,6 @@ jobs:
             cap-web/patient/index.html
 
           # Fix query string on shared script (breaks WebView file loading)
-          sed -i 's|shared/doctor-patient-loader\.js?v=[0-9]*|shared/doctor-patient-loader.js|g' \
-            cap-web/doctor/index.html
           sed -i 's|\.\./shared/doctor-patient-loader\.js?v=[0-9]*|../shared/doctor-patient-loader.js|g' \
             cap-web/doctor/index.html
 
