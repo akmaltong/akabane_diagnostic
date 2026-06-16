@@ -1504,8 +1504,9 @@ function onImportFile(e) {
 // SEND
 // ═══════════════════════════════════════════
 function openSendModal() {
-  const h = loadHistory();
+  const h = patientHistory();
   if (!h.length) { toast('Нет данных'); return; }
+  currentReportSession = h[0];
   renderSendOptions(h[0]);
   openModal('send-modal');
 }
@@ -1528,7 +1529,7 @@ function renderSendOptions(session) {
   html += `<div class="send-option" onclick="doSendTelegram()">
     <div class="send-icon" style="background:#1a2a3a">✈️</div>
     <div><div class="send-label">Telegram</div>
-    <div class="send-sub ${tgOk?'':'notconfigured'}">${tgOk?'Chat: '+s.tgChatId:'Не настроен — введите Token и Chat ID в настройках'}</div></div>
+    <div class="send-sub ${tgOk?'':'notconfigured'}">${tgOk?'Bot → Chat: '+s.tgChatId:'Открыть Telegram с текстом'}</div></div>
   </div>`;
   // Email
   const emailOk = s.emailService && s.emailTemplate && s.emailKey;
@@ -1550,10 +1551,20 @@ function renderSendOptions(session) {
 // Telegram
 async function doSendTelegram(session) {
   const s = loadSettings();
-  if (!s.tgToken || !s.tgChatId) { toast('Настройте Telegram в настройках'); return; }
-  const h = loadHistory();
-  const sess = session || h[0];
+  const sess = session || currentReportSession || getActiveSession();
   if (!sess) { toast('Нет данных'); return; }
+  const plainText = generatePatientPlainText(sess);
+  if (!s.tgToken || !s.tgChatId) {
+    // No bot configured — open Telegram share or copy text
+    closeModal('send-modal');
+    if (navigator.share) {
+      navigator.share({ title: 'Диагностика Акабане', text: plainText }).catch(() => {});
+    } else {
+      const tgUrl = 'https://t.me/share/url?url=&text=' + encodeURIComponent(plainText);
+      window.open(tgUrl, '_blank');
+    }
+    return;
+  }
   closeModal('send-modal');
   toast('Отправка в Telegram...');
   const text = `📋 *Диагностика Акабане*\n\n👤 Пациент: ${sess.patient}\n📅 Дата: ${sess.date}\n\n${generateProtocol(sess.analysis).replace(/\*\*/g,'*')}`;
@@ -1572,6 +1583,15 @@ async function doSendTelegram(session) {
 function openEmailModal() {
   closeModal('send-modal');
   const s = loadSettings();
+  const sess = currentReportSession || getActiveSession();
+  if (!s.emailService || !s.emailTemplate || !s.emailKey) {
+    // Fallback: open default mail client
+    const text = sess ? generatePatientPlainText(sess) : '';
+    const subject = encodeURIComponent('Результаты диагностики Акабане' + (sess ? ' — ' + sess.patient : ''));
+    const body = encodeURIComponent(text);
+    window.open('mailto:' + (s.emailTo || '') + '?subject=' + subject + '&body=' + body);
+    return;
+  }
   document.getElementById('email-to-input').value = s.emailTo || '';
   openModal('email-modal');
 }
