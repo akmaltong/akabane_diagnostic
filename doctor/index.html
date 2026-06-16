@@ -1353,10 +1353,11 @@ function drawChart(results) {
 // PROTOCOL
 // ═══════════════════════════════════════════
 function generateProtocol(analysis) {
+  const toLabel = e => typeof e === 'string' ? e : (e && (e.label || e.organ) ? (e.label || e.organ + (e.side ? ' (' + e.side + ')' : '')) : String(e || ''));
   let text = '';
-  const ex = analysis.excess || [];
-  const def = analysis.deficiency || [];
-  const sev = analysis.severe || [];
+  const ex = (analysis.excess || []).map(toLabel);
+  const def = (analysis.deficiency || []).map(toLabel);
+  const sev = (analysis.severe || []).map(toLabel);
   if (ex.length) {
     text += 'СЕДАЦИЯ МЕРИДИАНОВ С ИЗБЫТКОМ:\n';
     for (const item of ex) {
@@ -1663,17 +1664,18 @@ function getSessionTherapyItems(session) {
     seen.add(key);
     items.push({kind, organ, side, point, atlas: THERAPY_ATLAS[point] || null});
   };
-  for (const item of (session.analysis.excess || [])) {
+  const toLabel = e => typeof e === 'string' ? e : (e && (e.label || e.organ) ? (e.label || e.organ + (e.side ? ' (' + e.side + ')' : '')) : String(e || ''));
+  for (const item of (session.analysis.excess || []).map(toLabel)) {
     const organ = item.split(' (')[0];
     const side = item.match(/\(([^)]+)\)/)?.[1] || '';
     push('Седация', organ, side, TREATMENT[organ]?.sedation);
   }
-  for (const item of (session.analysis.deficiency || [])) {
+  for (const item of (session.analysis.deficiency || []).map(toLabel)) {
     const organ = item.split(' (')[0];
     const side = item.match(/\(([^)]+)\)/)?.[1] || '';
     push('Тонизация', organ, side, TREATMENT[organ]?.tonification);
   }
-  for (const item of (session.analysis.severe || [])) {
+  for (const item of (session.analysis.severe || []).map(toLabel)) {
     const organ = item.split(' (')[0];
     const side = item.match(/\(([^)]+)\)/)?.[1] || '';
     push('Тонизация', organ, side, TREATMENT[organ]?.tonification);
