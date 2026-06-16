@@ -233,7 +233,6 @@ async function initPatientFromUrl() {
     window.currentAkabanePatient = { id: pid || (pname ? upsertLocalPatient(pname).id : ''), name: pname || 'Без имени' };
     if (pid && pname) bindLocalPatientId(pname, pid);
     if (pname) toast('Пациент выбран: ' + pname);
-    if (pid) await loadCloudHistory(pid);
   }
 }
 async function ensureCloudPatient(name) {
@@ -268,9 +267,11 @@ async function saveSessionToCloud(session) {
   } catch(e) { console.warn('Supabase diagnostic save failed:', e); }
 }
 async function loadCloudHistory(patientId) {
-  if (!akabaneSupabase || !patientId) return;
+  if (!akabaneSupabase) return;
   try {
-    const r = await akabaneSupabase.from('diagnostics').select('id,created_at,result_json').eq('patient_id', patientId).order('created_at', {ascending: false});
+    let query = akabaneSupabase.from('diagnostics').select('id,created_at,result_json,patient_id').order('created_at', {ascending: false}).limit(50);
+    if (patientId) query = query.eq('patient_id', patientId);
+    const r = await query;
     if (r.error || !r.data || !r.data.length) return;
     const local = loadHistory();
     let added = 0;
@@ -280,7 +281,7 @@ async function loadCloudHistory(patientId) {
       if (!session.id) session.id = diag.id;
       if (!session.date && diag.created_at) session.date = new Date(diag.created_at).toLocaleString('ru-RU');
       if (!session.patient && window.currentAkabanePatient) session.patient = window.currentAkabanePatient.name || 'Без имени';
-      if (!session.patientId) session.patientId = patientId;
+      if (!session.patientId) session.patientId = diag.patient_id || patientId;
       if (!session.analysis) session.analysis = analyzeResults(session.results || []);
       if (!session.results) session.results = [];
       const exists = local.some(s => s.id === session.id);
@@ -1153,8 +1154,13 @@ function analyzeResults(results) {
   return { excess, deficiency, severe };
 }
 
+function patientHistory() {
+  const all = loadHistory();
+  const pid = window.currentAkabanePatient && window.currentAkabanePatient.id;
+  return pid ? all.filter(s => s.patientId === pid) : all;
+}
 function showLastResults() {
-  const h = loadHistory();
+  const h = patientHistory();
   if (!h.length) {
     document.getElementById('results-actions').style.display = 'none';
     document.getElementById('last-results-card').style.display = 'none';
@@ -1208,7 +1214,7 @@ function showLastResults() {
 // RESULTS VIEW
 // ═══════════════════════════════════════════
 function showResults() {
-  const h = loadHistory();
+  const h = patientHistory();
   if (!h.length) { toast('Нет данных для отображения'); return; }
   renderResultsContent(h[0], document.getElementById('results-content'));
   openModal('results-modal');
@@ -1932,7 +1938,11 @@ function toast(msg) {
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
-initPatientFromUrl().then(() => showLastResults());
+initPatientFromUrl().then(async () => {
+  const pid = window.currentAkabanePatient && window.currentAkabanePatient.id;
+  await loadCloudHistory(pid || null);
+  showLastResults();
+});
 </script>
 
 <script src="../shared/doctor-patient-loader.js?v=3"></script>
