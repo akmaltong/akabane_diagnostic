@@ -220,8 +220,8 @@ function bindLocalPatientId(name, id) {
 }
 async function initPatientFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  const pid = params.get('patient') || params.get('id') || '';
-  let pname = params.get('name') || '';
+  const pid = params.get('patient_id') || params.get('patient') || params.get('id') || '';
+  let pname = (params.get('patient_name') || params.get('name') || '').trim();
   const input = document.getElementById('patient-name');
 
   if (pid && !pname && akabaneSupabase) {
@@ -1007,9 +1007,13 @@ async function startTest() {
   }
 
   const params = new URLSearchParams(window.location.search);
-  const urlPatientId = params.get('patient') || params.get('id') || '';
+  const urlPatientId = params.get('patient_id') || params.get('patient') || params.get('id') || '';
+  const urlPatientName = (params.get('patient_name') || params.get('name') || '').trim();
+  // Only trust URL patient_id when URL name matches input (prevents stale-URL bug
+  // where old patient's URL is in address bar but user has typed a different name).
+  const urlIsForCurrentPatient = !urlPatientName || urlPatientName === currentPatient;
 
-  if (urlPatientId) {
+  if (urlPatientId && urlIsForCurrentPatient) {
     window.currentAkabanePatient = { id: urlPatientId, name: currentPatient };
     bindLocalPatientId(currentPatient, urlPatientId);
   } else if (!window.currentAkabanePatient || window.currentAkabanePatient.name !== currentPatient) {

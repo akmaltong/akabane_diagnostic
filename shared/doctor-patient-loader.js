@@ -83,6 +83,10 @@ doctor-patient-loader.js v3 HARD FIX
     window.selectedPatientId = patient.id || '';
     window.patientId = patient.id || '';
     window.patientName = patient.full_name || '';
+    // Keep doctor page's primary tracking variable in sync
+    if(patient.id || patient.full_name){
+      window.currentAkabanePatient = {id: patient.id || '', name: patient.full_name || patient.name || ''};
+    }
   }
 
   function findPatientInput(){
