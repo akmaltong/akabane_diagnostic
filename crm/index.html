@@ -3,78 +3,829 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Akabane CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{margin:0;background:#0d0d14;color:#e8e8f0;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:1100px;margin:auto;padding:18px}.card{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:18px;margin:14px 0}.brand{color:#e0b852;font-weight:900;letter-spacing:.08em}h1,h2{margin:8px 0;font-weight:950}.mut{color:#9696b8;line-height:1.5}input,textarea,select{width:100%;box-sizing:border-box;background:#1a1a2a;border:1px solid #2a2a40;border-radius:14px;color:#fff;padding:13px;margin-top:8px;font:inherit}textarea{min-height:90px}label{font-size:12px;color:#9696b8;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#7c6af7;color:white;border:0;border-radius:14px;padding:14px;margin-top:10px;font-weight:900;text-decoration:none;cursor:pointer}.btn2{background:#1a1a2a;border:1px solid #2a2a40}.btn-danger{background:#411616;border:1px solid #7e2a2a}.btn-gold{background:#3b2b10;border:1px solid rgba(224,184,82,.45);color:#f4d184}.btn-green{background:#12301d;border:1px solid #247548;color:#7be89f}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}.grid5{display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr 1fr;gap:10px}.topbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.stat{background:#10101a;border:1px solid #2a2a40;border-radius:16px;padding:14px}.stat b{font-size:24px}.patient{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px}.patient.overdue{border-color:#7e2a2a}.patient.soon{border-color:#9c7f2c}.patient-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.patient-main{display:flex;gap:12px;align-items:flex-start}.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#3b2b10,#7c6af7);display:flex;align-items:center;justify-content:center;font-weight:950;color:white;flex-shrink:0;border:1px solid rgba(224,184,82,.45)}.badge{display:inline-block;background:#262648;border:1px solid #3a3a68;border-radius:999px;padding:6px 10px;font-size:12px;color:#cfcfff;margin:2px}.unread{background:#3b2112;border-color:#d08a2b;color:#ffcf8a}.overdue-b{background:#411616;border-color:#7e2a2a;color:#ff9b9b}.soon-b{background:#3a321d;border-color:#9c7f2c;color:#ffe18a}.status-new{background:#1d2945;color:#9fc2ff;border-color:#31558c}.status-diagnostic{background:#342445;color:#d7a8ff;border-color:#6d4495}.status-course{background:#1d3b2b;color:#91efb9;border-color:#2b8053}.status-paused{background:#3a321d;color:#ffe18a;border-color:#9c7f2c}.status-completed{background:#12301d;color:#7be89f;border-color:#247548}.status-followup{background:#18343d;color:#84def0;border-color:#2b7480}.inbox-item{background:#1a1a2a;border:1px solid #2a2a40;border-radius:16px;padding:14px;margin-top:10px;border-left:4px solid #e0b852}.chat-box{background:#10101a;border:1px solid #2a2a40;border-radius:16px;padding:14px;max-height:360px;overflow:auto;margin-top:10px}.chat-msg{padding:12px;border-radius:14px;background:#1a1a2a;margin-top:8px}.chat-msg.patient{border-left:3px solid #7c6af7}.chat-msg.doctor{border-left:3px solid #e0b852}.chat-author{font-weight:900}.chat-time{color:#9696b8;font-size:12px;margin-top:4px}.file-link{display:inline-block;margin-top:8px;color:#f4d184;text-decoration:none;border:1px solid rgba(224,184,82,.35);border-radius:10px;padding:7px 10px}.err{background:#351515;border:1px solid #743030;color:#ff9b9b;border-radius:12px;padding:10px;margin:10px 0}.ok{background:#12301d;border:1px solid #247548;color:#7be89f;border-radius:12px;padding:10px;margin:10px 0}.selected{outline:2px solid #7c6af7}.empty{color:#9696b8;padding:18px;text-align:center;border:1px dashed #2a2a40;border-radius:16px;background:#10101a}.section{border-top:1px solid #2a2a40;margin-top:12px;padding-top:12px}.session,.payment{background:#10101a;border:1px solid #2a2a40;border-radius:14px;padding:12px;margin-top:8px}.promo-info{background:#2b1f0a;border:1px solid rgba(224,184,82,.45);color:#f4d184;border-radius:12px;padding:10px 13px;margin-top:8px;font-size:13px;line-height:1.45}.phone-link{color:#d6d6ff;text-decoration:none}@media(max-width:900px){.grid5,.stats{grid-template-columns:1fr 1fr}}@media(max-width:760px){.app{padding:12px}.grid,.grid3,.grid4,.grid5,.topbar,.stats{grid-template-columns:1fr}.patient-head{display:block}.patient-main{margin-bottom:10px}}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}.modal-box{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:22px;width:min(720px,96vw);max-height:92vh;overflow-y:auto}.modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:12px}.modal-close{background:#1a1a2a;border:1px solid #2a2a40;color:#e8e8f0;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0}.summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:12px 0}.summary-tile{border-radius:12px;padding:10px;text-align:center}.summary-tile b{display:block;font-size:22px;font-weight:950}.summary-tile span{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.proto-section{background:#10101a;border:1px solid #2a2a40;border-radius:14px;padding:14px;margin:10px 0}.proto-title{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}.proto-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1e1e30;gap:8px}.proto-row:last-child{border-bottom:0}.proto-organ{color:#e8e8f0;font-size:14px}.proto-point{background:#262648;border:1px solid #3a3a68;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:900;color:#cfcfff;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s}.proto-point:hover{background:#353a6a;border-color:#7c6af7;color:#fff}.pt-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1100;display:flex;align-items:center;justify-content:center;padding:16px}.pt-box{background:#13131f;border:1px solid #2a2a40;border-radius:20px;padding:22px;width:min(560px,95vw);max-height:85vh;overflow-y:auto}.pt-sec{margin-top:10px;font-size:14px;color:#c8c8ee;line-height:1.6;padding-top:10px;border-top:1px solid #1e1e30}.diag-entry{background:#10101a;border:1px solid #2a2a40;border-radius:12px;padding:11px 14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}.diag-entry-info{flex:1;min-width:0}.diag-entry-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.meas-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}.meas-table th{text-align:left;color:#9696b8;font-size:11px;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid #2a2a40}.meas-table td{padding:7px 8px;border-bottom:1px solid #1a1a2a;color:#c8c8ee}@media(max-width:600px){.summary-grid{grid-template-columns:1fr 1fr}}.patient-hdr{cursor:pointer;user-select:none;-webkit-user-select:none}.patient-body{display:none}.patient.open>.patient-body{display:block}.toggle-icon{font-size:13px;color:#9696b8;display:inline-block;transition:transform .25s;flex-shrink:0;align-self:center;padding:4px 6px}.patient.open .toggle-icon{transform:rotate(180deg)}
+:root{
+  --bg:#08091a;--bg2:#0c0d20;--surface:#0f1028;--surface2:#161630;
+  --border:#22233c;--border2:#2e2f50;
+  --gold:#c9a84c;--gold-d:rgba(201,168,76,.15);
+  --violet:#6a5ef5;--violet-d:rgba(106,94,245,.15);--violet-h:#7a6ef8;
+  --green:#3db87a;--green-d:rgba(61,184,122,.14);
+  --red:#e05151;--red-d:rgba(224,81,81,.13);
+  --amber:#e0a045;--amber-d:rgba(224,160,69,.14);
+  --text:#e6e6f4;--text2:#9898bc;--text3:#5c5c7e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;font-size:14px;display:flex;flex-direction:column;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:64px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0 14px;gap:4px;flex-shrink:0}
+.sb-logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#6050e0);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:16px;flex-shrink:0;text-decoration:none}
+.nav-btn{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;position:relative;border:1px solid transparent;transition:background .12s;color:var(--text3);user-select:none}
+.nav-btn:hover{background:rgba(255,255,255,.05);color:var(--text2)}
+.nav-btn.active{background:var(--violet-d);border-color:rgba(106,94,245,.3);color:#a0a0f8}
+.nb-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg2);display:none}
+.sb-space{flex:1}
+
+/* LAYOUT */
+.layout{flex:1;display:flex;overflow:hidden}
+.section{display:none;flex:1;overflow:hidden}
+.section.on{display:flex}
+
+/* LIST PANEL */
+.list-panel{width:284px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;background:var(--bg2)}
+.lp-head{padding:13px 14px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0}
+.lp-title{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--text)}
+.lp-count{font-size:12px;color:var(--text3);font-weight:400;margin-left:5px}
+.btn-add{background:var(--violet);color:#fff;border:0;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-add:hover{background:var(--violet-h)}
+.lp-search{margin:9px 12px 0;position:relative;flex-shrink:0}
+.lp-search input{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;color:var(--text);padding:7px 11px 7px 30px;font-size:13px;font-family:'DM Sans',sans-serif}
+.lp-search input::placeholder{color:var(--text3)}
+.lp-search input:focus{outline:0;border-color:var(--violet)}
+.lp-search-ic{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+.chips{display:flex;gap:5px;padding:7px 12px;overflow-x:auto;flex-shrink:0}
+.chips::-webkit-scrollbar{display:none}
+.chip{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .12s}
+.chip:hover{color:var(--text2)}
+.chip.on{background:var(--violet-d);border-color:rgba(106,94,245,.4);color:#a0a0f8}
+.pat-list{flex:1;overflow-y:auto}
+.pat-list::-webkit-scrollbar{width:3px}
+.pat-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.pat-row{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.035);display:flex;gap:10px;align-items:center;cursor:pointer;border-left:2px solid transparent;transition:background .1s}
+.pat-row:hover{background:rgba(255,255,255,.025)}
+.pat-row.sel{background:rgba(106,94,245,.08);border-left-color:var(--violet)}
+.pat-row.overdue:not(.sel){border-left-color:rgba(224,81,81,.4)}
+.p-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#241650,#4838b0);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:#bca8ff;flex-shrink:0}
+.p-av.gold{background:linear-gradient(135deg,#362008,#7a5018);color:#f0d070}
+.p-inf{flex:1;min-width:0}
+.p-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.p-rt{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.sp{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px}
+.sp-new{background:rgba(106,94,245,.15);color:#a0a0f8;border:1px solid rgba(106,94,245,.3)}
+.sp-diagnostic{background:rgba(180,120,255,.12);color:#c090ff;border:1px solid rgba(140,80,220,.3)}
+.sp-course{background:var(--green-d);color:#5dcc90;border:1px solid rgba(61,184,122,.3)}
+.sp-paused{background:var(--amber-d);color:#dba050;border:1px solid rgba(224,160,69,.3)}
+.sp-completed{background:rgba(61,184,122,.08);color:#4daa70;border:1px solid rgba(61,184,122,.2)}
+.sp-followup{background:rgba(61,180,220,.1);color:#4daad0;border:1px solid rgba(61,180,220,.25)}
+.unread-dot{width:7px;height:7px;border-radius:50%;background:var(--amber)}
+.list-empty{padding:28px 16px;text-align:center;color:var(--text3);font-size:13px}
+
+/* DETAIL PANEL */
+.detail-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:8px}
+.detail-empty-ic{font-size:44px;opacity:.2}
+.d-head{padding:13px 18px 11px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:center;flex-shrink:0;background:var(--bg2)}
+.d-av{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#241650,#4838b0);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:#bca8ff;flex-shrink:0;border:1px solid rgba(106,94,245,.3)}
+.d-inf{flex:1;min-width:0}
+.d-name{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--text);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px;font-size:12px;color:var(--text3)}
+.d-meta a{color:var(--text3);text-decoration:none}
+.d-meta a:hover{color:var(--text2)}
+.d-acts{display:flex;gap:7px;flex-shrink:0}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;border:0;white-space:nowrap;transition:opacity .12s}
+.btn:hover{opacity:.85}
+.btn-v{background:var(--violet);color:#fff}
+.btn-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)}
+.btn-s:hover{color:var(--text)}
+.btn-go{background:var(--green-d);color:var(--green);border:1px solid rgba(61,184,122,.3)}
+.btn-au{background:var(--gold-d);color:var(--gold);border:1px solid rgba(201,168,76,.35)}
+.btn-rm{background:var(--red-d);color:var(--red);border:1px solid rgba(224,81,81,.3)}
+.btn-ic{background:var(--surface2);color:var(--text2);border:1px solid var(--border2);width:36px;height:36px;padding:0;border-radius:9px;font-size:16px}
+.btn-ic:hover{color:var(--text)}
+
+/* TABS */
+.d-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);padding:0 14px;flex-shrink:0;overflow-x:auto}
+.d-tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 13px;font-size:12px;font-weight:600;color:var(--text3);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--text2)}
+.tab.on{color:var(--text);border-bottom-color:var(--violet)}
+.tab-body{flex:1;overflow-y:auto;padding:18px 20px}
+.tab-body::-webkit-scrollbar{width:3px}
+.tab-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* STATS ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.stat-v{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.stat-l{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+
+/* SEC LABEL */
+.sec-l{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:9px}
+
+/* CARD (entries) */
+.entry{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 15px;margin-bottom:8px}
+.entry-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.entry-date{font-size:13px;font-weight:600;color:var(--text)}
+.entry-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.entry-note{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5}
+.diag-bgs{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.dbg{font-size:10px;padding:2px 8px;border-radius:5px;font-weight:700}
+.dbg-ex{background:var(--red-d);color:#e08080;border:1px solid rgba(224,81,81,.3)}
+.dbg-def{background:var(--violet-d);color:#a0a0f0;border:1px solid rgba(106,94,245,.3)}
+.dbg-sev{background:var(--amber-d);color:#dba050;border:1px solid rgba(224,160,69,.3)}
+.dbg-ok{background:var(--green-d);color:#5dcc90;border:1px solid rgba(61,184,122,.3)}
+.pay-amt{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold)}
+.promo{background:var(--gold-d);border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:9px 13px;margin-bottom:12px;font-size:13px;color:var(--gold);line-height:1.5}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:100%}
+.chat-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:8px;min-height:0}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.msg{max-width:78%;border-radius:12px;padding:10px 14px;font-size:13px}
+.msg.doctor{align-self:flex-end;background:var(--violet-d);border:1px solid rgba(106,94,245,.25)}
+.msg.patient{align-self:flex-start;background:var(--surface2);border:1px solid var(--border2)}
+.msg-auth{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--text3);margin-bottom:3px}
+.msg-time{font-size:10px;color:var(--text3);margin-top:4px}
+.chat-compose{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:12px 14px;margin-top:10px;flex-shrink:0}
+.chat-compose textarea{width:100%;background:transparent;border:0;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;resize:none;min-height:54px}
+.chat-compose textarea:focus{outline:0}
+.chat-compose textarea::placeholder{color:var(--text3)}
+.compose-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* FIELDS */
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.fg{display:flex;flex-direction:column}
+.fg.full{grid-column:1/-1}
+.fl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.fi,.fsel,.fta{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:9px;color:var(--text);padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif}
+.fta{min-height:76px;resize:vertical}
+.fi:focus,.fsel:focus,.fta:focus{outline:0;border-color:var(--violet)}
+.fi::placeholder,.fta::placeholder{color:var(--text3)}
+.card-acts{display:flex;gap:9px;flex-wrap:wrap}
+
+/* ANALYTICS */
+.analytics-wrap{flex:1;overflow-y:auto;padding:22px}
+.analytics-wrap::-webkit-scrollbar{width:3px}
+.analytics-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.a-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px}
+.a-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+.a-v{font-family:'Rajdhani',sans-serif;font-size:32px;font-weight:700;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.a-l{font-size:11px;color:var(--text3);margin-top:4px}
+.inbox-entry{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin-bottom:9px;border-left:3px solid var(--gold)}
+.inbox-name{font-size:14px;font-weight:600;color:var(--text)}
+.inbox-msg{font-size:13px;color:var(--text2);margin-top:3px}
+.inbox-time{font-size:11px;color:var(--text3);margin-top:3px}
+.file-lnk{display:inline-flex;align-items:center;gap:5px;color:var(--gold);text-decoration:none;border:1px solid rgba(201,168,76,.3);border-radius:7px;padding:4px 10px;font-size:12px;margin-top:5px}
+
+/* MODALS */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:100;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal-bx{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:22px;width:min(540px,96vw);max-height:90vh;overflow-y:auto}
+.modal-bx.wide{width:min(700px,96vw)}
+.modal-bx::-webkit-scrollbar{width:3px}
+.modal-bx::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.modal-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;gap:12px}
+.modal-lbl{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.modal-ttl{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--text)}
+.modal-cl{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-cl:hover{color:var(--text)}
+.modal-ft{display:flex;gap:9px;margin-top:18px}
+
+/* DIAG MODAL */
+.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.sum-tile{border-radius:10px;padding:10px;text-align:center}
+.sum-tile b{display:block;font-size:22px;font-weight:950;font-family:'Rajdhani',sans-serif;line-height:1}
+.sum-tile span{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.proto-sec{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:13px;margin:8px 0}
+.proto-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.proto-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);gap:8px}
+.proto-row:last-child{border-bottom:0}
+.proto-org{color:var(--text);font-size:13px}
+.proto-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:4px 12px;font-size:12px;font-weight:700;color:#a0a0f0;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif}
+.proto-btn:hover{background:var(--violet-d);border-color:rgba(106,94,245,.5);color:#c0c0ff}
+.meas-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.meas-tbl th{text-align:left;color:var(--text3);font-size:10px;text-transform:uppercase;padding:5px 7px;border-bottom:1px solid var(--border)}
+.meas-tbl td{padding:5px 7px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2)}
+
+/* PT MODAL */
+.pt-sec{margin-top:12px}
+.pt-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.pt-body-txt{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* NOTIFY */
+.ntf{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;animation:ntfIn .18s ease;white-space:nowrap;pointer-events:none}
+.ntf.ok{background:var(--green-d);border:1px solid rgba(61,184,122,.4);color:#5dcc90}
+.ntf.err{background:var(--red-d);border:1px solid rgba(224,81,81,.4);color:#e08080}
+@keyframes ntfIn{from{opacity:0;transform:translateX(-50%) translateY(6px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* EMPTY */
+.empty-st{padding:22px;text-align:center;color:var(--text3);font-size:13px;border:1px dashed var(--border2);border-radius:12px;margin:4px 0}
+
+/* OVERVIEW EXTRAS */
+.quick-acts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.notes-blk{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px;font-size:13px;color:var(--text2);line-height:1.6}
+
+/* MOBILE */
+@media(max-width:860px){
+  body{flex-direction:row}
+  .sidebar{width:56px}
+  .list-panel{width:100%;max-width:260px}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .a-stats{grid-template-columns:1fr 1fr}
+  .fields{grid-template-columns:1fr}
+  .sum-grid{grid-template-columns:1fr 1fr}
+  .d-acts .btn-s{display:none}
+}
+@media(max-width:620px){
+  body{flex-direction:column;overflow:auto}
+  .sidebar{width:100%;height:52px;flex-direction:row;padding:0 14px;border-right:0;border-bottom:1px solid var(--border)}
+  .sb-logo{margin-bottom:0;margin-right:10px;width:32px;height:32px}
+  .sb-space{display:none}
+  .layout{flex-direction:column;overflow:visible;flex:none}
+  .section.on{flex-direction:column}
+  .list-panel{width:100%;max-width:100%;max-height:48vh;border-right:0;border-bottom:1px solid var(--border)}
+  .detail-panel{min-height:60vh}
+  .analytics-wrap{padding:14px}
+}
 </style>
 </head>
-<body><div class="app">
-<div class="card"><div class="brand">KUNGFU MAN · AKABANE CRM</div><h1>Пациенты</h1><div class="mut">Диагностика, курс, оплата, следующий визит, чат, файлы и личные кабинеты пациентов.</div><div id="status"></div></div>
-<div class="card"><h2>Аналитика</h2><div id="stats" class="stats"></div></div>
-<div class="card"><h2>Поиск и фильтр</h2><div class="topbar"><input id="searchInput" placeholder="Поиск по имени или телефону" oninput="renderPatients()"><select id="statusFilter" onchange="renderPatients()"><option value="">Все статусы</option><option value="new">Новый</option><option value="diagnostic">Диагностика</option><option value="course">На курсе</option><option value="paused">Пауза</option><option value="completed">Завершил</option><option value="followup">Контроль</option></select><button class="btn btn2" onclick="load()">Обновить</button></div></div>
-<div class="card"><h2>Входящие сообщения</h2><div class="mut">Показываются пациенты, у которых последнее сообщение написал пациент.</div><div id="inbox">Загрузка...</div></div>
-<div class="card"><h2>Чат врача</h2><div id="selectedPatient" class="mut">Выберите пациента из списка или входящих сообщений.</div><div id="chatBox" class="chat-box"><div class="empty">Диалог не выбран</div></div><textarea id="replyText" placeholder="Ответ пациенту"></textarea><input id="doctorFile" type="file"><div class="grid"><button class="btn" onclick="sendDoctorReply()">Отправить ответ</button><button class="btn btn-danger" onclick="clearSelectedChat()">Очистить чат</button></div></div>
-<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleNewPat()"><h2 style="margin:0">Новый пациент</h2><span id="newPatArrow" class="toggle-icon">▼</span></div><div id="newPatBody" style="display:none"><div class="grid"><div><label>ФИО</label><input id="name" placeholder="ФИО пациента"></div><div><label>Телефон</label><input id="phone" placeholder="+992 ..."></div></div><div class="grid"><div><label>Статус</label><select id="newStatus"><option value="new">Новый</option><option value="diagnostic">Диагностика</option><option value="course">На курсе</option><option value="paused">Пауза</option><option value="completed">Завершил</option><option value="followup">Контроль</option></select></div><div><label>Следующий визит</label><input id="newNextVisit" type="datetime-local"></div></div><label>Заметки</label><textarea id="note" placeholder="Жалобы, дата визита, состояние, важные наблюдения"></textarea><button class="btn" onclick="createPatient()">+ Сохранить пациента</button></div></div>
-<div class="card"><div class="patient-head"><h2>Список пациентов</h2><span id="count" class="badge">0 пациентов</span></div><div id="patientsList">Загрузка...</div></div>
-</div>
-<div id="diagModal" class="modal-overlay" style="display:none">
-  <div class="modal-box">
-    <div class="modal-head">
-      <div>
-        <div style="color:#e0b852;font-size:11px;font-weight:900;letter-spacing:.09em;margin-bottom:4px">ДИАГНОСТИКА АКАБАНЕ</div>
-        <b id="modalPatient" style="font-size:16px"></b>
-        <div id="modalDate" style="font-size:13px;color:#9696b8;margin-top:3px"></div>
+<body>
+
+<nav class="sidebar">
+  <a class="sb-logo" href="../" title="На главную">KM</a>
+  <div class="nav-btn active" data-nav="patients" onclick="setNav('patients')" title="Пациенты">👥</div>
+  <div class="nav-btn" data-nav="analytics" onclick="setNav('analytics')" title="Аналитика">📊</div>
+  <div class="nav-btn" data-nav="inbox" onclick="setNav('inbox')" title="Входящие" style="position:relative">
+    💬<span class="nb-dot" id="inboxDot"></span>
+  </div>
+  <div class="sb-space"></div>
+  <div class="nav-btn" onclick="load()" title="Обновить">🔄</div>
+</nav>
+
+<div class="layout">
+
+  <!-- PATIENTS -->
+  <div id="sec-patients" class="section on">
+    <div class="list-panel">
+      <div class="lp-head">
+        <span class="lp-title">Пациенты<span class="lp-count" id="patCount">0</span></span>
+        <button class="btn-add" onclick="openNewPat()">+ Добавить</button>
       </div>
-      <button class="modal-close" onclick="closeDiagModal()">✕</button>
+      <div class="lp-search">
+        <span class="lp-search-ic">🔍</span>
+        <input placeholder="Имя или телефон..." oninput="srchQ=this.value;renderList()">
+      </div>
+      <div class="chips">
+        <div class="chip on" data-f="" onclick="setFilter(this)">Все</div>
+        <div class="chip" data-f="course" onclick="setFilter(this)">На курсе</div>
+        <div class="chip" data-f="new" onclick="setFilter(this)">Новые</div>
+        <div class="chip" data-f="diagnostic" onclick="setFilter(this)">Диагностика</div>
+        <div class="chip" data-f="paused" onclick="setFilter(this)">Пауза</div>
+        <div class="chip" data-f="completed" onclick="setFilter(this)">Завершили</div>
+      </div>
+      <div class="pat-list" id="patRows"></div>
     </div>
-    <div id="modalBody"></div>
+    <div id="detailEl" class="detail-panel">
+      <div class="detail-empty"><div class="detail-empty-ic">👤</div><div>Выберите пациента</div></div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div id="sec-analytics" class="section">
+    <div class="analytics-wrap" id="analyticsEl">Загрузка...</div>
+  </div>
+
+  <!-- INBOX -->
+  <div id="sec-inbox" class="section">
+    <div class="analytics-wrap" id="inboxEl">Загрузка...</div>
+  </div>
+
+</div>
+
+<!-- NEW PATIENT MODAL -->
+<div id="newPatMod" class="modal-ov" style="display:none" onclick="if(event.target===this)closeMod('newPatMod')">
+  <div class="modal-bx">
+    <div class="modal-hd">
+      <div><div class="modal-lbl">АКАБАНЕ CRM</div><div class="modal-ttl">Новый пациент</div></div>
+      <button class="modal-cl" onclick="closeMod('newPatMod')">✕</button>
+    </div>
+    <div class="fields">
+      <div class="fg full"><label class="fl">ФИО *</label><input class="fi" id="np-name" placeholder="Имя Фамилия Отчество"></div>
+      <div class="fg"><label class="fl">Телефон</label><input class="fi" id="np-phone" placeholder="+992 ..."></div>
+      <div class="fg"><label class="fl">Статус</label>
+        <select class="fsel" id="np-status">
+          <option value="new">Новый</option><option value="diagnostic">Диагностика</option><option value="course">На курсе</option>
+        </select>
+      </div>
+      <div class="fg full"><label class="fl">Заметки</label><textarea class="fta" id="np-note" placeholder="Жалобы, состояние..." style="min-height:60px"></textarea></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-v" onclick="createPat()">Сохранить пациента</button>
+      <button class="btn btn-s" onclick="closeMod('newPatMod')">Отмена</button>
+    </div>
   </div>
 </div>
-<div id="ptModal" class="pt-modal" style="display:none">
-  <div class="pt-box">
-    <div class="modal-head">
+
+<!-- DIAG RESULT MODAL -->
+<div id="diagMod" class="modal-ov" style="display:none" onclick="if(event.target===this)closeMod('diagMod')">
+  <div class="modal-bx wide">
+    <div class="modal-hd">
       <div>
-        <div style="color:#e0b852;font-size:11px;font-weight:900;letter-spacing:.09em;margin-bottom:2px">ТОЧКА АКУПУНКТУРЫ</div>
-        <b id="ptTitle" style="font-size:16px">Точка</b>
-        <div id="ptSub" style="font-size:12px;color:#9696b8;margin-top:2px"></div>
+        <div class="modal-lbl">ДИАГНОСТИКА АКАБАНЕ</div>
+        <div class="modal-ttl" id="dm-pat"></div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px" id="dm-date"></div>
       </div>
-      <button class="modal-close" onclick="closePointModal()">✕</button>
+      <button class="modal-cl" onclick="closeMod('diagMod')">✕</button>
     </div>
-    <div id="ptBody"></div>
+    <div id="dm-body"></div>
   </div>
 </div>
+
+<!-- POINT MODAL -->
+<div id="ptMod" class="modal-ov" style="display:none" onclick="if(event.target===this)closeMod('ptMod')">
+  <div class="modal-bx">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-lbl">ТОЧКА АКУПУНКТУРЫ</div>
+        <div class="modal-ttl" id="pt-title">Точка</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px" id="pt-sub"></div>
+      </div>
+      <button class="modal-cl" onclick="closeMod('ptMod')">✕</button>
+    </div>
+    <div id="pt-body"></div>
+  </div>
+</div>
+
 <script>
-const SUPABASE_URL='https://ytalluctuccinghqaotw.supabase.co',SUPABASE_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd',sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const SB_URL='https://ytalluctuccinghqaotw.supabase.co',SB_KEY='sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
 const TREATMENT={"Лёгкие":{sedation:"LU5",tonification:"LU9"},"Толстая кишка":{sedation:"LI2",tonification:"LI11"},"Желудок":{sedation:"ST45",tonification:"ST41"},"Селезёнка/Поджелудочная":{sedation:"SP5",tonification:"SP2"},"Сердце":{sedation:"HT7",tonification:"HT9"},"Тонкая кишка":{sedation:"SI8",tonification:"SI3"},"Мочевой пузырь":{sedation:"BL65",tonification:"BL67"},"Почки":{sedation:"KI1",tonification:"KI7"},"Перикард":{sedation:"PC7",tonification:"PC9"},"Тройной обогреватель":{sedation:"TE10",tonification:"TE23"},"Жёлчный пузырь":{sedation:"GB38",tonification:"GB43"},"Печень":{sedation:"LIV2",tonification:"LIV8"}};
-const ATLAS_MINI={"LU5":{"title":"P5 Чи-цзэ (LU 5)","url":"https://www.eledia.ru/publ/17-1-0-335","location":"На локтевой складке у лучевой стороны сухожилия двуглавой мышцы плеча (рука слегка согнута).","functions":"Нормализует функции лёгких, охлаждает жар лёгких, осаждает аномальное поднятие Ци лёгких. Применяется при кашле, одышке, боли в горле, судорогах у детей."},"LU9":{"title":"P9 Тай-юань (LU 9)","url":"https://www.eledia.ru/publ/17-1-0-34","location":"На ладонной стороне лучезапястной складки, у лучевой стороны лучевой артерии.","functions":"Точка первичной Ци канала лёгких и средоточие сосудов. Нормализует функции лёгких и сосудов, используется при болях в грудной клетке, кашле."},"LI2":{"title":"GI2 Эр-цзянь (L.I. 2)","url":"https://www.eledia.ru/publ/18-1-0-373","location":"На лучевой стороне указательного пальца, во впадине кпереди от пястно-фалангового сустава (кисть слегка согнута).","functions":"Точка-ручей канала толстого кишечника. Применяется при жаре, боли в зубах, покраснении глаз, воспалении слизистой горла."},"LI11":{"title":"GI11 Цюй-чи (L.I. 11)","url":"https://www.eledia.ru/publ/18-1-0-30","location":"У лучевого края локтевой складки при согнутой в локте руке.","functions":"Одна из ключевых точек толстого кишечника. Рассеивает жар и ветер, очищает кровь. Применяется при лихорадке, кожных заболеваниях, гипертонии."},"ST45":{"title":"E45 Ли-дуй (ST 45)","url":"https://www.eledia.ru/publ/19-1-0-19","location":"На наружной стороне II пальца стопы, на 0,1 цуня от угла ногтя.","functions":"Точка-исток канала желудка. Применяется при болях в эпигастрии, вздутии, нарушениях сна, расстройствах психики."},"ST41":{"title":"Е41 Цзе-си (ST 41)","url":"https://www.eledia.ru/publ/19-1-0-447","location":"На тыле стопы в центре поперечной складки голеностопного сустава.","functions":"Нормализует функции желудка, рассеивает жар. Применяется при вздутии живота, запоре, рвоте, отёках."},"SP5":{"title":"RP5 Шан-цю (SP 5)","url":"https://www.eledia.ru/publ/20-1-0-375","location":"Кпереди и книзу от медиальной лодыжки, в углублении между вершиной лодыжки и бугром ладьевидной кости.","functions":"Точка-река канала селезёнки. Применяется при нарушении переваривания, вздутии живота, поносе, желтухе."},"SP2":{"title":"RP2 Да-ду (SP 2)","url":"https://www.eledia.ru/publ/20-1-0-17","location":"Кпереди от плюснефалангового сустава большого пальца стопы, на границе тыльной и подошвенной поверхности.","functions":"Точка-ручей канала селезёнки. Усиливает функцию селезёнки, согревает средний обогреватель. Применяется при боли в эпигастрии, диарее, ознобе."},"HT7":{"title":"C7 Шэнь-мэнь (HE 7)","url":"https://www.eledia.ru/publ/21-1-0-50","location":"У локтевого края проксимальной лучезапястной складки, у лучевого края сухожилия локтевого сгибателя запястья.","functions":"Точка первичной Ци канала сердца. Успокаивает дух Шэнь. Применяется при бессоннице, сердцебиении, тревоге, маниакально-депрессивных состояниях."},"HT9":{"title":"C9 Шао-чун (HE 9)","url":"https://www.eledia.ru/publ/21-1-0-32","location":"На лучевой стороне мизинца, на 0,1 цуня от угла ногтя.","functions":"Точка-исток канала сердца. Применяется при сердцебиении, боли в области сердца, расстройствах сознания, жаре."},"SI8":{"title":"IG8 Сяо-хай (SI 8)","url":"https://www.eledia.ru/publ/22-1-0-463","location":"В углублении между локтевым отростком и медиальным надмыщелком плечевой кости при согнутом локте.","functions":"Точка-устье канала тонкого кишечника. Применяется при болях в руке и плече, головной боли, эпилепсии."},"SI3":{"title":"IG3 Хоу-си (SI 3)","url":"https://www.eledia.ru/publ/22-1-0-417","location":"В углублении кзади от локтевого края V пястно-фалангового сустава, на конце поперечной ладонной складки.","functions":"Связана с сосудом Ду-май. Применяется при боли в шее и спине, эпилепсии, напряжении мышц поясницы, болезнях глаз."},"BL65":{"title":"V65 Шу-гу (BL 65)","url":"https://www.eledia.ru/publ/23-1-0-306","location":"Сзади и книзу от головки V плюсневой кости, на границе тыльной и подошвенной поверхности стопы.","functions":"Точка-ручей канала мочевого пузыря. Применяется при головной боли, ригидности затылка, боли в пояснице, воспалении глаз."},"BL67":{"title":"V67 Чжи-инь (BL 67)","url":"https://www.eledia.ru/publ/23-1-0-395","location":"На наружной стороне V пальца стопы, на 0,1 цуня от угла ногтя.","functions":"Точка-исток канала мочевого пузыря. Применяется при головной боли, заложенности носа, болях в глазах, неправильном положении плода."},"KI1":{"title":"R1 Юн-цюань (KID 1)","url":"https://www.eledia.ru/publ/24-1-0-305","location":"На подошве, между II и III плюсневыми костями, в углублении при поджатии пальцев.","functions":"Точка-исток канала почек. Одна из важнейших точек неотложной помощи: восстанавливает сознание, снижает жар, купирует судороги."},"KI7":{"title":"R7 Фу-лю (KID 7)","url":"https://www.eledia.ru/publ/24-1-0-165","location":"На 2 цуня прямо вверх от точки Тай-си R3, у переднего края пяточного сухожилия.","functions":"Точка-река канала почек. Нормализует обмен воды, укрепляет почки. Применяется при отёках, потливости, болях в пояснице."},"PC7":{"title":"MC7 Да-лин (P 7)","url":"https://www.eledia.ru/publ/25-1-0-59","location":"Посередине лучезапястной складки, между сухожилиями длинной ладонной мышцы и лучевого сгибателя запястья.","functions":"Точка первичной Ци канала перикарда. Успокаивает сердце и дух. Применяется при болях в груди, сердцебиении, тошноте, бессоннице."},"PC9":{"title":"MC9 Чжун-чун (P 9)","url":"https://www.eledia.ru/publ/25-1-0-515","location":"На кончике среднего пальца руки.","functions":"Точка-исток канала перикарда. Применяется при высокой лихорадке, потере сознания, инсульте, болях в груди."},"TE10":{"title":"TR10 Тянь-цзин (TB 10)","url":"https://www.eledia.ru/publ/26-1-0-31","location":"В углублении на 1 цунь выше локтевого отростка при согнутом локте.","functions":"Точка-устье канала Сань-цзяо. Применяется при шуме в ушах, снижении слуха, боли в горле, боли в плече и руке."},"TE23":{"title":"TR23 Сы-чжу-кун (TB 23)","url":"https://www.eledia.ru/publ/26-1-0-531","location":"В углублении у наружного конца брови.","functions":"Локальная точка для лечения болезней глаз и головной боли. Применяется при мигрени, лицевом параличе, болях в надбровье."},"GB38":{"title":"VB38 Ян-фу (GB 38)","url":"https://www.eledia.ru/publ/27-1-0-302","location":"На 4 цуня выше латеральной лодыжки, у переднего края малоберцовой кости.","functions":"Точка-река канала жёлчного пузыря. Охлаждает печень и жёлчный пузырь. Применяется при мигрени, горечи во рту, болях в подреберье."},"GB43":{"title":"VB43 Ся-си (GB 43)","url":"https://www.eledia.ru/publ/27-1-0-381","location":"На тыле стопы, на конце межпальцевой складки между IV и V пальцами.","functions":"Точка-ручей канала жёлчного пузыря. Применяется при головной боли, шуме в ушах, болях в боку, жаре."},"LIV2":{"title":"F2 Син-цзянь (LIV 2)","url":"https://www.eledia.ru/publ/28-1-0-18","location":"На складке между I и II пальцами стопы, кпереди от плюснефаланговых суставов.","functions":"Точка-ручей канала печени. Гасит огонь печени. Применяется при головной боли, раздражительности, болях в подреберье, нарушениях менструального цикла."},"LIV8":{"title":"F8 Цюй-цюань (LIV 8)","url":"https://www.eledia.ru/publ/28-1-0-294","location":"У медиального конца подколенной складки при согнутом колене.","functions":"Точка-устье канала печени. Питает Инь печени, рассеивает сырость-жар. Применяется при болях в колене, импотенции, зуде в паху."}};
-function openPointInfo(pt){const d=ATLAS_MINI[pt];const el=document.getElementById('ptModal');if(!el)return;if(!d){document.getElementById('ptTitle').textContent=pt;document.getElementById('ptSub').textContent='';document.getElementById('ptBody').innerHTML='<div class="mut">Подробная карточка для этой точки не найдена.</div>';el.style.display='flex';return}document.getElementById('ptTitle').textContent=d.title||pt;document.getElementById('ptSub').textContent=pt;let html='';if(d.location)html+='<div><b style="color:#e0b852;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Локализация</b><div class="pt-sec">'+esc(d.location)+'</div></div>';if(d.functions)html+='<div><b style="color:#e0b852;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Функции и показания</b><div class="pt-sec">'+esc(d.functions)+'</div></div>';if(d.url)html+='<div style="margin-top:16px"><a href="'+d.url+'" target="_blank" class="btn btn-gold" style="display:inline-block;padding:10px 18px;text-decoration:none;width:auto;font-size:13px">Полная карточка на eledia.ru →</a></div>';document.getElementById('ptBody').innerHTML=html;el.style.display='flex'}
-function closePointModal(){const el=document.getElementById('ptModal');if(el)el.style.display='none'}
-document.getElementById('diagModal').addEventListener('click',function(e){
-  const btn=e.target.closest('button[data-pt]');
-  if(btn){openPointInfo(btn.dataset.pt);return}
-  if(e.target===this)closeDiagModal();
+const ATLAS_MINI={"LU5":{"title":"P5 Чи-цзэ (LU 5)","url":"https://www.eledia.ru/publ/17-1-0-335","location":"На локтевой складке у лучевой стороны сухожилия двуглавой мышцы плеча.","functions":"Нормализует функции лёгких, охлаждает жар, осаждает аномальное поднятие Ци. Применяется при кашле, одышке, боли в горле."},"LU9":{"title":"P9 Тай-юань (LU 9)","url":"https://www.eledia.ru/publ/17-1-0-34","location":"На ладонной стороне лучезапястной складки, у лучевой стороны лучевой артерии.","functions":"Точка первичной Ци канала лёгких. Нормализует функции лёгких и сосудов."},"LI2":{"title":"GI2 Эр-цзянь (L.I. 2)","url":"https://www.eledia.ru/publ/18-1-0-373","location":"На лучевой стороне указательного пальца, кпереди от пястно-фалангового сустава.","functions":"Точка-ручей канала толстого кишечника. При жаре, боли в зубах, воспалении горла."},"LI11":{"title":"GI11 Цюй-чи (L.I. 11)","url":"https://www.eledia.ru/publ/18-1-0-30","location":"У лучевого края локтевой складки при согнутой в локте руке.","functions":"Рассеивает жар и ветер, очищает кровь. При лихорадке, кожных заболеваниях, гипертонии."},"ST45":{"title":"E45 Ли-дуй (ST 45)","url":"https://www.eledia.ru/publ/19-1-0-19","location":"На наружной стороне II пальца стопы, на 0,1 цуня от угла ногтя.","functions":"Точка-исток канала желудка. При болях в эпигастрии, вздутии, нарушениях сна."},"ST41":{"title":"Е41 Цзе-си (ST 41)","url":"https://www.eledia.ru/publ/19-1-0-447","location":"На тыле стопы в центре поперечной складки голеностопного сустава.","functions":"Нормализует функции желудка, рассеивает жар. При вздутии живота, запоре."},"SP5":{"title":"RP5 Шан-цю (SP 5)","url":"https://www.eledia.ru/publ/20-1-0-375","location":"Кпереди и книзу от медиальной лодыжки.","functions":"Точка-река канала селезёнки. При нарушении переваривания, вздутии живота."},"SP2":{"title":"RP2 Да-ду (SP 2)","url":"https://www.eledia.ru/publ/20-1-0-17","location":"Кпереди от плюснефалангового сустава большого пальца стопы.","functions":"Усиливает функцию селезёнки, согревает средний обогреватель. При диарее, ознобе."},"HT7":{"title":"C7 Шэнь-мэнь (HE 7)","url":"https://www.eledia.ru/publ/21-1-0-50","location":"У локтевого края проксимальной лучезапястной складки.","functions":"Успокаивает дух Шэнь. При бессоннице, сердцебиении, тревоге."},"HT9":{"title":"C9 Шао-чун (HE 9)","url":"https://www.eledia.ru/publ/21-1-0-32","location":"На лучевой стороне мизинца, на 0,1 цуня от угла ногтя.","functions":"Точка-исток канала сердца. При сердцебиении, расстройствах сознания, жаре."},"SI8":{"title":"IG8 Сяо-хай (SI 8)","url":"https://www.eledia.ru/publ/22-1-0-463","location":"В углублении между локтевым отростком и медиальным надмыщелком.","functions":"Точка-устье канала тонкого кишечника. При болях в руке и плече."},"SI3":{"title":"IG3 Хоу-си (SI 3)","url":"https://www.eledia.ru/publ/22-1-0-417","location":"В углублении кзади от V пястно-фалангового сустава.","functions":"Связана с сосудом Ду-май. При боли в шее и спине, эпилепсии."},"BL65":{"title":"V65 Шу-гу (BL 65)","url":"https://www.eledia.ru/publ/23-1-0-306","location":"Сзади и книзу от головки V плюсневой кости.","functions":"Точка-ручей канала мочевого пузыря. При головной боли, ригидности затылка."},"BL67":{"title":"V67 Чжи-инь (BL 67)","url":"https://www.eledia.ru/publ/23-1-0-395","location":"На наружной стороне V пальца стопы, на 0,1 цуня от угла ногтя.","functions":"Точка-исток канала мочевого пузыря. При головной боли, заложенности носа."},"KI1":{"title":"R1 Юн-цюань (KID 1)","url":"https://www.eledia.ru/publ/24-1-0-305","location":"На подошве, между II и III плюсневыми костями.","functions":"Точка-исток канала почек. Восстанавливает сознание, снижает жар, купирует судороги."},"KI7":{"title":"R7 Фу-лю (KID 7)","url":"https://www.eledia.ru/publ/24-1-0-165","location":"На 2 цуня прямо вверх от точки Тай-си R3.","functions":"Нормализует обмен воды, укрепляет почки. При отёках, потливости, болях в пояснице."},"PC7":{"title":"MC7 Да-лин (P 7)","url":"https://www.eledia.ru/publ/25-1-0-59","location":"Посередине лучезапястной складки.","functions":"Точка первичной Ци канала перикарда. При болях в груди, сердцебиении."},"PC9":{"title":"MC9 Чжун-чун (P 9)","url":"https://www.eledia.ru/publ/25-1-0-515","location":"На кончике среднего пальца руки.","functions":"Точка-исток канала перикарда. При высокой лихорадке, потере сознания."},"TE10":{"title":"TR10 Тянь-цзин (TB 10)","url":"https://www.eledia.ru/publ/26-1-0-31","location":"В углублении на 1 цунь выше локтевого отростка при согнутом локте.","functions":"Точка-устье канала Сань-цзяо. При шуме в ушах, боли в горле."},"TE23":{"title":"TR23 Сы-чжу-кун (TB 23)","url":"https://www.eledia.ru/publ/26-1-0-531","location":"В углублении у наружного конца брови.","functions":"Локальная точка для болезней глаз и головной боли, мигрени."},"GB38":{"title":"VB38 Ян-фу (GB 38)","url":"https://www.eledia.ru/publ/27-1-0-302","location":"На 4 цуня выше латеральной лодыжки, у переднего края малоберцовой кости.","functions":"Охлаждает печень и жёлчный пузырь. При мигрени, горечи во рту."},"GB43":{"title":"VB43 Ся-си (GB 43)","url":"https://www.eledia.ru/publ/27-1-0-381","location":"На тыле стопы, между IV и V пальцами.","functions":"Точка-ручей канала жёлчного пузыря. При головной боли, шуме в ушах."},"LIV2":{"title":"F2 Син-цзянь (LIV 2)","url":"https://www.eledia.ru/publ/28-1-0-18","location":"На складке между I и II пальцами стопы.","functions":"Гасит огонь печени. При раздражительности, болях в подреберье."},"LIV8":{"title":"F8 Цюй-цюань (LIV 8)","url":"https://www.eledia.ru/publ/28-1-0-294","location":"У медиального конца подколенной складки при согнутом колене.","functions":"Питает Инь печени. При болях в колене, нарушениях менструального цикла."}};
+
+const SL={'new':'Новый','diagnostic':'Диагностика','course':'На курсе','paused':'Пауза','completed':'Завершил','followup':'Контроль'};
+const SC={'new':'var(--violet)','diagnostic':'#c090ff','course':'var(--green)','paused':'var(--amber)','completed':'#4daa70','followup':'#4daad0'};
+
+let pats=[],msgs=[],sess=[],pays=[],diags=[];
+let selId=null,nav='patients',tab='overview',curDiag=null,srchQ='',filtr='';
+
+function e(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function ini(n){return String(n||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'?'}
+function fdt(v){return v?new Date(v).toLocaleString('ru'):'—'}
+function fdts(v){return v?new Date(v).toLocaleDateString('ru',{day:'numeric',month:'short'}):'—'}
+function toLocal(v){if(!v)return'';const d=new Date(v);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function fromLocal(v){return v?new Date(v).toISOString():null}
+function pHref(p){return String(p||'').replace(/[^\d+]/g,'')}
+function wa(phone){let n=String(phone||'').replace(/[^\d]/g,'');if(n.startsWith('8'))n='992'+n.slice(1);return n?'https://wa.me/'+n:''}
+function vs(p){if(!p.next_visit)return'';const d=new Date(p.next_visit)-Date.now();if(d<0)return'overdue';if(d<86400000)return'soon';return''}
+function gp(id){return pats.find(p=>p.id===id)}
+function pn(id){return gp(id)?.full_name||'Без имени'}
+function pmsg(id){return msgs.filter(m=>m.patient_id===id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}
+function pses(id){return sess.filter(s=>s.patient_id===id).sort((a,b)=>(a.session_number||0)-(b.session_number||0))}
+function ppay(id){return pays.filter(p=>p.patient_id===id).sort((a,b)=>new Date(b.payment_date||b.created_at)-new Date(a.payment_date||a.created_at))}
+function pdiag(id){return diags.filter(d=>d.patient_id===id).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
+function lmsg(id){const a=pmsg(id);return a[a.length-1]||null}
+function unrd(id){const l=lmsg(id);return l&&l.author==='patient'}
+function unrdCnt(){return pats.filter(p=>unrd(p.id)).length}
+function sp(s){s=s||'new';return`<span class="sp sp-${s}">${SL[s]||s}</span>`}
+function doctUrl(id){const p=gp(id);return`../doctor/?patient_id=${encodeURIComponent(id)}&patient_name=${encodeURIComponent(p?.full_name||'')}`}
+function patUrl(id){return`../patient/?id=${encodeURIComponent(id)}`}
+
+function ntf(msg,type='ok'){
+  document.querySelectorAll('.ntf').forEach(n=>n.remove());
+  const el=document.createElement('div');
+  el.className=`ntf ${type}`;el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2600);
+}
+
+function diagCls(t){const n=Number(t);if(!Number.isFinite(n))return null;if(n<=4)return'excess';if(n<=7)return'normal';if(n<=13)return'deficiency';return'severe'}
+function parseDiag(json){
+  let d;try{d=typeof json==='string'?JSON.parse(json):(json||{})}catch(er){d={}}
+  let ex=[],def=[],sev=[];
+  if(d.analysis){ex=d.analysis.excess||[];def=d.analysis.deficiency||[];sev=d.analysis.severe||[]}
+  const raw=d.results||d.measurements||d.rows||d.points||d.data||[];
+  const rows=raw.map((r,i)=>{
+    const t=r.reaction_time!=null?r.reaction_time:r.time!=null?r.time:r.value!=null?r.value:null;
+    const cls=t!==null?diagCls(t):null;
+    const organ=r.organ||r.meridian||r.name||('Точка '+(i+1));
+    const side=r.side||r.hand||'';
+    return{organ,side,t,cls,label:organ+(side?' ('+side+')':'')};
+  });
+  if(!ex.length&&!def.length&&!sev.length&&rows.length){
+    for(const r of rows){if(!r.cls)continue;if(r.cls==='excess')ex.push(r.label);else if(r.cls==='deficiency')def.push(r.label);else if(r.cls==='severe')sev.push(r.label)}
+  }
+  return{ex,def,sev,rows,normal:rows.filter(r=>r.cls==='normal').length};
+}
+
+async function load(keep=false){
+  try{
+    const [p,m,s,py,dg]=await Promise.all([
+      sb.from('patients').select('*').order('created_at',{ascending:false}),
+      sb.from('messages').select('*').order('created_at',{ascending:true}),
+      sb.from('therapy_sessions').select('*').order('created_at',{ascending:true}),
+      sb.from('payments').select('*').order('created_at',{ascending:false}),
+      sb.from('diagnostics').select('id,patient_id,created_at,result_json').order('created_at',{ascending:false}),
+    ]);
+    if(p.error)throw p.error;
+    pats=p.data||[];
+    msgs=m.data||[];
+    sess=(s.error&&String(s.error.message).includes('does not exist'))?[]:s.data||[];
+    pays=(py.error&&String(py.error.message).includes('does not exist'))?[]:py.data||[];
+    diags=(dg.error&&String(dg.error.message).includes('does not exist'))?[]:dg.data||[];
+    if(!keep&&pats.length&&!selId)selId=pats[0].id;
+    render();
+  }catch(er){
+    console.error(er);
+    ntf('Ошибка загрузки: '+er.message,'err');
+  }
+}
+
+function render(){
+  document.title=unrdCnt()?`(${unrdCnt()}) Akabane CRM`:'Akabane CRM';
+  document.getElementById('inboxDot').style.display=unrdCnt()?'block':'none';
+  document.querySelectorAll('.nav-btn[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===nav));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
+  document.getElementById(`sec-${nav}`).classList.add('on');
+  if(nav==='patients'){renderList();renderDetail();}
+  else if(nav==='analytics')renderAnalytics();
+  else if(nav==='inbox')renderInbox();
+}
+
+function renderList(){
+  const q=srchQ.trim().toLowerCase();
+  const list=pats.filter(p=>(!q||`${p.full_name||''} ${p.phone||''}`.toLowerCase().includes(q))&&(!filtr||(p.status||'new')===filtr));
+  document.getElementById('patCount').textContent=list.length;
+  const el=document.getElementById('patRows');
+  if(!list.length){el.innerHTML='<div class="list-empty">Пациентов нет</div>';return}
+  el.innerHTML=list.map(p=>{
+    const u=unrd(p.id),v=vs(p);
+    let sub='';
+    if(p.next_visit){
+      const d=new Date(p.next_visit);
+      sub=v==='overdue'?'⚠ Визит просрочен':v==='soon'?'⏰ Сегодня '+d.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('ru',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+    }else sub='Визит не назначен';
+    return`<div class="pat-row${selId===p.id?' sel':''}${v==='overdue'?' overdue':''}" onclick="selPat('${p.id}')">
+      <div class="p-av">${e(ini(p.full_name))}</div>
+      <div class="p-inf">
+        <div class="p-name">${e(p.full_name||'Без имени')}</div>
+        <div class="p-sub" style="color:${v==='overdue'?'var(--red)':v==='soon'?'var(--amber)':'var(--text3)'}">${e(sub)}</div>
+      </div>
+      <div class="p-rt">${sp(p.status)}${u?'<div class="unread-dot"></div>':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDetail(){
+  const el=document.getElementById('detailEl');
+  if(!selId||!gp(selId)){
+    el.innerHTML='<div class="detail-empty"><div class="detail-empty-ic">👤</div><div>Выберите пациента</div></div>';
+    return;
+  }
+  const p=gp(selId),v=vs(p),waLink=wa(p.phone);
+  const tabs=[
+    {id:'overview',lbl:'Обзор'},
+    {id:'diagnostics',lbl:'Диагностики'},
+    {id:'sessions',lbl:'Сеансы'},
+    {id:'payments',lbl:'Оплата'},
+    {id:'chat',lbl:'Чат'+(unrd(p.id)?' 🔴':'')},
+    {id:'card',lbl:'Карточка'},
+  ];
+  el.innerHTML=`
+    <div class="d-head">
+      <div class="d-av">${e(ini(p.full_name))}</div>
+      <div class="d-inf">
+        <div class="d-name">${e(p.full_name||'Без имени')}</div>
+        <div class="d-meta">
+          ${p.phone?`<a href="tel:${e(pHref(p.phone))}">${e(p.phone)}</a> ·`:''}
+          <span style="color:${SC[p.status||'new']||'var(--text2)'}">${SL[p.status||'new']}</span>
+          ${v==='overdue'?' · <span style="color:var(--red)">Визит просрочен</span>':v==='soon'?' · <span style="color:var(--amber)">Визит сегодня</span>':''}
+        </div>
+      </div>
+      <div class="d-acts">
+        <button class="btn btn-v" onclick="openDiag('${p.id}')">▶ Диагностика</button>
+        <button class="btn btn-s" onclick="openCab('${p.id}')">Кабинет</button>
+        ${waLink?`<a class="btn btn-ic" href="${e(waLink)}" target="_blank" title="WhatsApp">💬</a>`:''}
+        ${p.phone?`<a class="btn btn-ic" href="tel:${e(pHref(p.phone))}" title="Позвонить">📞</a>`:''}
+      </div>
+    </div>
+    <div class="d-tabs">${tabs.map(t=>`<div class="tab${tab===t.id?' on':''}" onclick="setTab('${t.id}')">${t.lbl}</div>`).join('')}</div>
+    <div class="tab-body" id="tabBody"></div>`;
+  renderTab(p);
+}
+
+function renderTab(p){
+  if(!p)p=gp(selId);if(!p)return;
+  const tc=document.getElementById('tabBody');if(!tc)return;
+  const se=pses(p.id),py=ppay(p.id),dg=pdiag(p.id);
+  if(tab==='overview')tc.innerHTML=tabOverview(p,se,py,dg);
+  else if(tab==='diagnostics')tc.innerHTML=tabDiag(dg);
+  else if(tab==='sessions')tc.innerHTML=tabSess(p,se);
+  else if(tab==='payments')tc.innerHTML=tabPay(p,py);
+  else if(tab==='chat'){tc.innerHTML=tabChat(p);scrollChat();}
+  else if(tab==='card')tc.innerHTML=tabCard(p);
+}
+
+function tabOverview(p,se,py,dg){
+  const paid=py.reduce((s,x)=>s+Number(x.amount||0),0)||Number(p.paid_amount||0);
+  const v=vs(p);const ld=dg[0];
+  let dHtml='';
+  if(ld){const r=parseDiag(ld.result_json);dHtml=`<div class="entry" style="margin-bottom:0"><div class="entry-row"><div><div class="entry-date">${fdt(ld.created_at)}</div><div class="diag-bgs">${r.ex.length?`<span class="dbg dbg-ex">🔻 ${r.ex.length}</span>`:''} ${r.def.length?`<span class="dbg dbg-def">🔺 ${r.def.length}</span>`:''} ${r.sev.length?`<span class="dbg dbg-sev">⬇⬇ ${r.sev.length}</span>`:''} ${!r.ex.length&&!r.def.length&&!r.sev.length?`<span class="dbg dbg-ok">✅ Норма</span>`:''}</div></div><button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="openDiagRes('${ld.id}')">Просмотр</button></div></div>`;}
+  return`<div class="stat-row">
+    <div class="stat-tile"><div class="stat-v">${se.length}</div><div class="stat-l">Сеансов</div></div>
+    <div class="stat-tile"><div class="stat-v" style="color:var(--gold)">${paid}</div><div class="stat-l">Оплачено</div></div>
+    <div class="stat-tile"><div class="stat-v" style="color:var(--violet)">${dg.length}</div><div class="stat-l">Диагностик</div></div>
+    <div class="stat-tile"><div class="stat-v" style="font-size:${p.next_visit?'15px':'26px'};color:${v==='overdue'?'var(--red)':v==='soon'?'var(--amber)':'var(--text2)'}">${p.next_visit?fdts(p.next_visit):'—'}</div><div class="stat-l">Следующий визит</div></div>
+  </div>
+  <div class="quick-acts">
+    <button class="btn btn-v" onclick="openDiag('${p.id}')">▶ Диагностика</button>
+    <button class="btn btn-go" onclick="setTab('sessions')">+ Сеанс</button>
+    <button class="btn btn-go" onclick="setTab('payments')">+ Оплата</button>
+    <button class="btn btn-s" onclick="cpLink('${p.id}')">🔗 Ссылка</button>
+    <button class="btn btn-s" onclick="dlCard('${p.id}')">📄 PDF</button>
+  </div>
+  ${ld?`<div class="sec-l">Последняя диагностика</div>${dHtml}<div style="margin-bottom:16px"></div>`:''}
+  ${p.note?`<div class="sec-l">Заметки</div><div class="notes-blk">${e(p.note)}</div>`:''}`;
+}
+
+function tabDiag(dg){
+  if(!dg.length)return'<div class="empty-st">Диагностик пока нет.<br>Нажмите "▶ Диагностика" чтобы начать.</div>';
+  return dg.map(d=>{const r=parseDiag(d.result_json);return`<div class="entry"><div class="entry-row"><div><div class="entry-date">${fdt(d.created_at)}</div><div class="diag-bgs">${r.ex.length?`<span class="dbg dbg-ex">🔻 ${r.ex.length}</span>`:''} ${r.def.length?`<span class="dbg dbg-def">🔺 ${r.def.length}</span>`:''} ${r.sev.length?`<span class="dbg dbg-sev">⬇⬇ ${r.sev.length}</span>`:''} ${!r.ex.length&&!r.def.length&&!r.sev.length?`<span class="dbg dbg-ok">✅ Норма</span>`:''}</div></div><div style="display:flex;gap:6px"><button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="openDiagRes('${d.id}')">Просмотр</button><button class="btn btn-rm" style="font-size:12px;padding:6px 10px" onclick="delDiag('${d.id}')">✕</button></div></div></div>`;}).join('');
+}
+
+function tabSess(p,se){
+  return`<div style="margin-bottom:12px"><button class="btn btn-go" onclick="addSess('${p.id}')">+ Добавить сеанс</button></div>
+  ${se.length?se.map(s=>`<div class="entry"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700">Сеанс ${s.session_number||'—'}</span><span style="font-size:12px;color:var(--text3)">${fdt(s.session_date)}</span></div>${s.note?`<div class="entry-note">${e(s.note)}</div>`:''}</div>`).join(''):'<div class="empty-st">Сеансов пока нет</div>'}`;
+}
+
+function tabPay(p,py){
+  return`<div class="promo">🎁 При оплате 3 сеансов курса — диагностика Акабане бесплатно</div>
+  <div style="margin-bottom:12px"><button class="btn btn-go" onclick="addPay('${p.id}')">+ Добавить оплату</button></div>
+  ${py.length?py.map(x=>`<div class="entry"><div class="pay-amt">${x.amount||0} сомони</div><div class="entry-sub">${e(fdt(x.payment_date||x.created_at))} · ${e(x.method||'manual')}${x.comment?' · '+e(x.comment):''}</div>${x.file_url?`<a class="file-lnk" href="${e(x.file_url)}" target="_blank">📎 ${e(x.file_name||'Файл')}</a>`:''}</div>`).join(''):'<div class="empty-st">Оплат пока нет</div>'}`;
+}
+
+function tabChat(p){
+  const ms=pmsg(p.id);
+  return`<div class="chat-wrap">
+    <div class="chat-msgs" id="chatMsgs">${ms.length?ms.map(m=>`<div class="msg ${e(m.author)}"><div class="msg-auth">${m.author==='patient'?'Пациент':'Акмал'}</div><div>${e(m.message||'')}</div>${m.file_url?`<a class="file-lnk" href="${e(m.file_url)}" target="_blank">📎 ${e(m.file_name||'Файл')}</a>`:''}<div class="msg-time">${fdt(m.created_at)}</div></div>`).join(''):'<div class="empty-st">Сообщений пока нет</div>'}</div>
+    <div class="chat-compose">
+      <textarea id="replyTxt" placeholder="Ответ пациенту..." rows="3"></textarea>
+      <div class="compose-foot">
+        <input type="file" id="chatFile" style="font-size:11px;color:var(--text3);max-width:150px">
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-rm" style="font-size:12px;padding:6px 12px" onclick="clrChat('${p.id}')">Очистить</button>
+          <button class="btn btn-v" style="font-size:12px;padding:6px 14px" onclick="sendRpl('${p.id}')">Отправить</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function scrollChat(){setTimeout(()=>{const m=document.getElementById('chatMsgs');if(m)m.scrollTop=m.scrollHeight;},50)}
+
+function tabCard(p){
+  return`<div class="fields">
+    <div class="fg"><label class="fl">Телефон</label><input class="fi" id="fc-phone" value="${e(p.phone||'')}"></div>
+    <div class="fg"><label class="fl">Статус</label><select class="fsel" id="fc-status">${Object.entries(SL).map(([k,v])=>`<option value="${k}"${(p.status||'new')===k?' selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Следующий визит</label><input class="fi" id="fc-visit" type="datetime-local" value="${e(toLocal(p.next_visit))}"></div>
+    <div class="fg"><label class="fl">Оплачено (сомони)</label><input class="fi" id="fc-paid" type="number" value="${p.paid_amount||0}"></div>
+    <div class="fg full"><label class="fl">Заметки</label><textarea class="fta" id="fc-note">${e(p.note||'')}</textarea></div>
+  </div>
+  <div class="card-acts">
+    <button class="btn btn-au" onclick="saveCard('${p.id}')">Сохранить карточку</button>
+    <button class="btn btn-rm" onclick="delPat('${p.id}')">Удалить пациента</button>
+  </div>`;
+}
+
+function renderAnalytics(){
+  const total=pats.length,course=pats.filter(p=>(p.status||'new')==='course').length,newC=pats.filter(p=>(p.status||'new')==='new').length;
+  const paid=pays.reduce((s,x)=>s+Number(x.amount||0),0)||pats.reduce((s,p)=>s+Number(p.paid_amount||0),0);
+  const ovrd=pats.filter(p=>vs(p)==='overdue').length;
+  const inc=pats.filter(p=>unrd(p.id)).map(p=>({p,l:lmsg(p.id)})).sort((a,b)=>new Date(b.l.created_at)-new Date(a.l.created_at));
+  document.getElementById('analyticsEl').innerHTML=`
+    <div style="font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;margin-bottom:18px">Аналитика</div>
+    <div class="a-stats">
+      <div class="a-stat"><div class="a-v">${total}</div><div class="a-l">Всего пациентов</div></div>
+      <div class="a-stat"><div class="a-v" style="color:var(--green)">${course}</div><div class="a-l">На курсе</div></div>
+      <div class="a-stat"><div class="a-v" style="color:var(--violet)">${newC}</div><div class="a-l">Новые</div></div>
+      <div class="a-stat"><div class="a-v" style="color:var(--gold);font-variant-numeric:tabular-nums">${paid}</div><div class="a-l">Оплат (сомони)</div></div>
+      <div class="a-stat"><div class="a-v" style="color:var(--red)">${ovrd}</div><div class="a-l">Просрочено</div></div>
+    </div>
+    <div class="sec-l">Все пациенты</div>
+    ${pats.map(p=>`<div class="entry" style="cursor:pointer" onclick="goToPat('${p.id}')"><div class="entry-row"><div style="display:flex;gap:10px;align-items:center"><div class="p-av" style="width:30px;height:30px;font-size:10px">${e(ini(p.full_name))}</div><div><div style="font-size:13px;font-weight:600">${e(p.full_name||'Без имени')}</div><div style="font-size:11px;color:var(--text3)">${e(p.phone||'Без телефона')}</div></div></div><div>${sp(p.status)}${vs(p)==='overdue'?'<span class="sp sp-new" style="background:var(--red-d);color:var(--red);border-color:rgba(224,81,81,.3)">Просрочен</span>':''}</div></div></div>`).join('')||'<div class="empty-st">Пациентов нет</div>'}`;
+}
+
+function renderInbox(){
+  const inc=pats.filter(p=>unrd(p.id)).map(p=>({p,l:lmsg(p.id)})).sort((a,b)=>new Date(b.l.created_at)-new Date(a.l.created_at));
+  document.getElementById('inboxEl').innerHTML=`
+    <div style="font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;margin-bottom:18px">Входящие <span style="font-size:14px;color:var(--text3);font-weight:400">${inc.length} непрочитанных</span></div>
+    ${inc.length?inc.map(({p,l})=>`<div class="inbox-entry"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div><div class="inbox-name">${e(p.full_name||'Без имени')}</div><div class="inbox-msg">${e(l.message||'')}</div>${l.file_url?`<a class="file-lnk" href="${e(l.file_url)}" target="_blank">📎 ${e(l.file_name||'Файл')}</a>`:''}<div class="inbox-time">${fdt(l.created_at)}</div></div><span class="sp sp-paused" style="background:var(--amber-d);color:var(--amber);border-color:rgba(224,160,69,.3)">Новое</span></div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-v" onclick="goToChat('${p.id}')">Ответить</button><button class="btn btn-s" onclick="openCab('${p.id}')">Кабинет</button></div></div>`).join(''):'<div class="empty-st">Входящих сообщений нет</div>'}`;
+}
+
+// NAVIGATION
+function setNav(n){nav=n;render()}
+function setFilter(el){
+  filtr=el.dataset.f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filtr));
+  renderList();
+}
+function setTab(t){tab=t;renderDetail()}
+function selPat(id){selId=id;tab='overview';renderList();renderDetail()}
+function goToPat(id){selId=id;tab='overview';nav='patients';render()}
+function goToChat(id){selId=id;tab='chat';nav='patients';render()}
+
+// ACTIONS
+function openDiag(id){
+  const p=gp(id);if(!p)return;
+  localStorage.setItem('akabane_current_patient',JSON.stringify({id:p.id,full_name:p.full_name||'',phone:p.phone||''}));
+  localStorage.setItem('akabane_active_patient_id',p.id);
+  localStorage.setItem('akabane_active_patient_name',p.full_name||'');
+  location.href=doctUrl(id);
+}
+function openCab(id){window.open(patUrl(id),'_blank')}
+function cpLink(id){navigator.clipboard?.writeText(location.origin+location.pathname.replace(/crm\/?$/,'')+patUrl(id).replace('../',''));ntf('Ссылка скопирована')}
+function dlCard(id){
+  const p=gp(id),s=pses(id),py=ppay(id);
+  const html=`<html><head><meta charset="utf-8"><style>body{font-family:Arial;padding:30px}.b{border:1px solid #ddd;padding:12px;margin:8px 0;border-radius:8px}</style></head><body><h1>${e(p.full_name)}</h1><p>${e(p.phone||'')}</p><div class="b"><b>Статус:</b> ${SL[p.status||'new']}<br><b>Визит:</b> ${fdt(p.next_visit)}<br><b>Заметки:</b> ${e(p.note||'')}</div><h2>Оплаты</h2>${py.map(x=>`<div class="b">${x.amount} сом · ${fdt(x.payment_date||x.created_at)}<br>${e(x.comment||'')}</div>`).join('')||'Нет'}<h2>Сеансы</h2>${s.map(x=>`<div class="b">Сеанс ${x.session_number} · ${fdt(x.session_date)}<br>${e(x.note||'')}</div>`).join('')||'Нет'}<script>window.print()<\/script></body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+
+async function saveCard(id){
+  try{
+    const phone=document.getElementById('fc-phone')?.value.trim()||'';
+    const status=document.getElementById('fc-status')?.value||'new';
+    const next_visit=fromLocal(document.getElementById('fc-visit')?.value);
+    const note=document.getElementById('fc-note')?.value.trim()||'';
+    const paid_amount=Number(document.getElementById('fc-paid')?.value||0);
+    const r=await sb.from('patients').update({phone,status,next_visit,note,paid_amount,paid:paid_amount>0,updated_at:new Date().toISOString()}).eq('id',id);
+    if(r.error)throw r.error;
+    ntf('Карточка сохранена');await load(true);
+  }catch(er){ntf('Ошибка: '+er.message,'err')}
+}
+
+async function addPay(id){
+  const amount=Number(prompt('Сумма оплаты (сомони):','900')||0);
+  if(!amount)return;
+  const comment=prompt('Комментарий:','')||'';
+  try{
+    const r=await sb.from('payments').insert({patient_id:id,amount,method:'manual',comment});
+    if(r.error)throw r.error;
+    const total=ppay(id).reduce((s,x)=>s+Number(x.amount||0),0)+amount;
+    await sb.from('patients').update({paid_amount:total,paid:true,payment_date:new Date().toISOString()}).eq('id',id);
+    ntf('Оплата добавлена');await load(true);
+  }catch(er){ntf('Ошибка: '+er.message,'err')}
+}
+
+async function addSess(id){
+  const n=pses(id).length+1;
+  const note=prompt(`Заметка к сеансу ${n}:`,'');
+  if(note===null)return;
+  try{
+    const r=await sb.from('therapy_sessions').insert({patient_id:id,session_number:n,session_date:new Date().toISOString(),note});
+    if(r.error)throw r.error;
+    await sb.from('patients').update({therapy_sessions:n,status:n>=3?'completed':'course'}).eq('id',id);
+    ntf(`Сеанс ${n} добавлен`);await load(true);
+  }catch(er){ntf('Ошибка: '+er.message,'err')}
+}
+
+async function sendRpl(id){
+  const text=document.getElementById('replyTxt')?.value.trim()||'';
+  const file=document.getElementById('chatFile')?.files[0];
+  if(!text&&!file){ntf('Введите текст или файл','err');return}
+  try{
+    let extra={};
+    if(file){
+      const safe=file.name.replace(/[^\w.\-]/g,'_');
+      const path=`doctor/${Date.now()}_${safe}`;
+      const up=await sb.storage.from('chat-files').upload(path,file,{upsert:false});
+      if(up.error)throw up.error;
+      const pub=sb.storage.from('chat-files').getPublicUrl(path);
+      extra={file_url:pub.data.publicUrl,file_name:file.name,file_type:file.type};
+    }
+    const r=await sb.from('messages').insert({patient_id:id,author:'doctor',message:text,...extra});
+    if(r.error)throw r.error;
+    ntf('Отправлено');await load(true);
+  }catch(er){ntf('Ошибка: '+er.message,'err')}
+}
+
+async function clrChat(id){
+  if(!confirm('Очистить весь чат?'))return;
+  await sb.from('messages').delete().eq('patient_id',id);
+  ntf('Чат очищен');await load(true);
+}
+
+async function delPat(id){
+  if(!confirm(`Удалить "${pn(id)}"? Все данные будут потеряны.`))return;
+  try{
+    await Promise.all([
+      sb.from('payments').delete().eq('patient_id',id),
+      sb.from('therapy_sessions').delete().eq('patient_id',id),
+      sb.from('messages').delete().eq('patient_id',id),
+      sb.from('diagnostics').delete().eq('patient_id',id),
+    ]);
+    const r=await sb.from('patients').delete().eq('id',id);
+    if(r.error)throw r.error;
+    if(selId===id)selId=null;
+    ntf('Пациент удалён');await load();
+  }catch(er){ntf('Ошибка: '+er.message,'err')}
+}
+
+// MODALS
+function openNewPat(){document.getElementById('newPatMod').style.display='flex'}
+function closeMod(id){document.getElementById(id).style.display='none'}
+
+async function createPat(){
+  const full_name=document.getElementById('np-name')?.value.trim();
+  if(!full_name){ntf('Введите ФИО','err');return}
+  const phone=document.getElementById('np-phone')?.value.trim();
+  const status=document.getElementById('np-status')?.value||'new';
+  const note=document.getElementById('np-note')?.value.trim();
+  try{
+    const r=await sb.from('patients').insert({full_name,phone,status,note}).select().single();
+    if(r.error)throw r.error;
+    closeMod('newPatMod');
+    ['np-name','np-phone','np-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+    selId=r.data.id;tab='overview';
+    ntf('Пациент добавлен');await load(true);
+  }catch(er){ntf('Ошибка: '+er.message,'err')}
+}
+
+function openDiagRes(diagId){
+  const dg=diags.find(d=>d.id===diagId);if(!dg)return;
+  curDiag=diagId;
+  const{ex,def,sev,rows,normal}=parseDiag(dg.result_json);
+  const p=gp(dg.patient_id);
+  document.getElementById('dm-pat').textContent=p?.full_name||'Пациент';
+  document.getElementById('dm-date').textContent=fdt(dg.created_at);
+  let html=`<div class="sum-grid">
+    <div class="sum-tile" style="background:rgba(224,81,81,.1);border:1px solid rgba(224,81,81,.25)"><b style="color:#e08080">${ex.length}</b><span style="color:#e08080">Избыток</span></div>
+    <div class="sum-tile" style="background:rgba(61,184,122,.08);border:1px solid rgba(61,184,122,.2)"><b style="color:#5dcc90">${normal}</b><span style="color:#5dcc90">Норма</span></div>
+    <div class="sum-tile" style="background:rgba(106,94,245,.1);border:1px solid rgba(106,94,245,.25)"><b style="color:#a0a0f0">${def.length}</b><span style="color:#a0a0f0">Недостаток</span></div>
+    <div class="sum-tile" style="background:rgba(224,160,69,.1);border:1px solid rgba(224,160,69,.25)"><b style="color:#dba050">${sev.length}</b><span style="color:#dba050">Гипернедост.</span></div>
+  </div>`;
+  if(ex.length){
+    html+=`<div class="proto-sec"><div class="proto-ttl" style="color:#e08080">🔻 Седация — Избыток (0–4)</div>`;
+    for(const lbl of ex){const org=lbl.split(' (')[0];const pt=(TREATMENT[org]&&TREATMENT[org].sedation)||'?';html+=`<div class="proto-row"><span class="proto-org">${e(lbl)}</span><button class="proto-btn" data-pt="${pt}">${e(pt)}</button></div>`}
+    html+='</div>';
+  }
+  const ton=[...def.map(l=>({l,sv:false})),...sev.map(l=>({l,sv:true}))];
+  if(ton.length){
+    html+=`<div class="proto-sec"><div class="proto-ttl" style="color:#a0a0f0">🔺 Тонизация — Недостаток${sev.length?' / Гипернедостаток':''}</div>`;
+    for(const it of ton){const org=it.l.split(' (')[0];const pt=(TREATMENT[org]&&TREATMENT[org].tonification)||'?';html+=`<div class="proto-row"><span class="proto-org">${it.sv?'<span style="color:var(--amber)">⬇⬇</span> ':''}${e(it.l)}</span><button class="proto-btn" data-pt="${pt}">${e(pt)}</button></div>`}
+    html+='</div>';
+  }
+  if(!ex.length&&!def.length&&!sev.length)html+=`<div class="proto-sec" style="text-align:center;color:var(--green);padding:18px">✅ Все меридианы в норме</div>`;
+  if(rows.length){
+    html+=`<details style="margin-top:12px"><summary style="cursor:pointer;color:var(--text3);font-size:13px;user-select:none">▶ Все измерения (${rows.length})</summary><table class="meas-tbl"><thead><tr><th>Меридиан</th><th>Сторона</th><th>Значение</th><th>Состояние</th></tr></thead><tbody>`;
+    const cm={excess:'#e08080',deficiency:'#a0a0f0',severe:'#dba050',normal:'#5dcc90'};
+    const lm={excess:'Избыток',deficiency:'Недостаток',severe:'Гипернедостаток',normal:'Норма'};
+    for(const r of rows)html+=`<tr><td>${e(r.organ)}</td><td>${e(r.side)}</td><td>${r.t!==null?Number(r.t).toFixed(1):'—'}</td><td style="color:${cm[r.cls]||'var(--text3)'}">${lm[r.cls]||'—'}</td></tr>`;
+    html+='</tbody></table></details>';
+  }
+  html+=`<div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-s" onclick="printDiag('${diagId}')">🖨 Печать</button><button class="btn btn-rm" onclick="delDiag('${diagId}')">🗑 Удалить</button></div>`;
+  document.getElementById('dm-body').innerHTML=html;
+  document.getElementById('diagMod').style.display='flex';
+}
+
+async function delDiag(id){
+  if(!confirm('Удалить диагностику?'))return;
+  const r=await sb.from('diagnostics').delete().eq('id',id);
+  if(r.error){ntf('Ошибка: '+r.error.message,'err');return}
+  closeMod('diagMod');ntf('Диагностика удалена');await load(true);
+}
+
+function printDiag(diagId){
+  const dg=diags.find(d=>d.id===diagId);if(!dg)return;
+  const{ex,def,sev,rows}=parseDiag(dg.result_json);const p=gp(dg.patient_id);
+  const r2h=(arr,type)=>arr.map(lbl=>{const org=lbl.split(' (')[0];const pt=(TREATMENT[org]&&TREATMENT[org][type])||'?';return`<tr><td>${e(lbl)}</td><td style="font-weight:900">${e(pt)}</td></tr>`;}).join('');
+  const nm=rows.filter(r=>r.cls==='normal').length;
+  const html=`<html><head><meta charset="utf-8"><style>body{font-family:Arial;padding:30px;max-width:700px;margin:auto}h2{margin:18px 0 8px;font-size:14px;border-bottom:1px solid #ddd;padding-bottom:4px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.tile{border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}.tile b{display:block;font-size:22px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px;border-bottom:1px solid #eee;font-size:13px}th{font-size:10px;text-transform:uppercase;color:#888}</style></head><body><h1>Диагностика Акабане</h1><p>${e(p?.full_name||'')} · ${fdt(dg.created_at)}</p><div class="grid"><div class="tile"><b style="color:#c0392b">${ex.length}</b><span>Избыток</span></div><div class="tile"><b style="color:#27ae60">${nm}</b><span>Норма</span></div><div class="tile"><b style="color:#2980b9">${def.length}</b><span>Недостаток</span></div><div class="tile"><b style="color:#e67e22">${sev.length}</b><span>Гипернедост.</span></div></div>${ex.length?`<h2>🔻 Седация</h2><table><thead><tr><th>Меридиан</th><th>Точка</th></tr></thead><tbody>${r2h(ex,'sedation')}</tbody></table>`:''}${def.length||sev.length?`<h2>🔺 Тонизация</h2><table><thead><tr><th>Меридиан</th><th>Точка</th></tr></thead><tbody>${r2h([...def,...sev],'tonification')}</tbody></table>`:''}<script>window.print()<\/script></body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+
+function openPtInfo(pt){
+  const d=ATLAS_MINI[pt];
+  document.getElementById('pt-title').textContent=d?.title||pt;
+  document.getElementById('pt-sub').textContent=pt;
+  let html='';
+  if(d){
+    if(d.location)html+=`<div class="pt-sec"><div class="pt-lbl">Локализация</div><div class="pt-body-txt">${e(d.location)}</div></div>`;
+    if(d.functions)html+=`<div class="pt-sec"><div class="pt-lbl">Функции и показания</div><div class="pt-body-txt">${e(d.functions)}</div></div>`;
+    if(d.url)html+=`<div style="margin-top:14px"><a href="${d.url}" target="_blank" class="btn btn-au" style="text-decoration:none;display:inline-flex">Полная карточка на eledia.ru →</a></div>`;
+  }else{html='<div class="pt-body-txt">Карточка для этой точки не найдена.</div>'}
+  document.getElementById('pt-body').innerHTML=html;
+  document.getElementById('ptMod').style.display='flex';
+}
+
+document.addEventListener('click',function(ev){
+  const btn=ev.target.closest('[data-pt]');
+  if(btn){openPtInfo(btn.dataset.pt);}
 });
-document.getElementById('ptModal').addEventListener('click',function(e){
-  if(e.target===this)closePointModal();
-});
-let statePatients=[],stateMessages=[],stateSessions=[],statePayments=[],stateDiagnostics=[],selectedPatientId=null,currentDiagId=null,openPatients=new Set();
-const statusEl=document.getElementById('status'),patientsListEl=document.getElementById('patientsList'),inboxEl=document.getElementById('inbox'),countEl=document.getElementById('count'),chatBoxEl=document.getElementById('chatBox'),selectedPatientEl=document.getElementById('selectedPatient'),replyTextEl=document.getElementById('replyText'),statsEl=document.getElementById('stats');
-const STATUS_LABELS={new:'Новый',diagnostic:'Диагностика',course:'На курсе',paused:'Пауза',completed:'Завершил',followup:'Контроль'};function patientDiagnostics(id){return stateDiagnostics.filter(d=>d.patient_id===id).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}function diagClassify(t){const n=Number(t);if(!Number.isFinite(n))return null;if(n<=4)return'excess';if(n<=7)return'normal';if(n<=13)return'deficiency';return'severe'}function parseDiag(json){let d;try{d=typeof json==='string'?JSON.parse(json):(json||{})}catch(e){d={}}let ex=[],def=[],sev=[];if(d.analysis){ex=d.analysis.excess||[];def=d.analysis.deficiency||[];sev=d.analysis.severe||[]}const rawRows=d.results||d.measurements||d.rows||d.points||d.data||[];const rows=rawRows.map((r,i)=>{const t=r.reaction_time!=null?r.reaction_time:r.time!=null?r.time:r.value!=null?r.value:null;const cls=t!==null?diagClassify(t):null;const organ=r.organ||r.meridian||r.name||('Точка '+(i+1));const side=r.side||r.hand||'';return{organ,side,t,cls,label:organ+(side?' ('+side+')':'')};});if(!ex.length&&!def.length&&!sev.length&&rows.length){for(const r of rows){if(!r.cls)continue;if(r.cls==='excess')ex.push(r.label);else if(r.cls==='deficiency')def.push(r.label);else if(r.cls==='severe')sev.push(r.label)}}const normal=rows.filter(r=>r.cls==='normal').length;return{ex,def,sev,rows,normal}}function openDiagResult(diagId){const diag=stateDiagnostics.find(d=>d.id===diagId);if(!diag)return;currentDiagId=diagId;const{ex,def,sev,rows,normal}=parseDiag(diag.result_json);const p=getPatient(diag.patient_id);document.getElementById('modalPatient').textContent=p?p.full_name:'Пациент';document.getElementById('modalDate').textContent=new Date(diag.created_at).toLocaleString();let html='<div class="summary-grid"><div class="summary-tile" style="background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.3)"><b style="color:#ff9b9b">'+ex.length+'</b><span style="color:#ff9b9b">Избыток</span></div><div class="summary-tile" style="background:rgba(82,201,122,.10);border:1px solid rgba(82,201,122,.25)"><b style="color:#7be89f">'+normal+'</b><span style="color:#7be89f">Норма</span></div><div class="summary-tile" style="background:rgba(82,128,224,.12);border:1px solid rgba(82,128,224,.3)"><b style="color:#8dbaff">'+def.length+'</b><span style="color:#8dbaff">Недостаток</span></div><div class="summary-tile" style="background:rgba(255,140,0,.12);border:1px solid rgba(255,140,0,.3)"><b style="color:#ffb56a">'+sev.length+'</b><span style="color:#ffb56a">Гипернедост.</span></div></div>';if(ex.length){html+='<div class="proto-section"><div class="proto-title" style="color:#ff9b9b">🔻 Седация — Избыток (0–4)</div>';for(const label of ex){const organ=label.split(' (')[0];const pt=(TREATMENT[organ]&&TREATMENT[organ].sedation)||'?';html+='<div class="proto-row"><span class="proto-organ">'+esc(label)+'</span><button class="proto-point" type="button" data-pt="'+pt+'">'+esc(pt)+'</button></div>'}html+='</div>'}const tonItems=[...def.map(function(l){return{label:l,isSev:false}}),...sev.map(function(l){return{label:l,isSev:true}})];if(tonItems.length){html+='<div class="proto-section"><div class="proto-title" style="color:#8dbaff">🔺 Тонизация — Недостаток'+(sev.length?' / Гипернедостаток':'')+'</div>';for(const item of tonItems){const organ=item.label.split(' (')[0];const pt=(TREATMENT[organ]&&TREATMENT[organ].tonification)||'?';html+='<div class="proto-row"><span class="proto-organ">'+(item.isSev?'<span style="color:#ffb56a">⬇⬇</span> ':'')+esc(item.label)+'</span><button class="proto-point" type="button" data-pt="'+pt+'">'+esc(pt)+'</button></div>'}html+='</div>'}if(!ex.length&&!def.length&&!sev.length){html+='<div class="proto-section" style="text-align:center;color:#7be89f;padding:20px">✅ Все меридианы в норме. Дисбаланс не выявлен.</div>'}if(rows.length){html+='<details style="margin-top:12px"><summary style="cursor:pointer;color:#9696b8;font-size:13px;user-select:none">▶ Все измерения ('+rows.length+')</summary><table class="meas-table"><thead><tr><th>Меридиан</th><th>Сторона</th><th>Значение</th><th>Состояние</th></tr></thead><tbody>';const clrMap={excess:'#ff9b9b',deficiency:'#8dbaff',severe:'#ffb56a',normal:'#7be89f'};const lblMap={excess:'Избыток',deficiency:'Недостаток',severe:'Гипернедостаток',normal:'Норма'};for(const r of rows){const clr=clrMap[r.cls]||'#9696b8';const lbl=lblMap[r.cls]||'—';html+='<tr><td>'+esc(r.organ)+'</td><td>'+esc(r.side)+'</td><td>'+(r.t!==null?Number(r.t).toFixed(1):'—')+'</td><td style="color:'+clr+'">'+lbl+'</td></tr>'}html+='</tbody></table></details>'}html+='<div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn2" style="padding:12px" onclick="printCurrentDiag()">🖨 Печать / PDF</button><button class="btn btn-danger" style="padding:12px" onclick="deleteCurrentDiag()">🗑 Удалить диагностику</button></div>';document.getElementById('modalBody').innerHTML=html;document.getElementById('diagModal').style.display='flex'}function closeDiagModal(){document.getElementById('diagModal').style.display='none'}async function deleteDiagnostic(id){if(!confirm('Удалить эту диагностику? Данные нельзя восстановить.'))return;const r=await sb.from('diagnostics').delete().eq('id',id);if(r.error){setStatus('Ошибка: '+r.error.message,'err');return}closeDiagModal();setStatus('Диагностика удалена');await load(true)}function deleteCurrentDiag(){if(currentDiagId)deleteDiagnostic(currentDiagId)}function printCurrentDiag(){const diag=stateDiagnostics.find(d=>d.id===currentDiagId);if(!diag)return;const{ex,def,sev,rows}=parseDiag(diag.result_json);const p=getPatient(diag.patient_id);const date=new Date(diag.created_at).toLocaleString();const rows2html=(arr,type)=>arr.map(label=>{const organ=label.split(' (')[0];const side=label.match(/\(([^)]+)\)/)?.[1]||'';const pt=(TREATMENT[organ]&&TREATMENT[organ][type])||'?';return '<tr><td>'+esc(label)+'</td><td style="font-weight:900">'+esc(pt)+'</td></tr>';}).join('');const html='<html><head><meta charset="utf-8"><title>Диагностика Акабане — '+(p?p.full_name:'')+'</title><style>body{font-family:Arial,sans-serif;padding:30px;color:#111;max-width:700px;margin:auto}h1{font-size:22px;margin-bottom:4px}h2{font-size:15px;font-weight:700;margin:20px 0 8px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #ddd;padding-bottom:4px}.meta{color:#666;font-size:13px;margin-bottom:20px}.grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:20px}.tile{border:1px solid #ccc;border-radius:8px;padding:10px;text-align:center}.tile b{display:block;font-size:24px}.tile span{font-size:11px;text-transform:uppercase;color:#666}table{width:100%;border-collapse:collapse;margin-bottom:16px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #eee;font-size:14px}th{font-size:11px;text-transform:uppercase;color:#888}tr:last-child td{border-bottom:0}.red{color:#c0392b}.blue{color:#2980b9}.ok{color:#27ae60}.norm{color:#666}@media print{body{padding:15px}}</style></head><body><h1>ДИАГНОСТИКА АКАБАНЕ</h1><div class="meta">'+(p?'<b>'+esc(p.full_name)+'</b> · ':'')+esc(date)+'</div>';const total=ex.length+def.length+sev.length+rows.filter(r=>r.cls==='normal').length;const normCount=rows.filter(r=>r.cls==='normal').length;const bodyHtml='<div class="grid"><div class="tile"><b class="red">'+ex.length+'</b><span>Избыток</span></div><div class="tile"><b class="ok">'+normCount+'</b><span>Норма</span></div><div class="tile"><b class="blue">'+def.length+'</b><span>Недостаток</span></div><div class="tile"><b style="color:#e67e22">'+sev.length+'</b><span>Гипернедост.</span></div></div>'+(ex.length?'<h2>🔻 Седация — Избыток (0–4)</h2><table><thead><tr><th>Меридиан (сторона)</th><th>Точка</th></tr></thead><tbody>'+rows2html(ex,'sedation')+'</tbody></table>':'')+(def.length||sev.length?'<h2>🔺 Тонизация — Недостаток / Гипернедостаток</h2><table><thead><tr><th>Меридиан (сторона)</th><th>Точка</th></tr></thead><tbody>'+rows2html([...def,...sev],'tonification')+'</tbody></table>':'')+(rows.length?'<h2>Все измерения</h2><table><thead><tr><th>Меридиан</th><th>Сторона</th><th>Значение</th><th>Состояние</th></tr></thead><tbody>'+rows.map(r=>{const clr={excess:'class="red"',deficiency:'class="blue"',severe:'style="color:#e67e22"',normal:'class="norm"'}[r.cls]||'';const lbl={excess:'Избыток',deficiency:'Недостаток',severe:'Гипернедостаток',normal:'Норма'}[r.cls]||'—';return '<tr><td>'+esc(r.organ)+'</td><td>'+esc(r.side)+'</td><td>'+(r.t!==null?Number(r.t).toFixed(1):'—')+'</td><td '+clr+'>'+lbl+'</td></tr>';}).join('')+'</tbody></table>':'');const w=window.open('','_blank');w.document.write(html+bodyHtml+'<script>window.print()<\/script></body></html>');w.document.close()};
-function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}function initials(name){return String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'?'}function patientUrl(id){return `../patient/?id=${encodeURIComponent(id)}`}function doctorUrl(id){return `../doctor/?patient_id=${encodeURIComponent(id)}&patient=${encodeURIComponent(id)}&patient_name=${encodeURIComponent(patientName(id))}`}function setStatus(text,type='ok'){statusEl.innerHTML=`<div class="${type}">${esc(text)}</div>`;setTimeout(()=>statusEl.innerHTML='',3500)}function getPatient(id){return statePatients.find(p=>p.id===id)}function patientName(id){return getPatient(id)?.full_name||'Без имени'}function patientMessages(id){return stateMessages.filter(m=>m.patient_id===id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}function patientSessions(id){return stateSessions.filter(s=>s.patient_id===id).sort((a,b)=>(a.session_number||0)-(b.session_number||0))}function patientPayments(id){return statePayments.filter(p=>p.patient_id===id).sort((a,b)=>new Date(b.payment_date||b.created_at)-new Date(a.payment_date||a.created_at))}function lastMessage(id){const a=patientMessages(id);return a[a.length-1]||null}function isNewForDoctor(id){const l=lastMessage(id);return l&&l.author==='patient'}function fmtDate(v){return v?new Date(v).toLocaleString():'—'}function toDatetimeLocal(v){if(!v)return'';const d=new Date(v);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}function fromDatetimeLocal(v){return v?new Date(v).toISOString():null}function statusBadge(s){s=s||'new';return `<span class="badge status-${s}">${STATUS_LABELS[s]||s}</span>`}function phoneHref(p){return String(p||'').replace(/[^\d+]/g,'')}function waUrl(phone){let n=String(phone||'').replace(/[^\d]/g,'');if(n.startsWith('00'))n=n.slice(2);if(n.startsWith('8'))n='992'+n.slice(1);return n?'https://wa.me/'+n:''}function visitState(p){if(!p.next_visit)return'';const diff=new Date(p.next_visit).getTime()-Date.now();if(diff<0)return'overdue';if(diff<86400000)return'soon';return''}function updateTitle(){const unread=statePatients.filter(p=>isNewForDoctor(p.id)).length;document.title=unread?`(${unread}) Akabane CRM`:'Akabane CRM'}
-async function load(keepScroll=false){try{const p=await sb.from('patients').select('*').order('created_at',{ascending:false});if(p.error)throw p.error;statePatients=p.data||[];const m=await sb.from('messages').select('*').order('created_at',{ascending:true});if(m.error)throw m.error;stateMessages=m.data||[];const s=await sb.from('therapy_sessions').select('*').order('created_at',{ascending:true});if(s.error&&!String(s.error.message||'').includes('does not exist'))throw s.error;stateSessions=s.data||[];const pay=await sb.from('payments').select('*').order('created_at',{ascending:false});if(pay.error&&!String(pay.error.message||'').includes('does not exist'))throw pay.error;statePayments=pay.data||[];const diag=await sb.from('diagnostics').select('id,patient_id,created_at,result_json').order('created_at',{ascending:false});if(diag.error&&!String(diag.error.message||'').includes('does not exist'))throw diag.error;stateDiagnostics=diag.data||[];renderStats();renderPatients();renderInbox();renderChat(keepScroll);updateTitle()}catch(e){console.error(e);patientsListEl.innerHTML=`<div class="err">Ошибка загрузки: ${esc(e.message||e)}</div>`;inboxEl.innerHTML=`<div class="err">Ошибка загрузки сообщений</div>`}}
-function renderStats(){const total=statePatients.length,newC=statePatients.filter(p=>(p.status||'new')==='new').length,course=statePatients.filter(p=>p.status==='course').length,done=statePatients.filter(p=>p.status==='completed').length,paid=statePayments.reduce((s,p)=>s+Number(p.amount||0),0)||statePatients.reduce((s,p)=>s+Number(p.paid_amount||0),0);statsEl.innerHTML=`<div class="stat"><div class="mut">Всего</div><b>${total}</b></div><div class="stat"><div class="mut">Новые</div><b>${newC}</b></div><div class="stat"><div class="mut">На курсе</div><b>${course}</b></div><div class="stat"><div class="mut">Завершили</div><b>${done}</b></div><div class="stat"><div class="mut">Оплаты</div><b>${paid}</b></div>`}
-function filteredPatients(){const q=document.getElementById('searchInput').value.trim().toLowerCase(),sf=document.getElementById('statusFilter').value;return statePatients.filter(p=>(!q||`${p.full_name||''} ${p.phone||''}`.toLowerCase().includes(q))&&(!sf||(p.status||'new')===sf))}
-function renderPatients(){const list=filteredPatients();countEl.textContent=`${list.length} пациентов`;patientsListEl.innerHTML=list.map(p=>{const last=lastMessage(p.id),newFlag=isNewForDoctor(p.id),sessions=patientSessions(p.id),payments=patientPayments(p.id),phone=p.phone||'',vs=visitState(p),wa=waUrl(phone);return `<div class="patient ${openPatients.has(p.id)?'open':''} ${selectedPatientId===p.id?'selected':''} ${vs}" id="p_${p.id}"><div class="patient-head patient-hdr" onclick="togglePatient('${p.id}')"><div class="patient-main"><div class="avatar">${esc(initials(p.full_name))}</div><div><b>${esc(p.full_name||'Без имени')}</b><div class="mut">${phone?`<a class="phone-link" href="tel:${esc(phoneHref(phone))}">${esc(phone)}</a>`:'Без телефона'} · создан ${new Date(p.created_at).toLocaleString()}</div>${p.note?`<div class="mut">Заметки: ${esc(p.note)}</div>`:''}${last?`<div class="mut">Последнее: ${esc(last.author==='patient'?'Пациент':'Акмал')}: ${esc(last.message||'')}</div>`:''}<div class="mut">Следующий визит: ${esc(fmtDate(p.next_visit))}</div></div></div><div>${statusBadge(p.status)}${newFlag?`<span class="badge unread">Новое</span>`:''}${vs==='overdue'?`<span class="badge overdue-b">Визит просрочен</span>`:''}${vs==='soon'?`<span class="badge soon-b">Визит скоро</span>`:''}<span class="badge">Оплата ${p.paid_amount||0}</span>${sessions.length?`<span class="badge">Сеансов ${sessions.length}</span>`:''}${patientDiagnostics(p.id).length?`<span class="badge">Диагностик ${patientDiagnostics(p.id).length}</span>`:''}</div><span class="toggle-icon">▼</span></div><div class="patient-body"><div class="section"><div class="grid5"><div><label>Телефон</label><input id="ph_${p.id}" value="${esc(phone)}" placeholder="+992 ..."></div><div><label>Статус</label><select id="st_${p.id}">${Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${(p.status||'new')===k?'selected':''}>${v}</option>`).join('')}</select></div><div><label>Следующий визит</label><input id="nv_${p.id}" type="datetime-local" value="${esc(toDatetimeLocal(p.next_visit))}"></div><div><label>Оплачено</label><input id="pa_${p.id}" type="number" value="${p.paid_amount||0}"></div><div><label>Курс</label><input id="ts_${p.id}" type="number" value="${p.therapy_sessions||0}"></div></div><label>Заметки</label><textarea id="nt_${p.id}" placeholder="Заметки пациента">${esc(p.note||'')}</textarea><div class="grid"><button class="btn btn-gold" onclick="savePatientMeta('${p.id}')">Сохранить карточку</button><button class="btn btn-green" onclick="addPayment('${p.id}')">+ Оплата</button></div><button class="btn btn2" onclick="addTherapySession('${p.id}')">+ Добавить сеанс</button></div><div class="section"><b>История оплат</b><div class="promo-info">🎁 При оплате 3 сеансов курса — диагностика Акабане бесплатно</div>${payments.map(x=>`<div class="payment"><b>${x.amount||0} сомони</b> · ${esc(fmtDate(x.payment_date||x.created_at))}<div class="mut">${esc(x.method||'')} ${x.comment?`· ${esc(x.comment)}`:''}</div>${x.file_url?`<a class="file-link" href="${esc(x.file_url)}" target="_blank">📎 ${esc(x.file_name||'Файл')}</a>`:''}</div>`).join('')||'<div class="mut">Оплат пока нет</div>'}</div><div class="section"><b>Сеансы терапии</b>${sessions.map(s=>`<div class="session"><div><b>Сеанс ${s.session_number||'—'}</b> · ${esc(fmtDate(s.session_date))}</div><div class="mut">${esc(s.note||'Без заметки')}</div></div>`).join('')||'<div class="mut">Сеансов пока нет</div>'}</div><div class="section"><b>Диагностики</b>${patientDiagnostics(p.id).slice(0,5).map(function(d){var r=parseDiag(d.result_json);var ex=r.ex,def=r.def,sev=r.sev;return '<div class="diag-entry"><div class="diag-entry-info"><div style="font-size:13px;font-weight:700">'+new Date(d.created_at).toLocaleString()+'</div><div class="diag-entry-badges">'+(ex.length?'<span class="badge" style="background:rgba(224,82,82,.18);border-color:rgba(224,82,82,.4);color:#ff9b9b">🔻 '+ex.length+'</span>':'')+(def.length?'<span class="badge" style="background:rgba(82,128,224,.18);border-color:rgba(82,128,224,.4);color:#8dbaff">🔺 '+def.length+'</span>':'')+(sev.length?'<span class="badge" style="background:rgba(255,140,0,.18);border-color:rgba(255,140,0,.4);color:#ffb56a">⬇⬇ '+sev.length+'</span>':'')+(!ex.length&&!def.length&&!sev.length?'<span class="badge" style="background:rgba(82,201,122,.12);border-color:rgba(82,201,122,.3);color:#7be89f">✅ Норма</span>':'')+'</div></div><button class="btn btn2" style="width:auto;padding:8px 14px;margin:0;font-size:13px" onclick="openDiagResult(\''+d.id+'\')">Просмотр</button><button class="btn btn-danger" style="width:auto;padding:8px 10px;margin:0 0 0 6px;font-size:13px" onclick="deleteDiagnostic(\''+d.id+'\')">✕</button></div></div>';}).join('')||'<div class="mut" style="font-size:13px;padding:8px 0">Диагностик пока нет</div>'}</div><div class="grid4"><button class="btn" onclick="openDiagnostic('${p.id}')">▶ Диагностика</button><button class="btn btn2" onclick="openCabinet('${p.id}')">Кабинет</button><button class="btn btn2" onclick="selectPatient('${p.id}')">Чат</button><button class="btn btn2" onclick="downloadPatientCard('${p.id}')">PDF-карта</button></div><div class="grid4"><button class="btn btn2" onclick="copyPatientLink('${p.id}')">Ссылка пациенту</button><a class="btn btn2" href="tel:${esc(phoneHref(phone))}">Позвонить</a>${wa?`<a class="btn btn2" href="${esc(wa)}" target="_blank">WhatsApp</a>`:`<button class="btn btn2">WhatsApp</button>`}<button class="btn btn-danger" onclick="deletePatient('${p.id}')">Удалить</button></div></div></div>`}).join('')||'<div class="empty"><b>Пациентов нет</b><br>Добавьте первого пациента выше.</div>'}
-function renderInbox(){const ids=[...new Set(stateMessages.filter(m=>m.author==='patient').map(m=>m.patient_id))];const incoming=ids.map(id=>({id,last:lastMessage(id)})).filter(x=>x.last&&x.last.author==='patient').sort((a,b)=>new Date(b.last.created_at)-new Date(a.last.created_at));inboxEl.innerHTML=incoming.map(x=>`<div class="inbox-item"><div class="patient-head"><div><b>${esc(patientName(x.id))}</b><div>${esc(x.last.message||'')}</div>${x.last.file_url?`<a class="file-link" href="${esc(x.last.file_url)}" target="_blank">📎 ${esc(x.last.file_name||'Файл')}</a>`:''}<div class="mut">${new Date(x.last.created_at).toLocaleString()}</div></div><span class="badge unread">Новое</span></div><div class="grid"><button class="btn" onclick="selectPatient('${x.id}')">Ответить</button><button class="btn btn2" onclick="openCabinet('${x.id}')">Открыть кабинет</button></div></div>`).join('')||'<div class="empty">Новых сообщений пока нет</div>'}
-function renderChat(keepScroll=false){if(!selectedPatientId){chatBoxEl.innerHTML='<div class="empty">Диалог не выбран</div>';selectedPatientEl.textContent='Выберите пациента из списка или входящих сообщений.';return}const p=getPatient(selectedPatientId);selectedPatientEl.innerHTML=`Выбран пациент: <b>${esc(p?.full_name||'Без имени')}</b>`;const arr=patientMessages(selectedPatientId);chatBoxEl.innerHTML=arr.map(m=>`<div class="chat-msg ${esc(m.author)}"><div class="chat-author">${m.author==='patient'?'Пациент':'Акмал'}</div><div>${esc(m.message||'')}</div>${m.file_url?`<a class="file-link" href="${esc(m.file_url)}" target="_blank">📎 ${esc(m.file_name||'Файл')}</a>`:''}<div class="chat-time">${new Date(m.created_at).toLocaleString()}</div></div>`).join('')||'<div class="empty">Сообщений пока нет</div>';if(!keepScroll)chatBoxEl.scrollTop=chatBoxEl.scrollHeight}
-async function uploadFile(file,prefix='chat'){if(!file)return{};const safe=file.name.replace(/[^\w.\-а-яА-ЯёЁ]/g,'_');const path=`${prefix}/${Date.now()}_${safe}`;const up=await sb.storage.from('chat-files').upload(path,file,{upsert:false});if(up.error)throw up.error;const pub=sb.storage.from('chat-files').getPublicUrl(path);return{file_url:pub.data.publicUrl,file_name:file.name,file_type:file.type}}
-async function createPatient(){const full_name=name.value.trim(),ph=phone.value.trim(),note=document.getElementById('note').value.trim(),status=newStatus.value,next_visit=fromDatetimeLocal(newNextVisit.value);if(!full_name){setStatus('Введите ФИО пациента','err');return}try{const r=await sb.from('patients').insert({full_name,phone:ph,note,status,next_visit}).select().single();if(r.error)throw r.error;name.value='';phone.value='';document.getElementById('note').value='';newNextVisit.value='';newStatus.value='new';setStatus('Пациент создан');await load()}catch(e){setStatus('Ошибка создания: '+(e.message||e),'err')}}
-async function savePatientMeta(id){try{const phone=document.getElementById(`ph_${id}`).value.trim(),note=document.getElementById(`nt_${id}`).value.trim(),status=document.getElementById(`st_${id}`).value,next_visit=fromDatetimeLocal(document.getElementById(`nv_${id}`).value),paid_amount=Number(document.getElementById(`pa_${id}`).value||0),therapy_sessions=Number(document.getElementById(`ts_${id}`).value||0),paid=paid_amount>0;const r=await sb.from('patients').update({phone,note,status,next_visit,paid_amount,paid,therapy_sessions,payment_date:paid?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)throw r.error;setStatus('Карточка сохранена');await load(true)}catch(e){setStatus('Ошибка сохранения: '+(e.message||e),'err')}}
-async function addPayment(id){const amount=Number(prompt('Сумма оплаты:', '900')||0);if(!amount)return;const comment=prompt('Комментарий к оплате:', '');try{const r=await sb.from('payments').insert({patient_id:id,amount,method:'manual',comment});if(r.error)throw r.error;const total=patientPayments(id).reduce((s,p)=>s+Number(p.amount||0),0)+amount;await sb.from('patients').update({paid_amount:total,paid:total>0,payment_date:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id);setStatus('Оплата добавлена');await load(true)}catch(e){setStatus('Ошибка оплаты: '+(e.message||e),'err')}}
-async function addTherapySession(id){const sessions=patientSessions(id),nextNum=sessions.length+1,note=prompt(`Заметка к сеансу ${nextNum}:`,'');if(note===null)return;try{const r=await sb.from('therapy_sessions').insert({patient_id:id,session_number:nextNum,session_date:new Date().toISOString(),note});if(r.error)throw r.error;await sb.from('patients').update({therapy_sessions:nextNum,status:nextNum>=3?'completed':'course',updated_at:new Date().toISOString()}).eq('id',id);setStatus(`Сеанс ${nextNum} добавлен`);await load(true)}catch(e){setStatus('Ошибка сеанса: '+(e.message||e),'err')}}
-async function sendDoctorReply(){const text=replyTextEl.value.trim(),file=document.getElementById('doctorFile').files[0];if(!selectedPatientId){setStatus('Выберите пациента','err');return}if(!text&&!file){setStatus('Введите текст или прикрепите файл','err');return}try{const uploaded=await uploadFile(file,'doctor');const r=await sb.from('messages').insert({patient_id:selectedPatientId,author:'doctor',message:text,...uploaded});if(r.error)throw r.error;replyTextEl.value='';document.getElementById('doctorFile').value='';setStatus('Ответ отправлен');await load()}catch(e){setStatus('Ошибка отправки: '+(e.message||e),'err')}}
-async function clearSelectedChat(){if(!selectedPatientId){setStatus('Выберите пациента','err');return}if(!confirm('Очистить весь чат?'))return;const r=await sb.from('messages').delete().eq('patient_id',selectedPatientId);if(r.error)setStatus(r.error.message,'err');else{setStatus('Чат очищен');await load()}}
-async function deletePatient(id){if(!confirm(`Удалить пациента "${patientName(id)}"?`))return;try{await sb.from('payments').delete().eq('patient_id',id);await sb.from('therapy_sessions').delete().eq('patient_id',id);await sb.from('messages').delete().eq('patient_id',id);await sb.from('diagnostics').delete().eq('patient_id',id);const r=await sb.from('patients').delete().eq('id',id);if(r.error)throw r.error;if(selectedPatientId===id)selectedPatientId=null;setStatus('Пациент удалён');await load()}catch(e){setStatus('Ошибка удаления: '+(e.message||e),'err')}}
-function togglePatient(id){if(openPatients.has(id)){openPatients.delete(id)}else{openPatients.add(id)}renderPatients()}function toggleNewPat(){const b=document.getElementById('newPatBody'),a=document.getElementById('newPatArrow');const o=b.style.display==='block';b.style.display=o?'none':'block';if(a)a.textContent=o?'▼':'▲'}function selectPatient(id){openPatients.add(id);selectedPatientId=id;replyTextEl.focus();renderPatients();renderInbox();renderChat()}function openDiagnostic(id){const p=getPatient(id);localStorage.setItem('akabane_current_patient',JSON.stringify({id:p.id,full_name:p.full_name||'',phone:p.phone||''}));localStorage.setItem('akabane_active_patient_id',p.id);localStorage.setItem('akabane_active_patient_name',p.full_name||'');location.href=doctorUrl(id)}function openCabinet(id){window.open(patientUrl(id),'_blank')}function copyPatientLink(id){navigator.clipboard?.writeText(location.origin+location.pathname.replace(/crm\/?$/,'')+patientUrl(id).replace('../',''));setStatus('Ссылка скопирована')}function downloadPatientCard(id){const p=getPatient(id),sessions=patientSessions(id),payments=patientPayments(id);const html=`<html><head><meta charset="utf-8"><title>Карта пациента</title><style>body{font-family:Arial;padding:30px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:8px}</style></head><body><h1>${esc(p.full_name)}</h1><div>${esc(p.phone||'')}</div><div class="box"><b>Статус:</b> ${STATUS_LABELS[p.status||'new']}<br><b>Следующий визит:</b> ${fmtDate(p.next_visit)}<br><b>Заметки:</b> ${esc(p.note||'')}</div><h2>Оплаты</h2>${payments.map(x=>`<div class="box">${x.amount} сомони · ${fmtDate(x.payment_date||x.created_at)}<br>${esc(x.comment||'')}</div>`).join('')||'Нет оплат'}<h2>Сеансы</h2>${sessions.map(x=>`<div class="box">Сеанс ${x.session_number} · ${fmtDate(x.session_date)}<br>${esc(x.note||'')}</div>`).join('')||'Нет сеансов'}<script>window.print()<\/script></body></html>`;const w=window.open('','_blank');w.document.write(html);w.document.close()}
-function setupRealtime(){try{sb.channel('akabane-crm-live').on('postgres_changes',{event:'*',schema:'public',table:'messages'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'patients'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'therapy_sessions'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'payments'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'diagnostics'},()=>load(true)).subscribe()}catch(e){console.warn(e)}}load();setupRealtime();setInterval(()=>load(true),30000);
-</script></body></html>
+
+function setupRealtime(){
+  try{
+    sb.channel('crm-v2').on('postgres_changes',{event:'*',schema:'public',table:'messages'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'patients'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'therapy_sessions'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'payments'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'diagnostics'},()=>load(true)).subscribe();
+  }catch(er){console.warn(er)}
+}
+
+load();setupRealtime();setInterval(()=>load(true),30000);
+</script>
+</body>
+</html>
