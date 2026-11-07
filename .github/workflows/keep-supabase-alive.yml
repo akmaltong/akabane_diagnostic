@@ -1,0 +1,26 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # каждый день в 8:00 UTC
+  workflow_dispatch:      # можно запустить вручную
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://ytalluctuccinghqaotw.supabase.co/rest/v1/patients?select=id&limit=1" \
+            -H "apikey: sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd" \
+            -H "Authorization: Bearer sb_publishable_1rbvxxVRGzBVOYUKbMku4w_jEo8dQxd")
+          echo "Supabase status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Supabase alive"
+          elif [ "$STATUS" = "503" ]; then
+            echo "⚠️ Supabase paused (503) — зайди на supabase.com и восстанови проект"
+            exit 1
+          else
+            echo "⚠️ Unexpected status: $STATUS"
+          fi
