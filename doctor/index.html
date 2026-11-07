@@ -265,10 +265,55 @@ async function ensureCloudPatient(name) {
   return local;
 }
 async function saveSessionToCloud(session) {
-  if (!akabaneSupabase || !session || !session.patientId) return;
+  if (!akabaneSupabase || !session) { toast('Нет подключения к облаку'); return false; }
+
+  // If patientId is a local id (not Supabase UUID) or missing — sync patient first
+  const isLocalId = !session.patientId || String(session.patientId).startsWith('p_');
+  if (isLocalId) {
+    const name = session.patientName || session.patient || 'Без имени';
+    try {
+      const cp = await ensureCloudPatient(name);
+      session.patientId = cp.id;
+      if (window.currentAkabanePatient) window.currentAkabanePatient.id = cp.id;
+      // Update in local history too
+      const h = loadHistory();
+      const idx = h.findIndex(s => s.id === session.id);
+      if (idx !== -1) { h[idx].patientId = cp.id; saveHistory(h); }
+    } catch(e) {
+      toast('Ошибка: пациент не создан в облаке');
+      return false;
+    }
+  }
+
+  if (!session.patientId) { toast('Нет ID пациента — облако не сохранено'); return false; }
+
   try {
-    await akabaneSupabase.from('diagnostics').insert({ patient_id: session.patientId, result_json: session });
-  } catch(e) { console.warn('Supabase diagnostic save failed:', e); }
+    const r = await akabaneSupabase.from('diagnostics').insert({ patient_id: session.patientId, result_json: session });
+    if (r.error) {
+      console.error('Cloud save error:', r.error);
+      toast('Ошибка облака: ' + (r.error.message || r.error.code));
+      return false;
+    }
+    return true;
+  } catch(e) {
+    console.warn('Supabase diagnostic save failed:', e);
+    toast('Нет связи — данные сохранены локально');
+    return false;
+  }
+}
+
+async function syncUnsyncedToCloud() {
+  if (!akabaneSupabase) return;
+  const h = loadHistory();
+  const unsynced = h.filter(s => !s.cloudSynced);
+  if (!unsynced.length) { toast('Все данные уже синхронизированы'); return; }
+  let ok = 0;
+  for (const session of unsynced) {
+    const saved = await saveSessionToCloud(session);
+    if (saved) { session.cloudSynced = true; ok++; }
+  }
+  saveHistory(h);
+  toast(ok ? `Синхронизировано: ${ok} из ${unsynced.length}` : 'Ошибка синхронизации');
 }
 async function loadCloudHistory(patientId) {
   if (!akabaneSupabase) return;
@@ -393,6 +438,7 @@ function openPatientCabinet(){
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <span style="font-size:16px;font-weight:700">История</span>
           <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="topbar-btn" onclick="syncUnsyncedToCloud()" style="color:#3db87a;border-color:rgba(61,184,122,.35);background:rgba(61,184,122,.10)">☁ Синхронизировать</button>
             <button class="topbar-btn" onclick="importJSON()">📥 Импорт</button>
             <button class="topbar-btn" onclick="exportAllJSON()">📤 Экспорт</button>
             <button class="topbar-btn" onclick="clearHistory()" style="color:var(--red);border-color:rgba(224,82,82,.35);background:rgba(224,82,82,.10)">🗑 Очистить</button>
@@ -1142,7 +1188,14 @@ function finishTest() {
   const h = loadHistory();
   h.unshift(session);
   saveHistory(h);
-  saveSessionToCloud(session);
+  saveSessionToCloud(session).then(ok => {
+    if (ok) {
+      session.cloudSynced = true;
+      const hh = loadHistory();
+      const idx = hh.findIndex(s => s.id === session.id);
+      if (idx !== -1) { hh[idx].cloudSynced = true; saveHistory(hh); }
+    }
+  });
 
   cancelTest();
   showLastResults();
