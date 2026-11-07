@@ -581,6 +581,7 @@ function scrollChat(){setTimeout(()=>{const m=document.getElementById('chatMsgs'
 
 function tabCard(p){
   return`<div class="fields">
+    <div class="fg full"><label class="fl">ФИО</label><input class="fi" id="fc-name" value="${e(p.full_name||'')}"></div>
     <div class="fg"><label class="fl">Телефон</label><input class="fi" id="fc-phone" value="${e(p.phone||'')}"></div>
     <div class="fg"><label class="fl">Статус</label><select class="fsel" id="fc-status">${Object.entries(SL).map(([k,v])=>`<option value="${k}"${(p.status||'new')===k?' selected':''}>${v}</option>`).join('')}</select></div>
     <div class="fg"><label class="fl">Следующий визит</label><input class="fi" id="fc-visit" type="datetime-local" value="${e(toLocal(p.next_visit))}"></div>
@@ -648,12 +649,14 @@ function dlCard(id){
 
 async function saveCard(id){
   try{
+    const full_name=document.getElementById('fc-name')?.value.trim()||'';
+    if(!full_name){ntf('Введите ФИО','err');return}
     const phone=document.getElementById('fc-phone')?.value.trim()||'';
     const status=document.getElementById('fc-status')?.value||'new';
     const next_visit=fromLocal(document.getElementById('fc-visit')?.value);
     const note=document.getElementById('fc-note')?.value.trim()||'';
     const paid_amount=Number(document.getElementById('fc-paid')?.value||0);
-    const r=await sb.from('patients').update({phone,status,next_visit,note,paid_amount,paid:paid_amount>0,updated_at:new Date().toISOString()}).eq('id',id);
+    const r=await sb.from('patients').update({full_name,phone,status,next_visit,note,paid_amount,paid:paid_amount>0,updated_at:new Date().toISOString()}).eq('id',id);
     if(r.error)throw r.error;
     ntf('Карточка сохранена');await load(true);
   }catch(er){ntf('Ошибка: '+er.message,'err')}
