@@ -2062,26 +2062,25 @@ function initRecognition() {
   recognition = new SR();
   recognition.lang = 'ru-RU';
   recognition.continuous = true;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 2;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+  let lastCmdAt = 0;
   recognition.onresult = function(e) {
-    const texts = [];
+    const now = Date.now();
+    if (now - lastCmdAt < 1200) return; // защита от двойного срабатывания
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      for (let j = 0; j < e.results[i].length; j++) {
-        texts.push(e.results[i][j].transcript.trim().toLowerCase());
+      const txt = e.results[i][0].transcript.trim().toLowerCase();
+      const startBtn = document.getElementById('btn-start');
+      const feelBtn  = document.getElementById('btn-feel');
+      if (startBtn && !startBtn.disabled && VOICE_START.some(w => txt.includes(w))) {
+        lastCmdAt = now; onStartPoint(); flashVoice(); return;
       }
-    }
-    const all = texts.join(' ');
-    const startBtn = document.getElementById('btn-start');
-    const feelBtn  = document.getElementById('btn-feel');
-    if (startBtn && !startBtn.disabled && VOICE_START.some(w => all.includes(w))) {
-      onStartPoint(); flashVoice(); return;
-    }
-    if (feelBtn && !feelBtn.disabled && VOICE_FEEL.some(w => all.includes(w))) {
-      onFeelPoint(); flashVoice(); return;
-    }
-    if (VOICE_SKIP.some(w => all.includes(w))) {
-      onSkipPoint(); flashVoice();
+      if (feelBtn && !feelBtn.disabled && VOICE_FEEL.some(w => txt.includes(w))) {
+        lastCmdAt = now; onFeelPoint(); flashVoice(); return;
+      }
+      if (VOICE_SKIP.some(w => txt.includes(w))) {
+        lastCmdAt = now; onSkipPoint(); flashVoice(); return;
+      }
     }
   };
   recognition.onerror = function(ev) {
