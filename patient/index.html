@@ -92,11 +92,12 @@ th{color:#aaa7d8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
   <div class="offer" id="offerBox">
     <div class="offer-top" onclick="toggleOffer()">
       <div>
-        <div class="brand">Лучший способ начать</div>
-        <h2>3 сеанса терапии</h2>
-        <div class="mut">Диагностика в подарок</div>
-        <div class="price">900 сомони</div>
-        <div class="mut small">3 терапевтических сеанса · 90 минут каждый</div>
+        <div class="brand">Продолжение курса · цена открытия</div>
+        <h2>Курс «Старт» — 3 сеанса</h2>
+        <div class="mut">Первая диагностика была бесплатной — дальше проходим курс</div>
+        <div class="price">600 сомони</div>
+        <div class="mut small">3 сеанса по 200 сомони · 90 минут каждый</div>
+        <div class="mut small">Отдельная диагностика в другой день — тоже бесплатно</div>
       </div>
       <div class="caret" id="offerCaret">∨</div>
     </div>
@@ -104,13 +105,14 @@ th{color:#aaa7d8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
     <div class="offer-body">
       <div class="pay-card">
         <div class="chip"></div>
-        <div class="card-number" id="cardNumber">4439 2000 2119 9871</div>
-        <div class="card-owner">AMIR OCHILOV</div>
+        <div class="card-number" id="cardNumber">11 404 60 50</div>
+        <div class="card-owner">Перевод по номеру на привязанную карту</div>
       </div>
       <div class="copy-row">
-        <button class="btn btn2" onclick="copyCard()">Скопировать карту</button>
+        <button class="btn btn2" onclick="copyCard()">Скопировать номер</button>
         <button class="btn btn2" onclick="scrollToChat()">Отправить чек</button>
       </div>
+      <div class="mut small" style="margin-top:14px">Приведите друга: после его первого платного визита — бесплатный сеанс 60 минут для вас.</div>
     </div>
   </div>
 
@@ -145,9 +147,9 @@ function toggleOffer(){
   document.getElementById('offerCaret').textContent=box.classList.contains('open')?'∧':'∨';
 }
 function copyCard(){
-  const card=document.getElementById('cardNumber').textContent.trim();
-  navigator.clipboard?.writeText(card);
-  ok('Номер карты скопирован');
+  const num=document.getElementById('cardNumber').textContent.replace(/\s+/g,'');
+  navigator.clipboard?.writeText(num);
+  ok('Номер скопирован');
 }
 function scrollToChat(){
   document.getElementById('chatCard').scrollIntoView({behavior:'smooth',block:'start'});
