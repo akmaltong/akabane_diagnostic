@@ -724,7 +724,7 @@ async function saveCard(id){
 }
 
 async function addPay(id){
-  const amount=Number(prompt('Сумма оплаты (сомони):','900')||0);
+  const amount=Number(prompt('Сумма оплаты (сомони):','600')||0);
   if(!amount)return;
   const comment=prompt('Комментарий:','')||'';
   try{
