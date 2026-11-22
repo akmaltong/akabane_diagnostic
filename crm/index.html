@@ -266,6 +266,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans
       <div class="lp-head">
         <span class="lp-title">Пациенты<span class="lp-count" id="patCount">0</span></span>
         <button class="btn-add" onclick="openNewPat()">+ Добавить</button>
+        <button class="btn-add" onclick="openCalImport()" title="Загрузить людей и сеансы из календаря">📅</button>
       </div>
       <div class="lp-search">
         <span class="lp-search-ic">🔍</span>
@@ -362,7 +363,7 @@ const ATLAS_MINI={"LU5":{"title":"P5 Чи-цзэ (LU 5)","url":"https://www.eled
 const SL={'new':'Новый','diagnostic':'Диагностика','course':'На курсе','paused':'Пауза','completed':'Завершил','followup':'Контроль'};
 const SC={'new':'var(--violet)','diagnostic':'#c090ff','course':'var(--green)','paused':'var(--amber)','completed':'#4daa70','followup':'#4daad0'};
 
-let pats=[],msgs=[],sess=[],pays=[],diags=[];
+let pats=[],msgs=[],sess=[],pays=[],diags=[],appts=[],apOk=true;
 let selId=null,nav='patients',tab='overview',curDiag=null,srchQ='',filtr='';
 
 function e(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
@@ -416,12 +417,13 @@ function parseDiag(json){
 
 async function load(keep=false){
   try{
-    const [p,m,s,py,dg]=await Promise.all([
+    const [p,m,s,py,dg,ap]=await Promise.all([
       sb.from('patients').select('*').order('created_at',{ascending:false}),
       sb.from('messages').select('*').order('created_at',{ascending:true}),
       sb.from('therapy_sessions').select('*').order('created_at',{ascending:true}),
       sb.from('payments').select('*').order('created_at',{ascending:false}),
       sb.from('diagnostics').select('id,patient_id,created_at,result_json').order('created_at',{ascending:false}),
+      sb.from('appointments').select('*').order('start_at',{ascending:true}),
     ]);
     if(p.error)throw p.error;
     pats=p.data||[];
@@ -429,6 +431,7 @@ async function load(keep=false){
     sess=(s.error&&String(s.error.message).includes('does not exist'))?[]:s.data||[];
     pays=(py.error&&String(py.error.message).includes('does not exist'))?[]:py.data||[];
     diags=(dg.error&&String(dg.error.message).includes('does not exist'))?[]:dg.data||[];
+    apOk=!ap.error;appts=ap.error?[]:ap.data||[];
     if(!keep&&pats.length&&!selId)selId=pats[0].id;
     render();
   }catch(er){
@@ -482,6 +485,7 @@ function renderDetail(){
   const tabs=[
     {id:'overview',lbl:'Обзор'},
     {id:'diagnostics',lbl:'Диагностики'},
+    {id:'visits',lbl:'Посещения ('+visitCount(p.id)+')'},
     {id:'sessions',lbl:'Сеансы'},
     {id:'payments',lbl:'Оплата'},
     {id:'chat',lbl:'Чат'+(unrd(p.id)?' 🔴':'')},
@@ -516,6 +520,7 @@ function renderTab(p){
   const se=pses(p.id),py=ppay(p.id),dg=pdiag(p.id);
   if(tab==='overview')tc.innerHTML=tabOverview(p,se,py,dg);
   else if(tab==='diagnostics')tc.innerHTML=tabDiag(dg);
+  else if(tab==='visits')tc.innerHTML=tabVisits(p);
   else if(tab==='sessions')tc.innerHTML=tabSess(p,se);
   else if(tab==='payments')tc.innerHTML=tabPay(p,py);
   else if(tab==='chat'){tc.innerHTML=tabChat(p);scrollChat();}
@@ -626,6 +631,62 @@ function setFilter(el){
   document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filtr));
   renderList();
 }
+
+/* ===== ПОСЕЩЕНИЯ ===== */
+const AS={planned:'Запланирован',came:'Пришёл',missed:'Пропуск',moved:'Перенос'};
+const AC={planned:'var(--text3)',came:'var(--green)',missed:'var(--red)',moved:'var(--amber)'};
+function papp(id){return appts.filter(a=>a.patient_id===id).sort((a,b)=>new Date(a.start_at)-new Date(b.start_at))}
+function visitCount(id){return appts.filter(a=>a.patient_id===id&&a.status==='came').length}
+function adt(v){const d=new Date(v);return d.toLocaleDateString('ru',{day:'numeric',month:'short',weekday:'short'})+', '+d.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}
+function tabVisits(p){
+  if(!apOk)return'<div class="entry">Таблица appointments не создана. Откройте Supabase → SQL Editor и выполните файл <b>shared/appointments.sql</b>.</div>';
+  const list=papp(p.id),c=k=>list.filter(a=>a.status===k).length;
+  const stat=(n,l,col)=>`<div style="flex:1;min-width:70px;text-align:center;padding:10px 6px;border:1px solid var(--border2);border-radius:10px"><div style="font-size:22px;font-weight:800;color:${col}">${n}</div><div style="font-size:11px;color:var(--text3)">${l}</div></div>`;
+  const rows=list.slice().reverse().map(a=>`<div class="entry"><div class="entry-row"><div><div class="entry-date">${e(adt(a.start_at))}</div>${a.note?`<div style="font-size:12px;color:var(--text3)">${e(a.note)}</div>`:''}</div><div style="color:${AC[a.status]};font-weight:700;font-size:12px">${AS[a.status]||a.status}</div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      ${['came','missed','moved','planned'].map(k=>`<button class="btn ${a.status===k?'btn-go':'btn-s'}" style="font-size:11px;padding:5px 10px" onclick="setApStatus('${a.id}','${k}')">${AS[k]}</button>`).join('')}
+      <button class="btn btn-s" style="font-size:11px;padding:5px 10px" onclick="delAppt('${a.id}')">🗑</button></div></div>`).join('');
+  return`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">${stat(c('came'),'Пришёл',AC.came)}${stat(c('missed'),'Пропуск',AC.missed)}${stat(c('moved'),'Перенос',AC.moved)}${stat(c('planned'),'Впереди',AC.planned)}</div>
+  <button class="btn btn-go" style="margin-bottom:12px" onclick="addAppt('${p.id}')">+ Добавить приём</button>${rows||'<div class="list-empty">Приёмов пока нет</div>'}`;
+}
+async function setApStatus(id,st){const{error}=await sb.from('appointments').update({status:st}).eq('id',id);if(error)return ntf(error.message,'err');const a=appts.find(x=>x.id===id);if(a)a.status=st;render();}
+async function delAppt(id){if(!confirm('Удалить приём?'))return;const{error}=await sb.from('appointments').delete().eq('id',id);if(error)return ntf(error.message,'err');appts=appts.filter(a=>a.id!==id);render();}
+async function addAppt(pid){const v=prompt('Дата и время (ГГГГ-ММ-ДД ЧЧ:ММ)',new Date().toISOString().slice(0,10)+' 12:00');if(!v)return;const d=new Date(v.replace(' ','T'));if(isNaN(d))return ntf('Неверная дата','err');const{data,error}=await sb.from('appointments').insert({patient_id:pid,start_at:d.toISOString(),status:'planned'}).select().single();if(error)return ntf(error.message,'err');appts.push(data);render();}
+
+/* ===== ИМПОРТ ИЗ КАЛЕНДАРЯ ===== */
+let calGroups=[];
+function nk(s){return String(s||'').toLowerCase().replace(/сеанс|ако/g,'').replace(/ҳ/g,'х').replace(/ҷ/g,'ч').replace(/қ/g,'к').replace(/ӯ/g,'у').replace(/ғ/g,'г').replace(/ӣ/g,'и').replace(/[^а-яa-z]/g,'').replace(/рахман$/,'рахман')}
+function guessPat(key){
+  for(const p of pats){if(p.calendar_name&&nk(p.calendar_name)===key)return p.id}
+  for(const p of pats){const w=nk(String(p.full_name||'').split(/\s+/)[0]);if(w.length>2&&(key===w||key.startsWith(w)||w.startsWith(key)))return p.id}
+  return'';
+}
+async function openCalImport(){
+  if(!apOk)return ntf('Сначала выполните shared/appointments.sql в Supabase','err');
+  let ev;try{ev=await(await fetch('../shared/calendar-events.json?'+Date.now())).json()}catch(er){return ntf('Нет файла календаря','err')}
+  const m={};for(const x of ev){const k=nk(x.title);(m[k]=m[k]||{key:k,name:x.title.replace(/сеанс/ig,'').replace(/\s+ако$/i,'').trim(),ev:[]}).ev.push(x)}
+  calGroups=Object.values(m).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+  const opts=g=>`<option value="">— пропустить —</option><option value="new"${guessPat(g.key)?'':' selected'}>➕ Создать нового</option>`+pats.map(p=>`<option value="${p.id}"${guessPat(g.key)===p.id?' selected':''}>${e(p.full_name||'Без имени')}</option>`).join('');
+  let box=document.getElementById('calMod');if(!box){box=document.createElement('div');box.id='calMod';box.className='modal-ov';box.onclick=ev2=>{if(ev2.target===box)box.style.display='none'};document.body.appendChild(box)}
+  box.innerHTML=`<div class="modal-bx"><div class="modal-hd"><div><div class="modal-lbl">КАЛЕНДАРЬ</div><div class="modal-ttl">Импорт людей и приёмов</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Проверьте соответствие имён. Статусы уже отмеченных приёмов не затрагиваются.</div></div><button class="modal-cl" onclick="document.getElementById('calMod').style.display='none'">✕</button></div>
+  <div style="padding:6px 0">${calGroups.map((g,i)=>`<div style="display:flex;gap:8px;align-items:center;margin:8px 0"><div style="flex:1"><b>${e(g.name)}</b><div style="font-size:11px;color:var(--text3)">приёмов: ${g.ev.length}</div></div><select id="cg${i}" style="max-width:55%;padding:7px;border-radius:8px;background:var(--bg2,#1a1a24);color:inherit;border:1px solid var(--border2)">${opts(g)}</select></div>`).join('')}</div>
+  <button class="btn btn-go" style="width:100%;padding:11px" onclick="runCalImport()">Импортировать</button></div>`;
+  box.style.display='flex';
+}
+async function runCalImport(){
+  let np=0,na=0;
+  for(let i=0;i<calGroups.length;i++){
+    const g=calGroups[i];let pid=document.getElementById('cg'+i).value;if(!pid)continue;
+    if(pid==='new'){const{data,error}=await sb.from('patients').insert({full_name:g.name,status:'course',calendar_name:g.name}).select().single();if(error){ntf(error.message,'err');return}pid=data.id;np++}
+    else await sb.from('patients').update({calendar_name:g.name}).eq('id',pid);
+    const rows=g.ev.map(x=>({patient_id:pid,start_at:x.start,end_at:x.end,calendar_event_id:x.id,calendar_title:x.title,status:'planned'}));
+    const{data,error}=await sb.from('appointments').upsert(rows,{onConflict:'calendar_event_id',ignoreDuplicates:true}).select();
+    if(error){ntf(error.message,'err');return}na+=(data||[]).length;
+  }
+  document.getElementById('calMod').style.display='none';
+  ntf(`Добавлено пациентов: ${np}, приёмов: ${na}`);await load(true);
+}
+
 function setTab(t){tab=t;renderDetail()}
 function selPat(id){selId=id;tab='overview';renderList();renderDetail();if(window.innerWidth<=620)document.getElementById('detailEl').scrollIntoView({behavior:'smooth'})}
 function goToPat(id){selId=id;tab='overview';nav='patients';render()}
@@ -825,7 +886,7 @@ document.addEventListener('click',function(ev){
 
 function setupRealtime(){
   try{
-    sb.channel('crm-v2').on('postgres_changes',{event:'*',schema:'public',table:'messages'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'patients'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'therapy_sessions'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'payments'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'diagnostics'},()=>load(true)).subscribe();
+    sb.channel('crm-v2').on('postgres_changes',{event:'*',schema:'public',table:'messages'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'patients'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'therapy_sessions'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'payments'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'diagnostics'},()=>load(true)).on('postgres_changes',{event:'*',schema:'public',table:'appointments'},()=>load(true)).subscribe();
   }catch(er){console.warn(er)}
 }
 

@@ -84,6 +84,11 @@ th{color:#aaa7d8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
     <div id="status"></div>
   </div>
 
+  <div class="card" id="visitsCard" style="display:none">
+    <div class="title">Мои сеансы</div>
+    <div id="visits" class="mut"></div>
+  </div>
+
   <div class="card">
     <div class="title">Мои диагностики</div>
     <div id="diagnostics" class="mut">Загрузка...</div>
@@ -284,6 +289,18 @@ function conclusion(rows,counts){
     ${deficiency.length?`<br><b>Недостаток:</b> ${esc(deficiency.join(', '))}`:''}
   </div>`;
 }
+function renderVisits(items){
+  const L={came:'✅ Были',missed:'✖ Пропуск',moved:'↻ Перенос',planned:'• Запланирован'};
+  const fmt=v=>{const d=new Date(v);return d.toLocaleDateString('ru',{day:'numeric',month:'long',weekday:'short'})+', '+d.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})};
+  const came=items.filter(x=>x.status==='came').length;
+  const next=items.find(x=>x.status==='planned'&&new Date(x.start_at)>Date.now());
+  let h='<div style="font-size:15px;color:inherit"><b>Посещено сеансов: '+came+'</b></div>';
+  if(next)h+='<div class="small" style="margin-top:4px">Ближайший: '+esc(fmt(next.start_at))+'</div>';
+  h+='<div style="margin-top:10px">'+items.slice().reverse().map(x=>'<div class="small" style="padding:5px 0;border-top:1px solid rgba(255,255,255,.08)">'+esc(fmt(x.start_at))+' — '+(L[x.status]||esc(x.status))+'</div>').join('')+'</div>';
+  document.getElementById('visits').innerHTML=h;
+  document.getElementById('visitsCard').style.display='';
+}
+
 function renderDiagnostics(items){
   const box=document.getElementById('diagnostics');
   if(!items || !items.length){
@@ -390,6 +407,11 @@ async function load(){
     }
 
     document.getElementById('patientInfo').innerHTML='<b>'+esc(p.data.full_name)+'</b>'+(p.data.phone?'<br>'+esc(p.data.phone):'');
+
+    try{
+      const ap=await sb.from('appointments').select('start_at,status').eq('patient_id',id).order('start_at',{ascending:true});
+      if(!ap.error&&ap.data&&ap.data.length)renderVisits(ap.data);
+    }catch(_){}
 
     const d=await sb.from('diagnostics').select('*').eq('patient_id',id).order('created_at',{ascending:false});
     if(d.error) throw d.error;
