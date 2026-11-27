@@ -432,7 +432,7 @@ async function load(keep=false){
     pays=(py.error&&String(py.error.message).includes('does not exist'))?[]:py.data||[];
     diags=(dg.error&&String(dg.error.message).includes('does not exist'))?[]:dg.data||[];
     apOk=!ap.error;appts=ap.error?[]:ap.data||[];
-    if(!keep||!window._synced){window._synced=1;setTimeout(autoSync,300)}
+    if(!window._syncing){window._syncing=1;setTimeout(async()=>{try{await autoSync()}finally{window._syncing=0}},300)}
     if(!keep&&pats.length&&!selId)selId=pats[0].id;
     render();
   }catch(er){
@@ -668,18 +668,25 @@ async function addAppt(pid){const v=prompt('Дата и время (ГГГГ-М�
 
 /* ===== ИМПОРТ ИЗ КАЛЕНДАРЯ ===== */
 let calGroups=[],calPending=0;
+async function loadCal(){
+  const get=async u=>{try{const r=await fetch(u+'?'+Date.now());return r.ok?await r.json():[]}catch(_){return[]}};
+  const all=[...await get('../shared/calendar-events.json'),...await get('../shared/calendar-extra.json')];
+  const t0=new Date();t0.setHours(0,0,0,0);const seen=new Set(),out=[];
+  for(const x of all){const k=nk(x.title)+'|'+String(x.start).slice(0,16);if(seen.has(k)||new Date(x.start)<t0)continue;seen.add(k);out.push(x)}
+  return out;
+}
 async function autoSync(){
   if(!apOk||!pats.length)return;
-  let ev;try{ev=await(await fetch('../shared/calendar-events.json?'+Date.now())).json()}catch(_){return}
+  const ev=await loadCal();
   const rows=[];let pend=new Set();
   for(const x of ev){
     const k=nk(x.title);if(!k)continue;
     const pt=pats.find(p=>p.calendar_name&&nk(p.calendar_name)===k)||pats.find(p=>nk(p.full_name)===k);
     if(!pt){pend.add(k);continue}
-    if(!appts.some(a=>a.calendar_event_id===x.id))rows.push({patient_id:pt.id,start_at:x.start,end_at:x.end,calendar_event_id:x.id,calendar_title:x.title,status:'planned'});
+    if(!appts.some(a=>a.calendar_event_id===x.id||(a.patient_id===pt.id&&String(a.start_at).slice(0,16)===new Date(x.start).toISOString().slice(0,16))))rows.push({patient_id:pt.id,start_at:x.start,end_at:x.end,calendar_event_id:x.id,calendar_title:x.title,status:'planned'});
   }
   calPending=pend.size;
-  if(rows.length){const r=await sb.from('appointments').upsert(rows,{onConflict:'calendar_event_id',ignoreDuplicates:true});if(!r.error){ntf('Из календаря добавлено приёмов: '+rows.length);await load(true)}}
+  if(rows.length){const r=await sb.from('appointments').upsert(rows,{onConflict:'calendar_event_id',ignoreDuplicates:true});if(r.error)ntf('Календарь: '+r.error.message,'err');else{ntf('Из календаря добавлено приёмов: '+rows.length);await load(true)}}
   const b=document.getElementById('calBadge');if(b)b.textContent=calPending?calPending:'';
 }
 function nk(s){return String(s||'').toLowerCase().replace(/сеанс|ако/g,'').replace(/ҳ/g,'х').replace(/ҷ/g,'ч').replace(/қ/g,'к').replace(/ӯ/g,'у').replace(/ғ/g,'г').replace(/ӣ/g,'и').replace(/[^а-яa-z]/g,'').replace(/рахман$/,'рахман')}
@@ -690,15 +697,24 @@ function guessPat(key){
 }
 async function openCalImport(){
   if(!apOk)return ntf('Сначала выполните shared/appointments.sql в Supabase','err');
-  let ev;try{ev=await(await fetch('../shared/calendar-events.json?'+Date.now())).json()}catch(er){return ntf('Нет файла календаря','err')}
+  const ev=await loadCal();
   const m={};for(const x of ev){const k=nk(x.title);(m[k]=m[k]||{key:k,name:x.title.replace(/сеанс/ig,'').replace(/\s+ако$/i,'').trim(),ev:[]}).ev.push(x)}
   calGroups=Object.values(m).filter(g=>!pats.some(p=>(p.calendar_name&&nk(p.calendar_name)===g.key)||nk(p.full_name)===g.key)).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
   const opts=g=>`<option value="">— пропустить —</option><option value="new"${guessPat(g.key)?'':' selected'}>➕ Создать нового</option>`+pats.map(p=>`<option value="${p.id}"${guessPat(g.key)===p.id?' selected':''}>${e(p.full_name||'Без имени')}</option>`).join('');
   let box=document.getElementById('calMod');if(!box){box=document.createElement('div');box.id='calMod';box.className='modal-ov';box.onclick=ev2=>{if(ev2.target===box)box.style.display='none'};document.body.appendChild(box)}
   box.innerHTML=`<div class="modal-bx"><div class="modal-hd"><div><div class="modal-lbl">КАЛЕНДАРЬ</div><div class="modal-ttl">Импорт людей и приёмов</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Проверьте соответствие имён. Статусы уже отмеченных приёмов не затрагиваются.</div></div><button class="modal-cl" onclick="document.getElementById('calMod').style.display='none'">✕</button></div>
   <div style="padding:6px 0">${calGroups.map((g,i)=>`<div style="display:flex;gap:8px;align-items:center;margin:8px 0"><div style="flex:1"><b>${e(g.name)}</b><div style="font-size:11px;color:var(--text3)">приёмов: ${g.ev.length}</div></div><select id="cg${i}" style="max-width:55%;padding:7px;border-radius:8px;background:var(--bg2,#1a1a24);color:inherit;border:1px solid var(--border2)">${opts(g)}</select></div>`).join('')}</div>
-  <button class="btn btn-go" style="width:100%;padding:11px" onclick="runCalImport()">Импортировать</button></div>`;
+  ${calGroups.length?'':'<div class="list-empty">Новых людей в календаре нет</div>'}<button class="btn btn-go" style="width:100%;padding:11px" onclick="runCalImport()">Импортировать</button>
+  <button class="btn btn-s" style="width:100%;padding:11px;margin-top:8px" onclick="purgePast()">Удалить прошедшие приёмы без отметки</button></div>`;
   box.style.display='flex';
+}
+async function purgePast(){
+  const ids=appts.filter(a=>a.status==='planned'&&new Date(a.end_at||a.start_at)<Date.now()).map(a=>a.id);
+  if(!ids.length)return ntf('Таких приёмов нет');
+  if(!confirm('Удалить '+ids.length+' прошедших приёмов без отметки? Отмеченные («Пришёл», «Пропуск», «Перенос») останутся.'))return;
+  const r=await sb.from('appointments').delete().in('id',ids);
+  if(r.error)return ntf(r.error.message,'err');
+  document.getElementById('calMod').style.display='none';ntf('Удалено: '+ids.length);await load(true);
 }
 async function runCalImport(){
   let np=0,na=0;
