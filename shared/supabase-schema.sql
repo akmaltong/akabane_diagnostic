@@ -115,3 +115,15 @@ create policy "appointments public select" on appointments for select to anon us
 create policy "appointments public insert" on appointments for insert to anon with check (patient_id is not null);
 create policy "appointments public update" on appointments for update to anon using (true);
 create policy "appointments public delete" on appointments for delete to anon using (true);
+
+-- Выполнить в Supabase → SQL Editor (удаление и правка пациентов и их данных)
+do $$
+declare t text;
+begin
+  foreach t in array array['patients','diagnostics','messages','therapy_sessions','payments'] loop
+    execute format('drop policy if exists "%s public delete" on %I', t, t);
+    execute format('create policy "%s public delete" on %I for delete to anon using (true)', t, t);
+    execute format('drop policy if exists "%s public update" on %I', t, t);
+    execute format('create policy "%s public update" on %I for update to anon using (true)', t, t);
+  end loop;
+end $$;
